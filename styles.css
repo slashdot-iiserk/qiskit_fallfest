@@ -2301,9 +2301,6 @@ html {
     max-width: 1000px;
     margin: 0 auto;
     position: relative;
-    padding-left: 2rem;
-    padding-right: 2rem;
-    perspective: 1000px;
 }
 
 .timeline-container::before {
@@ -2312,88 +2309,29 @@ html {
     left: 50%;
     top: 0;
     bottom: 0;
-    width: 2px;
-    background: linear-gradient(180deg, rgba(99, 102, 241, 0.3), rgba(236, 72, 153, 0.3), rgba(16, 185, 129, 0.3));
+    width: 4px;
+    background: linear-gradient(180deg, #6366f1, #ec4899, #10b981);
     transform: translateX(-50%);
-    z-index: 1;
 }
 
 .timeline-milestone {
     margin-bottom: 4rem;
     position: relative;
-    opacity: 0;
-    transform: translateY(50px);
-    animation: fadeInUpTimeline 0.8s ease-out forwards;
-    z-index: 2;
 }
 
-.timeline-milestone::after {
-    content: '';
-    position: absolute;
-    left: 50%;
-    top: 100%;
-    width: 2px;
-    height: 4rem;
-    background: linear-gradient(180deg, rgba(99, 102, 241, 0.6), rgba(236, 72, 153, 0.6));
-    transform: translateX(-50%);
-    z-index: -1;
-    animation: pulseLine 3s ease-in-out infinite;
+.timeline-milestone:nth-child(odd) .milestone-content {
+    padding-right: 55%;
 }
 
-@keyframes pulseLine {
-    0%, 100% {
-        opacity: 0.6;
-        transform: translateX(-50%) scaleY(1);
-    }
-    50% {
-        opacity: 1;
-        transform: translateX(-50%) scaleY(1.05);
-    }
-}
-
-.timeline-milestone:last-child::after {
-    display: none;
-}
-
-.timeline-milestone:nth-child(1) { animation-delay: 0.2s; }
-.timeline-milestone:nth-child(2) { animation-delay: 0.4s; }
-.timeline-milestone:nth-child(3) { animation-delay: 0.6s; }
-.timeline-milestone:nth-child(4) { animation-delay: 0.8s; }
-.timeline-milestone:nth-child(5) { animation-delay: 1.0s; }
-.timeline-milestone:nth-child(6) { animation-delay: 1.2s; }
-.timeline-milestone:nth-child(7) { animation-delay: 1.4s; }
-.timeline-milestone:nth-child(8) { animation-delay: 1.6s; }
-.timeline-milestone:nth-child(9) { animation-delay: 1.8s; }
-.timeline-milestone:nth-child(10) { animation-delay: 2.0s; }
-.timeline-milestone:nth-child(11) { animation-delay: 2.2s; }
-
-.timeline-milestone::before {
-    content: '';
-    position: absolute;
-    left: 50%;
-    top: 50%;
-    width: 30px;
-    height: 2px;
-    background: linear-gradient(90deg, rgba(99, 102, 241, 0.8), rgba(236, 72, 153, 0.8));
-    transform: translateY(-50%);
-    z-index: -1;
-}
-
-.timeline-milestone:nth-child(odd)::before {
-    right: calc(50% + 30px);
-    left: auto;
-    background: linear-gradient(-90deg, rgba(99, 102, 241, 0.8), rgba(236, 72, 153, 0.8));
-}
-
-.timeline-milestone:nth-child(even)::before {
-    left: calc(50% + 30px);
-    background: linear-gradient(90deg, rgba(99, 102, 241, 0.8), rgba(236, 72, 153, 0.8));
+.timeline-milestone:nth-child(even) .milestone-content {
+    padding-left: 55%;
+    text-align: right;
 }
 
 .milestone-year {
     position: absolute;
     left: 50%;
-    top: -1.5rem;
+    top: 1rem;
     transform: translateX(-50%);
     background: linear-gradient(135deg, #6366f1, #ec4899);
     color: white;
@@ -2402,60 +2340,24 @@ html {
     font-weight: 700;
     font-size: 1.1rem;
     font-family: 'Orbitron', monospace;
-    z-index: 100;
-    box-shadow:
-        0 5px 15px rgba(0, 0, 0, 0.3),
-        0 0 20px rgba(99, 102, 241, 0.4),
-        0 0 40px rgba(236, 72, 153, 0.2);
-    transition: all 0.3s ease;
-}
-
-.milestone-year:hover {
-    transform: translateX(-50%) translateY(-0.25rem) scale(1.1);
-    box-shadow:
-        0 8px 25px rgba(0, 0, 0, 0.4),
-        0 0 30px rgba(99, 102, 241, 0.6),
-        0 0 60px rgba(236, 72, 153, 0.4);
+    z-index: 3;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
 }
 
 .milestone-content {
-    background: rgba(255, 255, 255, 0.08);
-    backdrop-filter: blur(20px) saturate(180%);
-    border: 1px solid rgba(255, 255, 255, 0.18);
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 20px;
     padding: 2rem;
-    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    position: relative;
-    z-index: 3;
-    box-shadow:
-        0 8px 32px rgba(0, 0, 0, 0.12),
-        inset 0 1px 0 rgba(255, 255, 255, 0.2),
-        0 0 0 1px rgba(255, 255, 255, 0.05);
-}
-
-.timeline-milestone:nth-child(odd) .milestone-content {
-    margin-right: 60px;
-    margin-left: auto;
-    width: calc(50% - 60px);
-}
-
-.timeline-milestone:nth-child(even) .milestone-content {
-    margin-left: 60px;
-    margin-right: auto;
-    width: calc(50% - 60px);
-    text-align: left;
+    transition: all 0.3s ease;
 }
 
 .milestone-content:hover {
-    transform: translateY(-15px) scale(1.03) rotateX(5deg) rotateY(2deg);
-    background: rgba(255, 255, 255, 0.12);
-    border-color: rgba(99, 102, 241, 0.4);
-    box-shadow:
-        0 25px 50px rgba(0, 0, 0, 0.25),
-        0 15px 35px rgba(99, 102, 241, 0.15),
-        inset 0 1px 0 rgba(255, 255, 255, 0.3),
-        0 0 0 1px rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(25px) saturate(200%);
+    transform: translateY(-10px);
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(99, 102, 241, 0.3);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
 }
 
 .milestone-image {
@@ -2465,24 +2367,6 @@ html {
     border-radius: 50%;
     overflow: hidden;
     border: 3px solid rgba(99, 102, 241, 0.5);
-    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    animation: float 6s ease-in-out infinite;
-    position: relative;
-    z-index: 4;
-    box-shadow:
-        0 8px 25px rgba(0, 0, 0, 0.15),
-        0 0 0 1px rgba(255, 255, 255, 0.1),
-        inset 0 2px 4px rgba(255, 255, 255, 0.1);
-}
-
-.milestone-image:hover {
-    transform: scale(1.15) rotateY(15deg) rotateX(10deg);
-    border-color: #6366f1;
-    box-shadow:
-        0 20px 40px rgba(0, 0, 0, 0.3),
-        0 0 30px rgba(99, 102, 241, 0.8),
-        0 0 60px rgba(99, 102, 241, 0.4),
-        inset 0 2px 4px rgba(255, 255, 255, 0.2);
 }
 
 .timeline-milestone:nth-child(even) .milestone-image {
@@ -2506,24 +2390,6 @@ html {
     color: #ffffff;
     margin-bottom: 1rem;
     font-weight: 600;
-    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-    position: relative;
-    z-index: 6;
-}
-
-.milestone-text h3::after {
-    content: '';
-    position: absolute;
-    bottom: -5px;
-    left: 0;
-    width: 0;
-    height: 2px;
-    background: linear-gradient(90deg, #6366f1, #ec4899);
-    transition: width 0.3s ease;
-}
-
-.milestone-content:hover .milestone-text h3::after {
-    width: 100%;
 }
 
 .milestone-text p {
@@ -2768,35 +2634,18 @@ html {
     
     .timeline-container::before {
         left: 30px;
-        width: 1px;
-        background: rgba(99, 102, 241, 0.4);
-    }
-    
-    .timeline-milestone::before {
-        display: none;
-    }
-    
-    .timeline-milestone::after {
-        left: 30px;
-        width: 1px;
-        height: 3rem;
-        background: rgba(99, 102, 241, 0.6);
-        z-index: -1;
     }
     
     .timeline-milestone:nth-child(odd) .milestone-content,
     .timeline-milestone:nth-child(even) .milestone-content {
-        margin-left: 60px;
-        margin-right: 1rem;
-        width: calc(100% - 60px);
+        padding-left: 80px;
+        padding-right: 1rem;
         text-align: left;
     }
     
     .milestone-year {
         left: 30px;
         transform: none;
-        top: -1.5rem;
-        z-index: 100;
     }
     
     .timeline-milestone:nth-child(even) .milestone-image,
@@ -2852,22 +2701,6 @@ html {
     .cta-content h2 {
         font-size: 2rem;
     }
-
-    .tech-grid {
-        grid-template-columns: 1fr;
-    }
-
-    .principles-grid {
-        grid-template-columns: 1fr;
-    }
-
-    .principle-card {
-        padding: 1.5rem;
-    }
-
-    .principle-icon {
-        font-size: 2.5rem;
-    }
 }
 
 /* ==================== QUANTUM CENTURY ANIMATIONS ==================== */
@@ -2894,30 +2727,29 @@ html {
 
 @keyframes quantumPulse {
     0%, 100% {
+        opacity: 0.3;
         transform: scale(1);
-        opacity: 0.7;
     }
     50% {
-        transform: scale(1.2);
-        opacity: 1;
+        opacity: 0.8;
+        transform: scale(1.05);
     }
 }
 
 @keyframes waveFlow {
-    0% {
-        transform: translateX(-100%);
+    0%, 100% {
+        background-position: 0% 50%;
     }
-    100% {
-        transform: translateX(100%);
+    50% {
+        background-position: 100% 50%;
     }
 }
 
 /* Modern Quantum Technologies Section */
 .quantum-technologies {
     padding: 6rem 0;
-    background: linear-gradient(135deg, rgba(15, 23, 42, 0.95) 0%, rgba(30, 41, 59, 0.95) 100%);
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
     position: relative;
-    overflow: hidden;
 }
 
 .quantum-technologies::before {
@@ -2927,16 +2759,19 @@ html {
     left: 0;
     right: 0;
     bottom: 0;
-    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="rgba(99,102,241,0.1)"/><circle cx="75" cy="75" r="1" fill="rgba(236,72,153,0.1)"/><circle cx="50" cy="10" r="0.5" fill="rgba(16,185,129,0.1)"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
-    opacity: 0.3;
+    background-image: 
+        radial-gradient(circle at 20% 20%, rgba(99, 102, 241, 0.05) 1px, transparent 1px),
+        radial-gradient(circle at 80% 80%, rgba(236, 72, 153, 0.05) 1px, transparent 1px);
+    background-size: 100px 100px, 150px 150px;
+    animation: waveFlow 20s ease-in-out infinite;
     pointer-events: none;
 }
 
 .tech-intro {
     text-align: center;
+    color: #94a3b8;
     font-size: 1.2rem;
-    color: #cbd5e1;
-    margin-bottom: 3rem;
+    margin-bottom: 4rem;
     max-width: 800px;
     margin-left: auto;
     margin-right: auto;
@@ -2946,17 +2781,18 @@ html {
 .tech-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-    gap: 2rem;
+    gap: 2.5rem;
     margin-top: 3rem;
 }
 
 .tech-card {
-    background: rgba(255, 255, 255, 0.05);
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 20px;
-    padding: 2rem;
-    transition: all 0.3s ease;
+    background: rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 25px;
+    padding: 2.5rem;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     position: relative;
     overflow: hidden;
 }
@@ -2967,76 +2803,97 @@ html {
     top: 0;
     left: 0;
     right: 0;
-    height: 3px;
+    height: 4px;
     background: linear-gradient(90deg, #6366f1, #ec4899, #10b981);
-    transform: scaleX(0);
-    transition: transform 0.3s ease;
+    opacity: 0;
+    transition: opacity 0.3s ease;
 }
 
 .tech-card:hover::before {
-    transform: scaleX(1);
+    opacity: 1;
 }
 
 .tech-card:hover {
-    transform: translateY(-10px);
-    background: rgba(255, 255, 255, 0.08);
-    border-color: rgba(99, 102, 241, 0.3);
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3), 0 0 30px rgba(99, 102, 241, 0.2);
+    transform: translateY(-15px) scale(1.02);
+    background: rgba(255, 255, 255, 0.12);
+    border-color: rgba(99, 102, 241, 0.4);
+    box-shadow: 
+        0 25px 50px rgba(0, 0, 0, 0.3),
+        0 0 40px rgba(99, 102, 241, 0.3);
 }
 
 .tech-icon {
-    width: 60px;
-    height: 60px;
+    width: 80px;
+    height: 80px;
     background: linear-gradient(135deg, #6366f1, #ec4899);
-    border-radius: 15px;
+    border-radius: 20px;
     display: flex;
     align-items: center;
     justify-content: center;
+    margin-bottom: 2rem;
+    font-size: 2.5rem;
     color: white;
-    font-size: 1.5rem;
-    margin-bottom: 1.5rem;
     transition: all 0.3s ease;
+    box-shadow: 0 10px 30px rgba(99, 102, 241, 0.3);
 }
 
 .tech-card:hover .tech-icon {
     transform: scale(1.1) rotate(5deg);
-    box-shadow: 0 10px 20px rgba(99, 102, 241, 0.3);
+    box-shadow: 0 15px 40px rgba(99, 102, 241, 0.5);
 }
 
 .tech-card h3 {
-    font-size: 1.4rem;
+    font-size: 1.6rem;
     color: #ffffff;
     margin-bottom: 1rem;
-    font-weight: 600;
+    font-weight: 700;
+    font-family: 'Orbitron', monospace;
 }
 
 .tech-card p {
     color: #cbd5e1;
-    line-height: 1.6;
-    margin-bottom: 1.5rem;
+    line-height: 1.7;
+    margin-bottom: 2rem;
+    font-size: 1rem;
 }
 
 .tech-stats {
     display: flex;
     gap: 1rem;
-    margin-top: 1rem;
+    flex-wrap: wrap;
 }
 
 .tech-stats span {
     background: rgba(99, 102, 241, 0.2);
-    color: #a5b4fc;
-    padding: 0.3rem 0.8rem;
-    border-radius: 15px;
-    font-size: 0.85rem;
-    font-weight: 500;
+    color: #6366f1;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: 600;
     border: 1px solid rgba(99, 102, 241, 0.3);
+    backdrop-filter: blur(10px);
 }
 
 /* Quantum Principles Section */
 .quantum-principles {
     padding: 6rem 0;
-    background: linear-gradient(135deg, rgba(30, 41, 59, 0.95) 0%, rgba(15, 23, 42, 0.95) 100%);
+    background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
     position: relative;
+}
+
+.quantum-principles::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: 
+        radial-gradient(circle at 30% 70%, rgba(16, 185, 129, 0.05) 2px, transparent 2px),
+        radial-gradient(circle at 70% 30%, rgba(236, 72, 153, 0.05) 2px, transparent 2px);
+    background-size: 120px 120px, 180px 180px;
+    animation: quantumPulse 15s ease-in-out infinite;
+    pointer-events: none;
 }
 
 .principles-grid {
@@ -3047,1459 +2904,92 @@ html {
 }
 
 .principle-card {
-    background: rgba(255, 255, 255, 0.05);
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.15);
     border-radius: 20px;
-    padding: 2rem;
+    padding: 2.5rem;
     text-align: center;
-    transition: all 0.3s ease;
-    cursor: pointer;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+.principle-card::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: conic-gradient(
+        from 0deg,
+        transparent,
+        rgba(99, 102, 241, 0.1),
+        transparent,
+        rgba(236, 72, 153, 0.1),
+        transparent
+    );
+    animation: spin 8s linear infinite;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.principle-card:hover::before {
+    opacity: 1;
 }
 
 .principle-card:hover {
-    transform: translateY(-10px) scale(1.05);
-    background: rgba(255, 255, 255, 0.08);
-    border-color: rgba(99, 102, 241, 0.3);
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3), 0 0 30px rgba(99, 102, 241, 0.2);
+    transform: translateY(-10px) scale(1.02);
+    background: rgba(255, 255, 255, 0.12);
+    border-color: rgba(99, 102, 241, 0.4);
+    box-shadow: 
+        0 20px 40px rgba(0, 0, 0, 0.3),
+        0 0 30px rgba(99, 102, 241, 0.2);
 }
 
 .principle-icon {
-    font-size: 3rem;
-    margin-bottom: 1rem;
-    animation: principleFloat 4s ease-in-out infinite;
+    font-size: 3.5rem;
+    margin-bottom: 1.5rem;
+    height: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    z-index: 2;
+    filter: drop-shadow(0 5px 15px rgba(0, 0, 0, 0.3));
+    transition: transform 0.3s ease;
 }
 
-.principle-card:nth-child(1) .principle-icon { animation-delay: 0s; }
-.principle-card:nth-child(2) .principle-icon { animation-delay: 0.5s; }
-.principle-card:nth-child(3) .principle-icon { animation-delay: 1s; }
-.principle-card:nth-child(4) .principle-icon { animation-delay: 1.5s; }
-.principle-card:nth-child(5) .principle-icon { animation-delay: 2s; }
-.principle-card:nth-child(6) .principle-icon { animation-delay: 2.5s; }
-
-@keyframes principleFloat {
-    0%, 100% {
-        transform: translateY(0px) rotate(0deg);
-    }
-    25% {
-        transform: translateY(-5px) rotate(1deg);
-    }
-    50% {
-        transform: translateY(-10px) rotate(0deg);
-    }
-    75% {
-        transform: translateY(-5px) rotate(-1deg);
-    }
+.principle-card:hover .principle-icon {
+    transform: scale(1.1);
 }
 
 .principle-card h3 {
-    font-size: 1.3rem;
+    font-size: 1.4rem;
     color: #ffffff;
     margin-bottom: 1rem;
-    font-weight: 600;
+    font-weight: 700;
+    font-family: 'Orbitron', monospace;
+    position: relative;
+    z-index: 2;
 }
 
 .principle-card p {
     color: #cbd5e1;
     line-height: 1.6;
-}
-
-/* Enhanced particle effects for quantum century page */
-.quantum-particles-century::before,
-.quantum-particles-century::after {
-    content: '';
-    position: absolute;
-    width: 4px;
-    height: 4px;
-    background: #6366f1;
-    border-radius: 50%;
-    animation: quantumPulse 3s ease-in-out infinite;
-}
-
-.quantum-particles-century::before {
-    top: 20%;
-    left: 10%;
-    animation-delay: 0s;
-}
-
-.quantum-particles-century::after {
-    top: 60%;
-    right: 15%;
-    animation-delay: 1.5s;
-    background: #ec4899;
-}
-
-/* Timeline connector line animation */
-.timeline-container::before {
-    content: '';
-    position: absolute;
-    left: 50%;
-    top: 0;
-    bottom: 0;
-    width: 4px;
-    background: linear-gradient(180deg, #6366f1, #ec4899, #10b981);
-    transform: translateX(-50%);
-    animation: waveFlow 8s linear infinite;
-}
-
-.timeline-container::before {
-    background: linear-gradient(180deg, #6366f1 0%, #ec4899 50%, #10b981 100%);
-    background-size: 400% 400%;
-    animation: gradientShift 6s ease infinite;
-}
-
-@keyframes gradientShift {
-    0% {
-        background-position: 0% 50%;
-    }
-    50% {
-        background-position: 100% 50%;
-    }
-    100% {
-        background-position: 0% 50%;
-    }
-}
-
-/* Milestone year glow effect */
-.milestone-year {
-    position: absolute;
-    left: 50%;
-    top: -1.5rem;
-    transform: translateX(-50%);
-    background: linear-gradient(135deg, #6366f1, #ec4899);
-    color: white;
-    padding: 0.5rem 1rem;
-    border-radius: 25px;
-    font-weight: 700;
-    font-size: 1.1rem;
-    font-family: 'Orbitron', monospace;
-    z-index: 3;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3), 0 0 20px rgba(99, 102, 241, 0.5);
-    animation: yearGlow 4s ease-in-out infinite alternate;
-}
-
-@keyframes yearGlow {
-    from {
-        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3), 0 0 20px rgba(99, 102, 241, 0.5);
-    }
-    to {
-        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3), 0 0 30px rgba(99, 102, 241, 0.8), 0 0 40px rgba(236, 72, 153, 0.3);
-    }
-}
-
-/* Games Page Styles */
-.games-hero {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-    padding: 80px 0;
-    text-align: center;
-}
-
-.games-hero h1 {
-    font-size: 3.5rem;
-    margin-bottom: 20px;
-    text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
-}
-
-.games-hero p {
-    font-size: 1.3rem;
-    max-width: 600px;
-    margin: 0 auto;
-    opacity: 0.9;
-}
-
-.games-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 30px;
-    padding: 60px 0;
-}
-
-.game-card {
-    background: white;
-    border-radius: 15px;
-    padding: 30px;
-    text-align: center;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-    transition: all 0.3s ease;
-    cursor: pointer;
-    border: 2px solid transparent;
-}
-
-.game-card:hover {
-    transform: translateY(-10px);
-    box-shadow: 0 20px 40px rgba(0,0,0,0.2);
-    border-color: #667eea;
-}
-
-.game-icon {
-    font-size: 4rem;
-    margin-bottom: 20px;
-    color: #667eea;
-}
-
-.game-card h3 {
-    font-size: 1.5rem;
-    margin-bottom: 15px;
-    color: #333;
-}
-
-.game-card p {
-    color: #666;
-    line-height: 1.6;
-}
-
-.game-btn {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-    border: none;
-    padding: 12px 30px;
-    border-radius: 25px;
     font-size: 1rem;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    margin: 5px;
-}
-
-.game-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
-}
-
-.game-btn.primary {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-}
-
-.game-btn.secondary {
-    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-}
-
-.game-btn.reset {
-    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-}
-
-/* Modal Styles */
-.game-modal {
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0,0,0,0.8);
-    z-index: 1000;
-    justify-content: center;
-    align-items: center;
-    opacity: 0;
-    transition: opacity 0.3s ease;
-}
-
-.game-modal.active {
-    opacity: 1;
-}
-
-.modal-content {
-    background: white;
-    border-radius: 20px;
-    width: 90%;
-    max-width: 800px;
-    max-height: 90vh;
-    overflow-y: auto;
-    position: relative;
-    transform: scale(0.9);
-    transition: transform 0.3s ease;
-}
-
-.game-modal.active .modal-content {
-    transform: scale(1);
-}
-
-.modal-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 20px 30px;
-    border-bottom: 1px solid #eee;
-}
-
-.modal-header h2 {
-    margin: 0;
-    color: #333;
-}
-
-.close-btn {
-    background: none;
-    border: none;
-    font-size: 2rem;
-    cursor: pointer;
-    color: #666;
-    transition: color 0.3s ease;
-}
-
-.close-btn:hover {
-    color: #333;
-}
-
-.game-content {
-    padding: 30px;
-}
-
-/* Registration Page Styles */
-.registration-hero {
-    background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
-    color: white;
-    padding: 80px 0;
-    text-align: center;
-    position: relative;
-    overflow: hidden;
-}
-
-.registration-hero-background {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    opacity: 0.1;
-}
-
-.quantum-particles-registration {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    background-image:
-        radial-gradient(circle at 20% 30%, #6366f1 2px, transparent 2px),
-        radial-gradient(circle at 80% 70%, #ec4899 2px, transparent 2px),
-        radial-gradient(circle at 60% 20%, #10b981 2px, transparent 2px);
-    background-size: 200px 200px, 250px 250px, 180px 180px;
-    animation: floatParticles 20s ease-in-out infinite;
-}
-
-.registration-circuit-bg {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 80%;
-    height: 80%;
-    background-image:
-        linear-gradient(90deg, transparent 48%, rgba(99, 102, 241, 0.3) 49%, rgba(99, 102, 241, 0.3) 51%, transparent 52%),
-        linear-gradient(0deg, transparent 48%, rgba(236, 72, 153, 0.3) 49%, rgba(236, 72, 153, 0.3) 51%, transparent 52%);
-    background-size: 200px 200px, 200px 200px;
-    animation: quantumPulse 4s ease-in-out infinite;
-}
-
-.registration-hero-content {
     position: relative;
     z-index: 2;
-    max-width: 800px;
-    margin: 0 auto;
-    padding: 2rem;
-}
-
-.registration-title {
-    font-family: 'Orbitron', monospace;
-    font-size: 3.5rem;
-    font-weight: 900;
-    margin-bottom: 20px;
-    background: linear-gradient(135deg, #6366f1, #ec4899);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    text-shadow: 0 0 20px rgba(99, 102, 241, 0.3);
-}
-
-.registration-subtitle {
-    font-size: 1.3rem;
-    margin-bottom: 40px;
-    opacity: 0.9;
-    line-height: 1.6;
-}
-
-.registration-stats {
-    display: flex;
-    justify-content: center;
-    gap: 30px;
-    flex-wrap: wrap;
-}
-
-.registration-stats .stat-item {
-    background: rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: 15px;
-    padding: 20px;
-    text-align: center;
-    min-width: 120px;
-}
-
-.registration-stats .stat-number {
-    display: block;
-    font-size: 2rem;
-    font-weight: 700;
-    color: #6366f1;
-    margin-bottom: 5px;
-}
-
-.registration-stats .stat-label {
-    font-size: 0.9rem;
-    color: #cbd5e1;
-    font-weight: 500;
-}
-
-/* Registration Form Styles */
-.registration-section {
-    padding: 80px 0;
-    background: white;
-}
-
-.registration-container {
-    max-width: 800px;
-    margin: 0 auto;
-    padding: 0 20px;
-}
-
-.registration-header {
-    text-align: center;
-    margin-bottom: 50px;
-}
-
-.registration-header .section-title {
-    margin-bottom: 20px;
-}
-
-.registration-intro {
-    font-size: 1.1rem;
-    color: #64748b;
-    line-height: 1.6;
-    max-width: 600px;
-    margin: 0 auto;
-}
-
-.registration-form {
-    background: #f8fafc;
-    border-radius: 20px;
-    padding: 40px;
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-}
-
-.form-section {
-    margin-bottom: 40px;
-    padding: 30px;
-    background: white;
-    border-radius: 15px;
-    border: 1px solid #e2e8f0;
-    transition: all 0.3s ease;
-}
-
-.form-section:hover {
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-    transform: translateY(-2px);
-}
-
-.form-section-title {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    font-size: 1.3rem;
-    font-weight: 600;
-    color: #1e293b;
-    margin-bottom: 25px;
-    padding-bottom: 15px;
-    border-bottom: 2px solid #e2e8f0;
-}
-
-.form-section-title i {
-    font-size: 1.5rem;
-    color: #6366f1;
-}
-
-.form-group {
-    margin-bottom: 25px;
-}
-
-.form-label {
-    display: block;
-    font-weight: 600;
-    color: #374151;
-    margin-bottom: 8px;
-    font-size: 1rem;
-}
-
-.required {
-    color: #ef4444;
-    margin-left: 4px;
-}
-
-.form-input {
-    width: 100%;
-    padding: 15px 20px;
-    border: 2px solid #e2e8f0;
-    border-radius: 10px;
-    font-size: 1rem;
-    transition: all 0.3s ease;
-    background: white;
-    color: #1f2937;
-}
-
-.form-input:focus {
-    outline: none;
-    border-color: #6366f1;
-    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
-}
-
-.form-input:valid {
-    border-color: #10b981;
-}
-
-.form-error {
-    color: #ef4444;
-    font-size: 0.875rem;
-    margin-top: 5px;
-    display: none;
-}
-
-/* Rating Scale Styles */
-.rating-container {
-    margin-top: 15px;
-}
-
-.rating-scale {
-    display: flex;
-    align-items: center;
-    gap: 20px;
-    flex-wrap: wrap;
-}
-
-.rating-label {
-    font-weight: 600;
-    color: #6b7280;
-    font-size: 0.9rem;
-}
-
-.rating-options {
-    display: flex;
-    gap: 10px;
-    flex: 1;
-    justify-content: space-between;
-    max-width: 300px;
-}
-
-.rating-option {
-    width: 40px;
-    height: 40px;
-    border: 2px solid #e2e8f0;
-    border-radius: 50%;
-    background: white;
-    color: #6b7280;
-    font-weight: 600;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.3s ease;
-    position: relative;
-}
-
-.rating-option:hover {
-    border-color: #6366f1;
-    background: #6366f1;
-    color: white;
-}
-
-.rating-option.selected {
-    border-color: #6366f1;
-    background: #6366f1;
-    color: white;
-    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
-}
-
-.rating-option input[type="radio"] {
-    position: absolute;
-    opacity: 0;
-    width: 100%;
-    height: 100%;
     margin: 0;
-    cursor: pointer;
 }
 
-.rating-option input[type="radio"]:checked + .rating-option {
-    border-color: #6366f1;
-    background: #6366f1;
-    color: white;
-}
-
-/* Radio Group Styles */
-.radio-group {
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-    margin-top: 15px;
-}
-
-.radio-option {
-    position: relative;
-}
-
-.radio-label {
-    display: flex;
-    align-items: flex-start;
-    gap: 15px;
-    padding: 15px;
-    background: #f8fafc;
-    border: 2px solid #e2e8f0;
-    border-radius: 10px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    font-size: 1rem;
-    color: #374151;
-    line-height: 1.5;
-}
-
-.radio-label:hover {
-    border-color: #6366f1;
-    background: #f0f4ff;
-}
-
-.radio-custom {
-    width: 20px;
-    height: 20px;
-    border: 2px solid #d1d5db;
-    border-radius: 50%;
-    background: white;
-    position: relative;
-    flex-shrink: 0;
-    margin-top: 2px;
-    transition: all 0.3s ease;
-}
-
-.radio-option input[type="radio"]:checked + .radio-label .radio-custom {
-    border-color: #6366f1;
-    background: #6366f1;
-}
-
-.radio-option input[type="radio"]:checked + .radio-label .radio-custom::after {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 8px;
-    height: 8px;
-    background: white;
-    border-radius: 50%;
-}
-
-.radio-option input[type="radio"] {
-    position: absolute;
-    opacity: 0;
-    width: 100%;
-    height: 100%;
-    margin: 0;
-    cursor: pointer;
-}
-
-/* Submit Button Styles */
-.form-submit {
-    text-align: center;
-    margin-top: 40px;
-    padding-top: 30px;
-    border-top: 2px solid #e2e8f0;
-}
-
-.submit-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 15px;
-    padding: 18px 40px;
-    background: linear-gradient(135deg, #6366f1, #ec4899);
-    color: white;
-    border: none;
-    border-radius: 50px;
-    font-size: 1.2rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    box-shadow: 0 10px 30px rgba(99, 102, 241, 0.3);
-    position: relative;
-    overflow: hidden;
-}
-
-.submit-btn::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(135deg, #ec4899, #10b981);
-    transition: left 0.3s ease;
-    z-index: -1;
-}
-
-.submit-btn:hover::before {
-    left: 0;
-}
-
-.submit-btn:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 15px 40px rgba(99, 102, 241, 0.4);
-}
-
-.submit-btn:disabled {
-    opacity: 0.7;
-    cursor: not-allowed;
-    transform: none;
-}
-
-.submit-btn:disabled:hover {
-    transform: none;
-    box-shadow: 0 10px 30px rgba(99, 102, 241, 0.3);
-}
-
-.submit-note {
-    margin-top: 20px;
-    font-size: 0.9rem;
-    color: #6b7280;
-    line-height: 1.5;
-    max-width: 500px;
-    margin-left: auto;
-    margin-right: auto;
-}
-
-/* Success Message Styles */
-.success-message {
-    text-align: center;
-    padding: 40px;
-    background: white;
-    border-radius: 20px;
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-    max-width: 600px;
-    margin: 0 auto;
-}
-
-.success-icon {
-    font-size: 4rem;
-    color: #10b981;
-    margin-bottom: 20px;
-}
-
-.success-message h3 {
-    font-size: 1.8rem;
-    color: #1e293b;
-    margin-bottom: 15px;
-    font-weight: 700;
-}
-
-.success-message p {
-    color: #64748b;
-    line-height: 1.6;
-    margin-bottom: 30px;
-}
-
-.success-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 10px;
-    padding: 12px 30px;
-    background: linear-gradient(135deg, #10b981, #059669);
-    color: white;
-    border: none;
-    border-radius: 25px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    box-shadow: 0 5px 15px rgba(16, 185, 129, 0.3);
-}
-
-.success-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 20px rgba(16, 185, 129, 0.4);
-}
-
-/* Responsive Design for Registration */
-@media (max-width: 768px) {
-    .registration-title {
-        font-size: 2.5rem;
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
     }
-
-    .registration-subtitle {
-        font-size: 1.1rem;
-    }
-
-    .registration-stats {
-        gap: 15px;
-    }
-
-    .registration-stats .stat-item {
-        min-width: 100px;
-        padding: 15px;
-    }
-
-    .registration-container {
-        padding: 0 15px;
-    }
-
-    .registration-form {
-        padding: 30px 20px;
-    }
-
-    .form-section {
-        padding: 20px;
-    }
-
-    .rating-scale {
-        flex-direction: column;
-        gap: 15px;
-        align-items: center;
-    }
-
-    .rating-options {
-        max-width: 100%;
-        justify-content: space-between;
-    }
-
-    .submit-btn {
-        padding: 15px 30px;
-        font-size: 1.1rem;
-    }
-}
-
-@media (max-width: 480px) {
-    .registration-title {
-        font-size: 2rem;
-    }
-
-    .registration-stats {
-        flex-direction: column;
-        gap: 10px;
-    }
-
-    .registration-stats .stat-item {
-        width: 100%;
-        max-width: 200px;
-        margin: 0 auto;
-    }
-
-    .form-section {
-        margin-bottom: 30px;
-        padding: 15px;
-    }
-
-    .rating-options {
-        gap: 5px;
-    }
-
-    .rating-option {
-        width: 35px;
-        height: 35px;
-        font-size: 0.9rem;
-    }
-
-    .radio-label {
-        padding: 12px;
-        font-size: 0.9rem;
-    }
-
-    .submit-btn {
-        padding: 12px 25px;
-        font-size: 1rem;
-    }
-}
-
-.close-btn {
-    background: none;
-    border: none;
-    font-size: 2rem;
-    cursor: pointer;
-    color: #666;
-    transition: color 0.3s ease;
-}
-
-.close-btn:hover {
-    color: #333;
-}
-
-.game-content {
-    padding: 30px;
-}
-
-/* Coin Flip Game Styles */
-.coin-game {
-    text-align: center;
-}
-
-.game-instructions {
-    margin-bottom: 30px;
-}
-
-.game-instructions h4 {
-    color: #333;
-    margin-bottom: 10px;
-}
-
-.game-instructions p {
-    color: #666;
-    line-height: 1.6;
-}
-
-.coin-container {
-    display: flex;
-    justify-content: center;
-    margin: 40px 0;
-}
-
-.quantum-coin {
-    width: 150px;
-    height: 150px;
-    position: relative;
-    transform-style: preserve-3d;
-    transition: transform 1s;
-}
-
-.coin-face, .coin-superposition {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    border-radius: 50%;
-    backface-visibility: hidden;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    font-size: 2rem;
-    font-weight: bold;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-}
-
-.coin-face.heads {
-    background: linear-gradient(135deg, #ffd700 0%, #ffb347 100%);
-    color: #333;
-}
-
-.coin-face.tails {
-    background: linear-gradient(135deg, #c0c0c0 0%, #a8a8a8 100%);
-    color: #333;
-    transform: rotateY(180deg);
-}
-
-.coin-superposition {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-    transform: rotateY(90deg);
-}
-
-.coin-text {
-    font-size: 3rem;
-    margin-bottom: 5px;
-}
-
-.coin-label {
-    font-size: 0.8rem;
-    opacity: 0.8;
-}
-
-.superposition-text {
-    font-size: 3rem;
-    margin-bottom: 5px;
-}
-
-.superposition-label {
-    font-size: 0.8rem;
-    opacity: 0.9;
-}
-
-.quantum-coin.flipping {
-    animation: coinFlip 1s ease-in-out;
-}
-
-.quantum-coin.superposition .coin-superposition {
-    transform: rotateY(0deg);
-}
-
-.quantum-coin.heads .heads {
-    transform: rotateY(0deg);
-}
-
-.quantum-coin.tails .tails {
-    transform: rotateY(0deg);
-}
-
-@keyframes coinFlip {
-    0% { transform: rotateY(0deg); }
-    50% { transform: rotateY(1800deg); }
-    100% { transform: rotateY(1800deg); }
-}
-
-.coin-controls {
-    display: flex;
-    justify-content: center;
-    gap: 15px;
-    margin: 30px 0;
-    flex-wrap: wrap;
-}
-
-.probability-display {
-    display: flex;
-    justify-content: center;
-    gap: 30px;
-    margin-top: 30px;
-}
-
-.prob-item {
-    text-align: center;
-}
-
-.prob-label {
-    display: block;
-    font-weight: bold;
-    color: #333;
-    margin-bottom: 5px;
-}
-
-.prob-value {
-    font-size: 1.5rem;
-    color: #667eea;
-}
-
-/* Entanglement Game Styles */
-.entanglement-game {
-    text-align: center;
-}
-
-.entanglement-container {
-    margin: 40px 0;
-}
-
-.particle-pair {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 50px;
-}
-
-.entangled-particle {
-    width: 120px;
-    height: 120px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    color: white;
-    font-size: 1.2rem;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-    transition: all 0.3s ease;
-}
-
-.particle-label {
-    font-weight: bold;
-    margin-bottom: 10px;
-}
-
-.particle-state {
-    font-size: 2rem;
-    font-weight: bold;
-}
-
-.entangled-particle.spin-up {
-    background: linear-gradient(135deg, #ffd700 0%, #ffb347 100%);
-    color: #333;
-}
-
-.entangled-particle.spin-down {
-    background: linear-gradient(135deg, #c0c0c0 0%, #a8a8a8 100%);
-    color: #333;
-}
-
-.entanglement-link {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    color: #667eea;
-    font-size: 1.5rem;
-}
-
-.entanglement-link i {
-    margin-bottom: 5px;
-}
-
-.entanglement-controls {
-    display: flex;
-    justify-content: center;
-    gap: 15px;
-    margin: 30px 0;
-    flex-wrap: wrap;
-}
-
-.result-display {
-    margin-top: 30px;
-    padding: 20px;
-    background: #f8f9fa;
-    border-radius: 10px;
-    font-size: 1.1rem;
-    color: #333;
-}
-
-/* Qubit Visualizer Styles */
-.qubit-game {
-    text-align: center;
-}
-
-.qubit-visualizer {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 50px;
-    margin: 40px 0;
-    flex-wrap: wrap;
-}
-
-.bloch-sphere {
-    width: 200px;
-    height: 200px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    position: relative;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-}
-
-.qubit-point {
-    width: 20px;
-    height: 20px;
-    background: #ffd700;
-    border-radius: 50%;
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    box-shadow: 0 0 10px rgba(255, 215, 0, 0.8);
-    transition: transform 0.3s ease;
-}
-
-.sphere-labels {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    align-items: center;
-    padding: 20px;
-    color: white;
-    font-weight: bold;
-    pointer-events: none;
-}
-
-.state-0 {
-    align-self: center;
-    margin-top: 10px;
-}
-
-.state-1 {
-    align-self: center;
-    margin-bottom: 10px;
-}
-
-.state-plus, .state-minus {
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-}
-
-.state-plus {
-    right: 10px;
-}
-
-.state-minus {
-    left: 10px;
-}
-
-.qubit-controls {
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-    min-width: 250px;
-}
-
-.control-group {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
-
-.control-group label {
-    font-weight: bold;
-    color: #333;
-}
-
-.control-group input {
-    width: 100%;
-}
-
-.qubit-state-display {
-    margin-top: 40px;
-    display: flex;
-    justify-content: center;
-    gap: 50px;
-    flex-wrap: wrap;
-}
-
-.state-vector, .probabilities {
-    background: #f8f9fa;
-    padding: 20px;
-    border-radius: 10px;
-    min-width: 200px;
-}
-
-.state-vector h4, .probabilities h4 {
-    margin-top: 0;
-    color: #333;
-}
-
-#state-vector-display {
-    font-family: 'Courier New', monospace;
-    font-size: 1.1rem;
-    color: #667eea;
-    margin: 10px 0;
-}
-
-.prob-item {
-    margin: 10px 0;
-    font-weight: bold;
-    color: #333;
-}
-
-/* Maze Game Styles */
-.maze-game {
-    text-align: center;
-}
-
-.maze-container {
-    margin: 40px 0;
-    display: flex;
-    justify-content: center;
-}
-
-.maze-grid {
-    display: grid;
-    grid-template-columns: repeat(10, 30px);
-    grid-template-rows: repeat(10, 30px);
-    gap: 1px;
-    border: 2px solid #333;
-    background: #333;
-}
-
-.maze-cell {
-    width: 30px;
-    height: 30px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-size: 1.2rem;
-    background: white;
-    transition: all 0.2s ease;
-}
-
-.maze-cell.wall {
-    background: #666;
-}
-
-.maze-cell.player {
-    background: #4CAF50;
-    color: white;
-}
-
-.maze-cell.goal {
-    background: #ffd700;
-    color: #333;
-}
-
-.maze-controls {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin: 30px 0;
-    flex-wrap: wrap;
-    gap: 20px;
-}
-
-.control-buttons {
-    display: flex;
-    gap: 15px;
-    flex-wrap: wrap;
-}
-
-.maze-stats {
-    display: flex;
-    gap: 20px;
-    font-weight: bold;
-    color: #333;
-}
-
-.maze-legend {
-    display: flex;
-    justify-content: center;
-    gap: 30px;
-    margin-top: 30px;
-    flex-wrap: wrap;
-}
-
-.legend-item {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    font-weight: bold;
-    color: #333;
-}
-
-.legend-symbol {
-    font-size: 1.5rem;
-}
-
-/* Memory Game Styles */
-.memory-game {
-    text-align: center;
-}
-
-.memory-container {
-    margin: 40px 0;
-    display: flex;
-    justify-content: center;
-}
-
-.memory-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 80px);
-    grid-template-rows: repeat(3, 80px);
-    gap: 10px;
-}
-
-.memory-card {
-    width: 80px;
-    height: 80px;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    border-radius: 10px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-size: 2rem;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-}
-
-.memory-card:hover {
-    transform: scale(1.05);
-}
-
-.memory-card.flipped {
-    background: linear-gradient(135deg, #ffd700 0%, #ffb347 100%);
-    color: #333;
-}
-
-.memory-card.matched {
-    background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
-    color: white;
-    cursor: default;
-}
-
-.memory-controls {
-    display: flex;
-    justify-content: center;
-    gap: 15px;
-    margin: 30px 0;
-    flex-wrap: wrap;
-}
-
-.memory-stats {
-    display: flex;
-    justify-content: center;
-    gap: 30px;
-    margin-top: 30px;
-    flex-wrap: wrap;
-}
-
-.stat-item {
-    text-align: center;
-}
-
-.stat-label {
-    display: block;
-    font-weight: bold;
-    color: #333;
-    margin-bottom: 5px;
-}
-
-.stat-value {
-    font-size: 1.5rem;
-    color: #667eea;
-}
-
-/* Responsive Design for Games */
-@media (max-width: 768px) {
-    .games-hero h1 {
-        font-size: 2.5rem;
-    }
-
-    .games-hero p {
-        font-size: 1.1rem;
-    }
-
-    .games-grid {
-        grid-template-columns: 1fr;
-        gap: 20px;
-        padding: 40px 0;
-    }
-
-    .game-card {
-        padding: 20px;
-    }
-
-    .modal-content {
-        width: 95%;
-        margin: 20px;
-    }
-
-    .particle-pair {
-        flex-direction: column;
-        gap: 30px;
-    }
-
-    .entanglement-link {
-        transform: rotate(90deg);
-    }
-
-    .qubit-visualizer {
-        flex-direction: column;
-        gap: 30px;
-    }
-
-    .maze-grid {
-        grid-template-columns: repeat(10, 25px);
-        grid-template-rows: repeat(10, 25px);
-    }
-
-    .maze-cell {
-        width: 25px;
-        height: 25px;
-        font-size: 1rem;
-    }
-
-    .memory-grid {
-        grid-template-columns: repeat(3, 60px);
-        grid-template-rows: repeat(4, 60px);
-    }
-
-    .memory-card {
-        width: 60px;
-        height: 60px;
-        font-size: 1.5rem;
-    }
-
-    .maze-legend, .probability-display, .memory-stats {
-        flex-direction: column;
-        gap: 15px;
+    to {
+        transform: rotate(360deg);
     }
 }
