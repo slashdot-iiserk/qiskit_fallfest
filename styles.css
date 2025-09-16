@@ -508,13 +508,14 @@ body {
     box-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
 }
 
-/* Exclude SlashDot logos from visibility enhancements */
+/* SlashDot logos now use white text version - no additional enhancements needed */
 .logo-item img[src*="SlashDot"] {
     background: none;
     padding: 0;
     border-radius: 0;
     box-shadow: none;
     filter: brightness(1.1);
+    transform: scale(1.5);
 }
 
 .logo-item:hover img {
@@ -523,10 +524,10 @@ body {
     transform: scale(1.05);
 }
 
-/* Exclude SlashDot logos from hover enhancements */
+/* SlashDot logos use white text version - subtle hover enhancement */
 .logo-item:hover img[src*="SlashDot"] {
     box-shadow: none;
-    transform: none;
+    transform: scale(1.5);
     filter: brightness(1.3);
 }
 
@@ -1222,6 +1223,7 @@ body {
     border-radius: 0;
     box-shadow: none;
     opacity: 0.7;
+    transform: scale(1.5);
 }
 
 .partner-logos img:hover {
@@ -1229,10 +1231,10 @@ body {
     transform: scale(1.05);
 }
 
-/* Exclude SlashDot logos from hover enhancements */
+/* SlashDot logos hover enhancement */
 .partner-logos img[src*="SlashDot"]:hover {
     box-shadow: none;
-    transform: none;
+    transform: scale(1.5);
     opacity: 1;
 }
 
