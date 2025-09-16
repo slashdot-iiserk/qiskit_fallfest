@@ -54,6 +54,10 @@ body {
 
 .nav-logo img {
     border-radius: 50%;
+    background: rgba(255, 255, 255, 0.9);
+    padding: 5px;
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+    transition: all 0.3s ease;
 }
 
 .nav-menu {
@@ -494,13 +498,35 @@ body {
 }
 
 .logo-item img {
-    height: 40px;
+    height: 70px;
     width: auto;
     filter: brightness(1.1);
     transition: filter 0.3s ease;
+    background: rgba(255, 255, 255, 0.9);
+    padding: 10px;
+    border-radius: 8px;
+    box-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
+}
+
+/* Exclude SlashDot logos from visibility enhancements */
+.logo-item img[src*="SlashDot"] {
+    background: none;
+    padding: 0;
+    border-radius: 0;
+    box-shadow: none;
+    filter: brightness(1.1);
 }
 
 .logo-item:hover img {
+    filter: brightness(1.3);
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.6);
+    transform: scale(1.05);
+}
+
+/* Exclude SlashDot logos from hover enhancements */
+.logo-item:hover img[src*="SlashDot"] {
+    box-shadow: none;
+    transform: none;
     filter: brightness(1.3);
 }
 
@@ -1182,11 +1208,31 @@ body {
 
 .partner-logos img {
     height: 40px;
+    background: rgba(255, 255, 255, 0.9);
+    padding: 6px;
+    border-radius: 6px;
+    box-shadow: 0 0 12px rgba(255, 255, 255, 0.4);
+    transition: all 0.3s ease;
+}
+
+/* Exclude SlashDot logos from visibility enhancements */
+.partner-logos img[src*="SlashDot"] {
+    background: none;
+    padding: 0;
+    border-radius: 0;
+    box-shadow: none;
     opacity: 0.7;
-    transition: opacity 0.3s ease;
 }
 
 .partner-logos img:hover {
+    box-shadow: 0 0 18px rgba(255, 255, 255, 0.7);
+    transform: scale(1.05);
+}
+
+/* Exclude SlashDot logos from hover enhancements */
+.partner-logos img[src*="SlashDot"]:hover {
+    box-shadow: none;
+    transform: none;
     opacity: 1;
 }
 
@@ -1309,7 +1355,7 @@ body {
     }
 
     .logo-item img {
-        height: 35px;
+        height: 50px;
     }
 
     .days {
@@ -1409,7 +1455,7 @@ body {
     }
 
     .logo-item img {
-        height: 30px;
+        height: 45px;
     }
 
     .register-btn {
