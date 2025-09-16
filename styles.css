@@ -2301,6 +2301,8 @@ html {
     max-width: 1000px;
     margin: 0 auto;
     position: relative;
+    padding-left: 2rem;
+    padding-right: 2rem;
 }
 
 .timeline-container::before {
@@ -2309,9 +2311,10 @@ html {
     left: 50%;
     top: 0;
     bottom: 0;
-    width: 4px;
-    background: linear-gradient(180deg, #6366f1, #ec4899, #10b981);
+    width: 2px;
+    background: linear-gradient(180deg, rgba(99, 102, 241, 0.3), rgba(236, 72, 153, 0.3), rgba(16, 185, 129, 0.3));
     transform: translateX(-50%);
+    z-index: 1;
 }
 
 .timeline-milestone {
@@ -2320,6 +2323,22 @@ html {
     opacity: 0;
     transform: translateY(50px);
     animation: fadeInUpTimeline 0.8s ease-out forwards;
+}
+
+.timeline-milestone::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 100%;
+    width: 2px;
+    height: 4rem;
+    background: linear-gradient(180deg, rgba(99, 102, 241, 0.6), rgba(236, 72, 153, 0.6));
+    transform: translateX(-50%);
+    z-index: 2;
+}
+
+.timeline-milestone:last-child::after {
+    display: none;
 }
 
 .timeline-milestone:nth-child(1) { animation-delay: 0.2s; }
@@ -2334,13 +2353,27 @@ html {
 .timeline-milestone:nth-child(10) { animation-delay: 2.0s; }
 .timeline-milestone:nth-child(11) { animation-delay: 2.2s; }
 
-.timeline-milestone:nth-child(odd) .milestone-content {
-    padding-right: 55%;
+.timeline-milestone::before {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 30px;
+    height: 2px;
+    background: linear-gradient(90deg, rgba(99, 102, 241, 0.8), rgba(236, 72, 153, 0.8));
+    transform: translateY(-50%);
+    z-index: 2;
 }
 
-.timeline-milestone:nth-child(even) .milestone-content {
-    padding-left: 55%;
-    text-align: right;
+.timeline-milestone:nth-child(odd)::before {
+    right: calc(50% + 30px);
+    left: auto;
+    background: linear-gradient(-90deg, rgba(99, 102, 241, 0.8), rgba(236, 72, 153, 0.8));
+}
+
+.timeline-milestone:nth-child(even)::before {
+    left: calc(50% + 30px);
+    background: linear-gradient(90deg, rgba(99, 102, 241, 0.8), rgba(236, 72, 153, 0.8));
 }
 
 .milestone-year {
@@ -2366,6 +2399,20 @@ html {
     border-radius: 20px;
     padding: 2rem;
     transition: all 0.3s ease;
+    position: relative;
+}
+
+.timeline-milestone:nth-child(odd) .milestone-content {
+    margin-right: 60px;
+    margin-left: auto;
+    width: calc(50% - 60px);
+}
+
+.timeline-milestone:nth-child(even) .milestone-content {
+    margin-left: 60px;
+    margin-right: auto;
+    width: calc(50% - 60px);
+    text-align: left;
 }
 
 .milestone-content:hover {
@@ -2657,12 +2704,26 @@ html {
     
     .timeline-container::before {
         left: 30px;
+        width: 1px;
+        background: rgba(99, 102, 241, 0.4);
+    }
+    
+    .timeline-milestone::before {
+        display: none;
+    }
+    
+    .timeline-milestone::after {
+        left: 30px;
+        width: 1px;
+        height: 3rem;
+        background: rgba(99, 102, 241, 0.6);
     }
     
     .timeline-milestone:nth-child(odd) .milestone-content,
     .timeline-milestone:nth-child(even) .milestone-content {
-        padding-left: 80px;
-        padding-right: 1rem;
+        margin-left: 60px;
+        margin-right: 1rem;
+        width: calc(100% - 60px);
         text-align: left;
     }
     
