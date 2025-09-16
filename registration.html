@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registration | Qiskit Fall Fest 2025</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <nav class="navbar">
+            <div class="nav-container">
+                <div class="nav-logo">
+                    <img src="assets/qiskit logo.svg" alt="Qiskit Logo" style="height: 30px;">
+                    <span>Qiskit Fall Fest</span>
+                </div>
+                <ul class="nav-menu">
+                    <li class="nav-item">
+                        <a href="index.html" class="nav-link">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="index.html#about-institute" class="nav-link">About Us</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="index.html#event-details" class="nav-link">Event</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="index.html#organizers" class="nav-link">Organizers</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="quantum-century.html" class="nav-link">100 Years</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="games.html" class="nav-link">Games</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="registration.html" class="nav-link active">Registration</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="archive.html" class="nav-link">Archive</a>
+                    </li>
+                </ul>
+                <div class="hamburger">
+                    <span class="bar"></span>
+                    <span class="bar"></span>
+                    <span class="bar"></span>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Registration Hero Section -->
+    <section class="registration-hero">
+        <div class="registration-hero-background">
+            <div class="quantum-particles-registration"></div>
+            <div class="registration-circuit-bg"></div>
+        </div>
+        <div class="registration-hero-content">
+            <h1 class="registration-title">Join Qiskit Fall Fest 2025</h1>
+            <p class="registration-subtitle">Register now to be part of the quantum revolution at IISER Kolkata</p>
+            <div class="registration-stats">
+                <div class="stat-item">
+                    <span class="stat-number">October</span>
+                    <span class="stat-label">24-26</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number">IISER</span>
+                    <span class="stat-label">Kolkata</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number">FREE</span>
+                    <span class="stat-label">Event</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Registration Form Section -->
+    <section class="registration-section">
+        <div class="container">
+            <div class="registration-container">
+                <div class="registration-header">
+                    <h2 class="section-title">Registration Form</h2>
+                    <p class="registration-intro">Fill out the form below to secure your spot at Qiskit Fall Fest 2025. All fields marked with * are required.</p>
+                </div>
+
+                <form id="registrationForm" class="registration-form" action="https://docs.google.com/forms/u/0/d/e/YOUR_FORM_ID/formResponse" method="POST" target="_blank">
+                    <!-- Hidden iframe for form submission -->
+                    <iframe name="hidden_iframe" id="hidden_iframe" style="display:none;" onload="if(submitted){showSuccessMessage()}"></iframe>
+                    <!-- Personal Information -->
+                    <div class="form-section">
+                        <h3 class="form-section-title">
+                            <i class="fas fa-user"></i>
+                            Personal Information
+                        </h3>
+
+                        <div class="form-group">
+                            <label for="name" class="form-label">
+                                Name <span class="required">*</span>
+                            </label>
+                            <input type="text" id="name" name="entry.1234567890" class="form-input" required>
+                            <div class="form-error" id="nameError"></div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="email" class="form-label">
+                                Email Address <span class="required">*</span>
+                            </label>
+                            <input type="email" id="email" name="entry.0987654321" class="form-input" required>
+                            <div class="form-error" id="emailError"></div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="rollNo" class="form-label">
+                                Roll Number <span class="required">*</span>
+                            </label>
+                            <input type="text" id="rollNo" name="entry.1122334455" class="form-input" required>
+                            <div class="form-error" id="rollNoError"></div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="phone" class="form-label">
+                                Phone Number <span class="required">*</span>
+                            </label>
+                            <input type="tel" id="phone" name="entry.5566778899" class="form-input" required>
+                            <div class="form-error" id="phoneError"></div>
+                        </div>
+                    </div>
+
+                    <!-- Technical Background -->
+                    <div class="form-section">
+                        <h3 class="form-section-title">
+                            <i class="fas fa-code"></i>
+                            Technical Background
+                        </h3>
+
+                        <div class="form-group">
+                            <label class="form-label">
+                                How comfortable are you with Python? <span class="required">*</span>
+                            </label>
+                            <div class="rating-container">
+                                <div class="rating-scale">
+                                    <span class="rating-label">Beginner</span>
+                                    <div class="rating-options">
+                                        <input type="radio" id="python1" name="entry.2233445566" value="1" required>
+                                        <label for="python1" class="rating-option">1</label>
+
+                                        <input type="radio" id="python2" name="entry.2233445566" value="2">
+                                        <label for="python2" class="rating-option">2</label>
+
+                                        <input type="radio" id="python3" name="entry.2233445566" value="3">
+                                        <label for="python3" class="rating-option">3</label>
+
+                                        <input type="radio" id="python4" name="entry.2233445566" value="4">
+                                        <label for="python4" class="rating-option">4</label>
+
+                                        <input type="radio" id="python5" name="entry.2233445566" value="5">
+                                        <label for="python5" class="rating-option">5</label>
+                                    </div>
+                                    <span class="rating-label">Expert</span>
+                                </div>
+                            </div>
+                            <div class="form-error" id="pythonError"></div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">
+                                Do you have any prior knowledge of Quantum Computing? <span class="required">*</span>
+                            </label>
+                            <div class="radio-group">
+                                <div class="radio-option">
+                                    <input type="radio" id="quantum1" name="entry.3344556677" value="none" required>
+                                    <label for="quantum1" class="radio-label">
+                                        <span class="radio-custom"></span>
+                                        No, never even heard of it
+                                    </label>
+                                </div>
+
+                                <div class="radio-option">
+                                    <input type="radio" id="quantum2" name="entry.3344556677" value="heard">
+                                    <label for="quantum2" class="radio-label">
+                                        <span class="radio-custom"></span>
+                                        Heard the name, but have no idea what it is
+                                    </label>
+                                </div>
+
+                                <div class="radio-option">
+                                    <input type="radio" id="quantum3" name="entry.3344556677" value="basic">
+                                    <label for="quantum3" class="radio-label">
+                                        <span class="radio-custom"></span>
+                                        Yes, I have some basic knowledge
+                                    </label>
+                                </div>
+
+                                <div class="radio-option">
+                                    <input type="radio" id="quantum4" name="entry.3344556677" value="comfortable">
+                                    <label for="quantum4" class="radio-label">
+                                        <span class="radio-custom"></span>
+                                        Yes, I am comfortable in Quantum Computing
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="form-error" id="quantumError"></div>
+                        </div>
+                    </div>
+
+                    <!-- Submit Section -->
+                    <div class="form-submit">
+                        <button type="submit" class="submit-btn">
+                            <span>Register Now</span>
+                            <i class="fas fa-rocket"></i>
+                        </button>
+                        <p class="submit-note">
+                            By registering, you agree to receive updates about Qiskit Fall Fest 2025.
+                            Your information will be kept confidential and used only for event purposes.
+                        </p>
+                    </div>
+                </form>
+
+                <!-- Success Message -->
+                <div id="successMessage" class="success-message" style="display: none;">
+                    <div class="success-icon">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <h3>Registration Successful!</h3>
+                    <p>Thank you for registering for Qiskit Fall Fest 2025. We'll send you a confirmation email shortly with all the event details.</p>
+                    <button class="success-btn" onclick="resetForm()">Register Another Person</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>Qiskit Fall Fest 2025</h3>
+                    <p>Exploring the quantum frontier at IISER Kolkata</p>
+                    <div class="footer-links">
+                        <a href="index.html">Home</a>
+                        <a href="quantum-century.html">100 Years</a>
+                        <a href="games.html">Games</a>
+                        <a href="archive.html">Archive</a>
+                    </div>
+                </div>
+                <div class="footer-section">
+                    <h3>Contact</h3>
+                    <p><i class="fas fa-envelope"></i> slashdot@iiserkol.ac.in</p>
+                    <p><i class="fas fa-map-marker-alt"></i> IISER Kolkata, India</p>
+                </div>
+                <div class="footer-section">
+                    <h3>Follow Us</h3>
+                    <div class="social-links">
+                        <a href="#" class="social-link"><i class="fab fa-github"></i></a>
+                        <a href="#" class="social-link"><i class="fab fa-linkedin"></i></a>
+                        <a href="#" class="social-link"><i class="fab fa-twitter"></i></a>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 SlashDot - IISER Kolkata. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="registration.js"></script>
+</body>
+</html>

@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quantum Games | Qiskit Fall Fest 2025</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <nav class="navbar">
+            <div class="nav-container">
+                <div class="nav-logo">
+                    <img src="assets/qiskit logo.svg" alt="Qiskit Logo" style="height: 30px;">
+                    <span>Qiskit Fall Fest</span>
+                </div>
+                <ul class="nav-menu">
+                    <li class="nav-item">
+                        <a href="index.html" class="nav-link">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="index.html#about-institute" class="nav-link">About Us</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="index.html#event-details" class="nav-link">Event</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="index.html#organizers" class="nav-link">Organizers</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="quantum-century.html" class="nav-link">100 Years</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="games.html" class="nav-link active">Games</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="registration.html" class="nav-link">Registration</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="archive.html" class="nav-link">Archive</a>
+                    </li>
+                </ul>
+                <div class="hamburger">
+                    <span class="bar"></span>
+                    <span class="bar"></span>
+                    <span class="bar"></span>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Games Hero Section -->
+    <section class="games-hero">
+        <div class="games-hero-background">
+            <div class="quantum-particles-games"></div>
+            <div class="games-circuit-bg"></div>
+        </div>
+        <div class="games-hero-content">
+            <h1 class="games-title">Quantum Games</h1>
+            <p class="games-subtitle">Discover quantum mechanics through interactive games and challenges</p>
+            <div class="games-stats">
+                <div class="stat-item">
+                    <span class="stat-number">5</span>
+                    <span class="stat-label">Games</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number">∞</span>
+                    <span class="stat-label">Fun</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number">⚛️</span>
+                    <span class="stat-label">Quantum</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Games Grid Section -->
+    <section class="games-section">
+        <div class="container">
+            <h2 class="section-title">Choose Your Quantum Adventure</h2>
+            <div class="games-grid">
+
+                <!-- Quantum Coin Flip -->
+                <div class="game-card" data-game="coin">
+                    <div class="game-icon">
+                        <i class="fas fa-coins"></i>
+                    </div>
+                    <h3>Quantum Coin Flip</h3>
+                    <p>Experience superposition! Flip a quantum coin that can be both heads and tails until measured.</p>
+                    <div class="game-difficulty">
+                        <span class="difficulty-badge beginner">Beginner</span>
+                    </div>
+                    <button class="play-btn" onclick="startGame('coin')">
+                        <span>Play Now</span>
+                        <i class="fas fa-play"></i>
+                    </button>
+                </div>
+
+                <!-- Quantum Entanglement -->
+                <div class="game-card" data-game="entanglement">
+                    <div class="game-icon">
+                        <i class="fas fa-link"></i>
+                    </div>
+                    <h3>Entanglement Challenge</h3>
+                    <p>Test your understanding of quantum entanglement with this mind-bending puzzle game.</p>
+                    <div class="game-difficulty">
+                        <span class="difficulty-badge intermediate">Intermediate</span>
+                    </div>
+                    <button class="play-btn" onclick="startGame('entanglement')">
+                        <span>Play Now</span>
+                        <i class="fas fa-play"></i>
+                    </button>
+                </div>
+
+                <!-- Qubit Visualizer -->
+                <div class="game-card" data-game="qubit">
+                    <div class="game-icon">
+                        <i class="fas fa-atom"></i>
+                    </div>
+                    <h3>Qubit Visualizer</h3>
+                    <p>Visualize quantum states on the Bloch sphere and understand qubit rotations.</p>
+                    <div class="game-difficulty">
+                        <span class="difficulty-badge intermediate">Intermediate</span>
+                    </div>
+                    <button class="play-btn" onclick="startGame('qubit')">
+                        <span>Play Now</span>
+                        <i class="fas fa-play"></i>
+                    </button>
+                </div>
+
+                <!-- Quantum Maze -->
+                <div class="game-card" data-game="maze">
+                    <div class="game-icon">
+                        <i class="fas fa-route"></i>
+                    </div>
+                    <h3>Quantum Maze</h3>
+                    <p>Navigate through a maze using quantum tunneling! Can you reach the end without touching walls?</p>
+                    <div class="game-difficulty">
+                        <span class="difficulty-badge advanced">Advanced</span>
+                    </div>
+                    <button class="play-btn" onclick="startGame('maze')">
+                        <span>Play Now</span>
+                        <i class="fas fa-play"></i>
+                    </button>
+                </div>
+
+                <!-- Quantum Memory -->
+                <div class="game-card" data-game="memory">
+                    <div class="game-icon">
+                        <i class="fas fa-brain"></i>
+                    </div>
+                    <h3>Quantum Memory</h3>
+                    <p>Test your quantum intuition with this memory game featuring quantum states and measurements.</p>
+                    <div class="game-difficulty">
+                        <span class="difficulty-badge beginner">Beginner</span>
+                    </div>
+                    <button class="play-btn" onclick="startGame('memory')">
+                        <span>Play Now</span>
+                        <i class="fas fa-play"></i>
+                    </button>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- Game Modal -->
+    <div id="game-modal" class="game-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="game-title">Quantum Game</h3>
+                <button class="close-btn" onclick="closeGame()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div id="game-content" class="game-content">
+                <!-- Game content will be loaded here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>Quantum Games</h3>
+                    <p>Learn quantum computing through interactive games and challenges.</p>
+                    <div class="footer-social">
+                        <a href="#"><i class="fab fa-facebook"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                        <a href="#"><i class="fab fa-linkedin"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                    </div>
+                </div>
+                <div class="footer-section">
+                    <h4>Quick Links</h4>
+                    <ul>
+                        <li><a href="index.html">Main Event</a></li>
+                        <li><a href="quantum-century.html">100 Years</a></li>
+                        <li><a href="index.html#about-event">About</a></li>
+                        <li><a href="archive.html">Archive</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Games</h4>
+                    <ul>
+                        <li><a href="#" onclick="startGame('coin')">Coin Flip</a></li>
+                        <li><a href="#" onclick="startGame('entanglement')">Entanglement</a></li>
+                        <li><a href="#" onclick="startGame('qubit')">Qubit Visualizer</a></li>
+                        <li><a href="#" onclick="startGame('maze')">Quantum Maze</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Contact</h4>
+                    <p><i class="fas fa-envelope"></i> slashdot@iiserkol.ac.in</p>
+                    <p><i class="fas fa-map-marker-alt"></i> IISER Kolkata, Mohanpur, Nadia</p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 IBM Qiskit Fall Fest - Quantum Games. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="games.js"></script>
+    <script src="games.js"></script>
+</body>
+</html></content>
+<parameter name="filePath">/home/shuvam/codes/qiskit_fallfest/games.html
