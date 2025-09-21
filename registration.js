@@ -70,7 +70,7 @@ function validateForm() {
     }
 
     // Validate Python comfort level
-    const pythonComfort = document.querySelector('input[name="entry.2233445566"]:checked');
+    const pythonComfort = document.querySelector('input[name="entry.1978928870"]:checked');
     if (!pythonComfort) {
         showError('pythonError', 'Please select your Python comfort level');
         isValid = false;
@@ -79,7 +79,7 @@ function validateForm() {
     }
 
     // Validate quantum knowledge
-    const quantumKnowledge = document.querySelector('input[name="entry.3344556677"]:checked');
+    const quantumKnowledge = document.querySelector('input[name="entry.949802710"]:checked');
     if (!quantumKnowledge) {
         showError('quantumError', 'Please select your quantum computing knowledge level');
         isValid = false;
@@ -132,17 +132,44 @@ function isValidPhone(phone) {
 function submitForm() {
     const form = document.getElementById('registrationForm');
 
+    // Add timestamp to prevent draft conflicts
+    const timestampInput = form.querySelector('input[name="submissionTimestamp"]');
+    if (timestampInput) {
+        timestampInput.value = Date.now().toString();
+    }
+
     // Show loading state
     const submitBtn = form.querySelector('.submit-btn');
     const originalText = submitBtn.innerHTML;
-    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Registering...';
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Submitting to Google Forms...';
     submitBtn.disabled = true;
 
-    // Submit the form to Google Forms
-    form.submit();
+    // Add a message before redirect
+    const messageDiv = document.createElement('div');
+    messageDiv.style.cssText = `
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: white;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        z-index: 1000;
+        text-align: center;
+        border: 2px solid #6366f1;
+    `;
+    messageDiv.innerHTML = `
+        <i class="fas fa-paper-plane" style="color: #6366f1; font-size: 24px; margin-bottom: 10px;"></i>
+        <h3 style="color: #1f2937; margin: 0 0 10px 0;">Submitting Registration...</h3>
+        <p style="color: #6b7280; margin: 0;">Redirecting to Google Forms to complete submission.</p>
+    `;
+    document.body.appendChild(messageDiv);
 
-    // Note: Since we're submitting to Google Forms, the page will redirect
-    // The success message won't be shown, but the form will be submitted
+    // Submit the form after a short delay to show the message
+    setTimeout(() => {
+        form.submit();
+    }, 1000);
 }
 
 function resetForm() {
@@ -192,3 +219,43 @@ document.getElementById('rollNo').addEventListener('input', function(e) {
     let value = e.target.value.replace(/[^a-zA-Z0-9]/g, '');
     e.target.value = value;
 });
+
+// Google Sign-in helper
+function openGoogleSignIn() {
+    // Use a simpler continue URL to avoid 400 errors
+    const signInUrl = 'https://accounts.google.com/AccountChooser';
+
+    // Open in new tab
+    const signInTab = window.open(signInUrl, '_blank');
+
+    // Check if popup blocker prevented opening
+    if (!signInTab || signInTab.closed || typeof signInTab.closed == 'undefined') {
+        alert('Popup blocked! Please allow popups for this site and try again, or sign in manually at: https://accounts.google.com');
+        return;
+    }
+
+    // Show instructions
+    alert('A new tab has opened for sign-in. Please select your institute email and sign in. You can close the tab after signing in and return here to submit the registration form.');
+
+    // Monitor the tab - when it closes, user has completed sign-in
+    const checkClosed = setInterval(() => {
+        if (signInTab.closed) {
+            clearInterval(checkClosed);
+            // Update the UI to show user is ready to submit
+            const reminder = document.querySelector('.signin-reminder');
+            if (reminder) {
+                reminder.innerHTML = `
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <i class="fas fa-check-circle" style="color: #059669; font-size: 20px;"></i>
+                        <div>
+                            <h4 style="color: #059669; margin: 0; font-size: 16px; font-weight: 600;">Signed In Successfully!</h4>
+                            <p style="color: #059669; margin: 4px 0 0 0; font-size: 14px;">You can now submit the registration form below.</p>
+                        </div>
+                    </div>
+                `;
+                reminder.style.background = 'linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%)';
+                reminder.style.borderColor = '#059669';
+            }
+        }
+    }, 1000);
+}

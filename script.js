@@ -39,15 +39,8 @@ window.addEventListener('scroll', () => {
 
 // Registration button functionality
 function openRegistration() {
-    // For now, show an alert. In a real implementation, this would open a registration form or redirect
-    alert('Registration form will open here! 🚀\n\nThis is a demo - in the real implementation, this would redirect to the registration page or open a modal with the registration form.');
-    
-    // Optional: Add some visual feedback
-    const btn = document.querySelector('.register-btn');
-    btn.style.transform = 'scale(0.95)';
-    setTimeout(() => {
-        btn.style.transform = 'scale(1)';
-    }, 150);
+    // Redirect to the registration page
+    window.location.href = 'registration.html';
 }
 
 // Intersection Observer for animations

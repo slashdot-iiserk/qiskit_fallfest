@@ -1119,14 +1119,9 @@ body {
     color: white;
     border-radius: 50%;
     text-decoration: none;
-    transition: transform 0.3s ease;
+    transition: all 0.3s ease;
 }
 
-.social-links a:hover {
-    transform: translateY(-3px) scale(1.1);
-}
-
-/* Footer */
 .footer {
     background: #0f172a;
     color: white;
@@ -1245,188 +1240,373 @@ body {
     color: #64748b;
 }
 
+/* Registration Page Styles */
+.registration-hero {
+    height: 60vh;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
+    overflow: hidden;
+}
+
+.registration-hero-background {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0.1;
+}
+
+.quantum-particles-registration {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background-image: 
+        radial-gradient(circle at 20% 30%, #6366f1 2px, transparent 2px),
+        radial-gradient(circle at 80% 70%, #ec4899 2px, transparent 2px),
+        radial-gradient(circle at 60% 20%, #10b981 2px, transparent 2px);
+    background-size: 200px 200px, 250px 250px, 180px 180px;
+    animation: floatParticles 20s ease-in-out infinite;
+}
+
+.registration-circuit-bg {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 80%;
+    height: 80%;
+    background-image: 
+        linear-gradient(90deg, transparent 48%, rgba(99, 102, 241, 0.3) 49%, rgba(99, 102, 241, 0.3) 51%, transparent 52%),
+        linear-gradient(0deg, transparent 48%, rgba(236, 72, 153, 0.3) 49%, rgba(236, 72, 153, 0.3) 51%, transparent 52%);
+    background-size: 200px 200px, 200px 200px;
+    animation: quantumPulse 4s ease-in-out infinite;
+}
+
+.registration-hero-content {
+    text-align: center;
+    z-index: 2;
+    color: white;
+    padding: 2rem;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.registration-title {
+    font-family: 'Orbitron', monospace;
+    font-size: 3rem;
+    font-weight: 900;
+    margin-bottom: 1rem;
+    background: linear-gradient(135deg, #6366f1, #ec4899);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-shadow: 0 0 20px rgba(99, 102, 241, 0.5);
+}
+
+.registration-subtitle {
+    font-size: 1.2rem;
+    color: #cbd5e1;
+    margin-bottom: 2rem;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.registration-stats {
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
+    margin-bottom: 2rem;
+}
+
+.stat-item {
+    text-align: center;
+    padding: 1rem;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.stat-number {
+    display: block;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #10b981;
+}
+
+.stat-label {
+    display: block;
+    font-size: 0.9rem;
+    color: #94a3b8;
+    margin-top: 0.5rem;
+}
+
+.registration-section {
+    padding: 4rem 0;
+    background: #0f172a;
+    color: white;
+}
+
+.registration-container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 0 2rem;
+}
+
+.registration-header {
+    text-align: center;
+    margin-bottom: 3rem;
+}
+
+.registration-intro {
+    font-size: 1.1rem;
+    color: #cbd5e1;
+    max-width: 600px;
+    margin: 1rem auto 0;
+}
+
+.registration-form {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 15px;
+    padding: 3rem;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+}
+
+.form-section {
+    margin-bottom: 3rem;
+}
+
+.form-section-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #6366f1;
+    margin-bottom: 2rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.form-section-title i {
+    color: #ec4899;
+}
+
+.form-group {
+    margin-bottom: 2rem;
+}
+
+.form-label {
+    display: block;
+    font-weight: 600;
+    color: #f1f5f9;
+    margin-bottom: 0.5rem;
+    font-size: 1rem;
+}
+
+.required {
+    color: #ef4444;
+}
+
+.form-input {
+    width: 100%;
+    padding: 1rem;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.05);
+    color: white;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+}
+
+.form-input:focus {
+    outline: none;
+    border-color: #6366f1;
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.form-input::placeholder {
+    color: #94a3b8;
+}
+
+.rating-container {
+    margin-top: 1rem;
+}
+
+.rating-scale {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.rating-label {
+    font-size: 0.9rem;
+    color: #94a3b8;
+    font-weight: 500;
+}
+
+.rating-options {
+    display: flex;
+    gap: 0.5rem;
+    flex: 1;
+    justify-content: center;
+}
+
+.rating-option {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.05);
+    color: white;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-weight: 600;
+}
+
+.rating-option:hover {
+    border-color: #6366f1;
+    background: rgba(99, 102, 241, 0.2);
+}
+
+input[type="radio"]:checked + .rating-option {
+    background: #6366f1;
+    border-color: #6366f1;
+    color: white;
+}
+
+.radio-group {
+    margin-top: 1rem;
+}
+
+.radio-option {
+    margin-bottom: 1rem;
+}
+
+.radio-label {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    cursor: pointer;
+    font-weight: 500;
+    color: #f1f5f9;
+    padding: 0.75rem;
+    border-radius: 8px;
+    transition: background 0.3s ease;
+}
+
+.radio-label:hover {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.radio-custom {
+    width: 20px;
+    height: 20px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.05);
+    transition: all 0.3s ease;
+    flex-shrink: 0;
+}
+
+input[type="radio"]:checked + .radio-label .radio-custom {
+    background: #6366f1;
+    border-color: #6366f1;
+}
+
+input[type="radio"]:checked + .radio-label .radio-custom::after {
+    content: '';
+    display: block;
+    width: 8px;
+    height: 8px;
+    background: white;
+    border-radius: 50%;
+    margin: 2px;
+}
+
+.form-error {
+    color: #ef4444;
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
+    display: none;
+}
+
+.submit-btn {
+    width: 100%;
+    padding: 1.25rem;
+    background: linear-gradient(135deg, #6366f1, #ec4899);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-top: 2rem;
+}
+
+.submit-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(99, 102, 241, 0.4);
+}
+
+.submit-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.success-message {
+    display: none;
+    text-align: center;
+    padding: 2rem;
+    background: rgba(16, 185, 129, 0.1);
+    border: 1px solid #10b981;
+    border-radius: 8px;
+    margin-top: 2rem;
+}
+
+.success-message h3 {
+    color: #10b981;
+    margin-bottom: 1rem;
+}
+
+.success-message p {
+    color: #cbd5e1;
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
-    .hamburger {
-        display: flex;
-    }
-
-    .nav-menu {
-        position: fixed;
-        left: -100%;
-        top: 70px;
-        flex-direction: column;
-        background: rgba(15, 23, 42, 0.95);
-        width: 100%;
-        text-align: center;
-        transition: 0.3s;
-        padding: 2rem 0;
-    }
-
-    .nav-menu.active {
-        left: 0;
-    }
-
-    .hero-title {
+    .registration-title {
         font-size: 2.5rem;
     }
-
-    .fall-fest-text {
-        font-size: 1.8rem;
-    }
-
-    .fest-title {
-        font-size: 2rem;
-    }
-
-    .chapter-title {
-        font-size: 1.2rem;
-    }
-
-    .main-badge img {
-        height: 150px;
-    }
-
-    .logos-container {
+    
+    .registration-stats {
+        flex-direction: column;
         gap: 1rem;
     }
-
-    /* Hero emoji images responsive scaling */
-    .hero-background::before {
-        width: 80px;
-        height: 80px;
-        top: 15%;
-        left: 3%;
+    
+    .registration-form {
+        padding: 2rem;
     }
-
-    .hero-background::after {
-        width: 70px;
-        height: 70px;
-        bottom: 20%;
-        right: 5%;
-    }
-
-    .hero-emoji-theme-top {
-        width: 60px;
-        height: 60px;
-        top: 25%;
-        right: 5%;
-    }
-
-    .hero-emoji-cat-left {
-        width: 65px;
-        height: 65px;
-        top: 65%;
-        left: 2%;
-    }
-
-    .hero-emoji-theme-center {
-        width: 50px;
-        height: 50px;
-        top: 40%;
-        left: 10%;
-    }
-
-    /* New emoji images responsive styling for tablets */
-    .hero-emoji-qiskit-right {
-        width: 65px;
-        height: 65px;
-        top: 50%;
-        right: 8%;
-    }
-
-    .hero-emoji-entanglement-top {
-        width: 55px;
-        height: 55px;
-        top: 12%;
-        left: 20%;
-    }
-
-    .hero-emoji-atom-bottom {
-        width: 60px;
-        height: 60px;
-        bottom: 12%;
-        left: 8%;
-    }
-
-    .hero-emoji-qiskit3-left {
-        width: 50px;
-        height: 50px;
-        top: 30%;
-        left: 5%;
-    }
-
-    .logo-item img {
-        height: 50px;
-    }
-
-    .days {
-        font-size: 2rem;
-    }
-
-    .about-content,
-    .institute-content {
-        grid-template-columns: 1fr;
-        gap: 2rem;
-    }
-
-    .full-illustration {
-        max-width: 300px;
-    }
-
-    .institute-stats {
-        grid-template-columns: 1fr;
+    
+    .rating-scale {
+        flex-direction: column;
         gap: 1rem;
     }
-
-    .schedule-container {
-        grid-template-columns: 1fr;
-    }
-
-    .organizer-grid {
-        grid-template-columns: 1fr;
-        gap: 2rem;
-    }
-
-    .footer-content {
-        grid-template-columns: 1fr;
-        gap: 2rem;
-    }
-
-    .section-title {
-        font-size: 2rem;
-    }
-
-    .day-feature-image img {
-        width: 100px;
-        height: 100px;
-        border-radius: 20px;
-        padding: 6px;
-    }
-
-    .quantum-visual {
-        width: 250px;
-        height: 250px;
-    }
-
-    .qubit {
-        width: 50px;
-        height: 50px;
-    }
-
-    .quantum-gate {
-        width: 80px;
-        height: 80px;
-    }
-
-    .quantum-gate img {
-        width: 50px;
-        height: 50px;
-    }
-
-    @keyframes orbit {
-        from { transform: rotate(0deg) translateX(100px) rotate(0deg); }
-        to { transform: rotate(360deg) translateX(100px) rotate(-360deg); }
+    
+    .rating-options {
+        justify-content: space-between;
     }
 }
 
@@ -2016,165 +2196,6 @@ html {
     color: #6366f1;
     text-decoration: none;
     transition: all 0.3s ease;
-}
-
-.social-links a:hover {
-    background: #6366f1;
-    color: white;
-    transform: translateY(-3px);
-    box-shadow: 0 5px 15px rgba(99, 102, 241, 0.3);
-}
-
-/* Archive Stats Section */
-.archive-stats {
-    padding: 6rem 0;
-    background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
-}
-
-.stats-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 2rem;
-    max-width: 800px;
-    margin: 0 auto;
-    padding: 0 2rem;
-}
-
-.stat-card {
-    background: rgba(255, 255, 255, 0.05);
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 20px;
-    padding: 2rem;
-    text-align: center;
-    transition: all 0.3s ease;
-}
-
-.stat-card:hover {
-    transform: translateY(-10px);
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
-    border-color: rgba(99, 102, 241, 0.3);
-}
-
-.stat-icon {
-    width: 60px;
-    height: 60px;
-    background: linear-gradient(135deg, #6366f1, #ec4899);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin: 0 auto 1rem;
-    font-size: 1.5rem;
-    color: white;
-}
-
-.stat-number {
-    font-size: 2.5rem;
-    font-weight: 900;
-    color: #ffffff;
-    margin-bottom: 0.5rem;
-    font-family: 'Orbitron', monospace;
-}
-
-.stat-label {
-    color: #94a3b8;
-    font-size: 1rem;
-    font-weight: 500;
-}
-
-/* Archive Navigation */
-.nav-link.active {
-    color: #6366f1 !important;
-    font-weight: 600;
-}
-
-.archive-links {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-}
-
-.archive-links a {
-    color: #94a3b8;
-    text-decoration: none;
-    transition: color 0.3s ease;
-}
-
-.archive-links a:hover {
-    color: #6366f1;
-}
-
-/* Responsive Design for Archive */
-@media (max-width: 768px) {
-    .archive-title {
-        font-size: 2.5rem;
-    }
-    
-    .archive-subtitle {
-        font-size: 1.4rem;
-    }
-    
-    .archive-description {
-        font-size: 1rem;
-    }
-    
-    .gallery-grid {
-        grid-template-columns: 1fr;
-        gap: 1.5rem;
-        padding: 0 1rem;
-    }
-    
-    .materials-grid {
-        grid-template-columns: 1fr;
-        gap: 1.5rem;
-        padding: 0 1rem;
-    }
-    
-    .organizer-grid {
-        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-        gap: 1.5rem;
-        padding: 0 1rem;
-    }
-    
-    .stats-grid {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 1.5rem;
-        padding: 0 1rem;
-    }
-    
-    .gallery-filters {
-        gap: 0.5rem;
-        padding: 0 1rem;
-    }
-    
-    .filter-btn {
-        padding: 0.5rem 1rem;
-        font-size: 0.9rem;
-    }
-}
-
-@media (max-width: 480px) {
-    .archive-title {
-        font-size: 2rem;
-    }
-    
-    .archive-subtitle {
-        font-size: 1.2rem;
-    }
-    
-    .stats-grid {
-        grid-template-columns: 1fr;
-    }
-    
-    .organizer-grid {
-        grid-template-columns: 1fr;
-    }
-    
-    .gallery-filters {
-        flex-wrap: wrap;
-        justify-content: center;
-    }
 }
 
 /* ==================== QUANTUM CENTURY PAGE STYLES ==================== */

@@ -87,9 +87,32 @@
                     <p class="registration-intro">Fill out the form below to secure your spot at Qiskit Fall Fest 2025. All fields marked with * are required.</p>
                 </div>
 
-                <form id="registrationForm" class="registration-form" action="https://docs.google.com/forms/u/0/d/e/YOUR_FORM_ID/formResponse" method="POST" target="_blank">
-                    <!-- Hidden iframe for form submission -->
-                    <iframe name="hidden_iframe" id="hidden_iframe" style="display:none;" onload="if(submitted){showSuccessMessage()}"></iframe>
+                <form id="registrationForm" class="registration-form" action="https://docs.google.com/forms/d/e/1FAIpQLSdHtf5fHO50z85WMqOPBstlC7ieGFMpJG3mgzw5dMhRxXJycQ/formResponse" method="POST">
+                    <!-- Hidden inputs for Google Forms compatibility -->
+                    <input type="hidden" name="entry.658598685" value="">
+                    <input type="hidden" name="entry.361003796" value="">
+                    <input type="hidden" name="entry.1046343065" value="">
+                    <input type="hidden" name="entry.695156353" value="">
+                    <input type="hidden" name="emailAddress" value="">
+                    <input type="hidden" name="fvv" value="1">
+                    <input type="hidden" name="pageHistory" value="0">
+                    <input type="hidden" name="fbzx" value="-2480696332644305734">
+                    <input type="hidden" name="submissionTimestamp" value="-1">
+
+                    <!-- Sign-in reminder -->
+                    <div class="signin-reminder" style="background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); border: 1px solid #f59e0b; border-radius: 8px; padding: 16px; margin-bottom: 24px;">
+                        <div style="display: flex; align-items: center; gap: 12px;">
+                            <i class="fas fa-info-circle" style="color: #d97706; font-size: 20px;"></i>
+                            <div>
+                                <h4 style="color: #92400e; margin: 0; font-size: 16px; font-weight: 600;">Important: Sign-in Required</h4>
+                                <p style="color: #92400e; margin: 4px 0 0 0; font-size: 14px;">Click "Sign in with Google" - it will open your account chooser in a new tab. Sign in with your institute email, then close the tab and submit the form.</p>
+                                <button type="button" onclick="openGoogleSignIn()" style="background: #dc2626; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 14px; margin-top: 8px;">
+                                    <i class="fab fa-google"></i> Sign in with Google
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- Personal Information -->
                     <div class="form-section">
                         <h3 class="form-section-title">
@@ -101,15 +124,16 @@
                             <label for="name" class="form-label">
                                 Name <span class="required">*</span>
                             </label>
-                            <input type="text" id="name" name="entry.1234567890" class="form-input" required>
+                            <input type="text" id="name" name="entry.658598685" class="form-input" required>
                             <div class="form-error" id="nameError"></div>
                         </div>
 
                         <div class="form-group">
                             <label for="email" class="form-label">
                                 Email Address <span class="required">*</span>
+                                <span style="font-size: 12px; color: #6b7280; font-weight: normal;">(Your institute email will be automatically collected when signed in)</span>
                             </label>
-                            <input type="email" id="email" name="entry.0987654321" class="form-input" required>
+                            <input type="email" id="email" name="entry.1046343065" class="form-input" required>
                             <div class="form-error" id="emailError"></div>
                         </div>
 
@@ -117,7 +141,7 @@
                             <label for="rollNo" class="form-label">
                                 Roll Number <span class="required">*</span>
                             </label>
-                            <input type="text" id="rollNo" name="entry.1122334455" class="form-input" required>
+                            <input type="text" id="rollNo" name="entry.361003796" class="form-input" required>
                             <div class="form-error" id="rollNoError"></div>
                         </div>
 
@@ -125,7 +149,7 @@
                             <label for="phone" class="form-label">
                                 Phone Number <span class="required">*</span>
                             </label>
-                            <input type="tel" id="phone" name="entry.5566778899" class="form-input" required>
+                            <input type="tel" id="phone" name="entry.695156353" class="form-input" required>
                             <div class="form-error" id="phoneError"></div>
                         </div>
                     </div>
@@ -145,19 +169,19 @@
                                 <div class="rating-scale">
                                     <span class="rating-label">Beginner</span>
                                     <div class="rating-options">
-                                        <input type="radio" id="python1" name="entry.2233445566" value="1" required>
+                                        <input type="radio" id="python1" name="entry.1978928870" value="1" required>
                                         <label for="python1" class="rating-option">1</label>
 
-                                        <input type="radio" id="python2" name="entry.2233445566" value="2">
+                                        <input type="radio" id="python2" name="entry.1978928870" value="2">
                                         <label for="python2" class="rating-option">2</label>
 
-                                        <input type="radio" id="python3" name="entry.2233445566" value="3">
+                                        <input type="radio" id="python3" name="entry.1978928870" value="3">
                                         <label for="python3" class="rating-option">3</label>
 
-                                        <input type="radio" id="python4" name="entry.2233445566" value="4">
+                                        <input type="radio" id="python4" name="entry.1978928870" value="4">
                                         <label for="python4" class="rating-option">4</label>
 
-                                        <input type="radio" id="python5" name="entry.2233445566" value="5">
+                                        <input type="radio" id="python5" name="entry.1978928870" value="5">
                                         <label for="python5" class="rating-option">5</label>
                                     </div>
                                     <span class="rating-label">Expert</span>
@@ -172,7 +196,7 @@
                             </label>
                             <div class="radio-group">
                                 <div class="radio-option">
-                                    <input type="radio" id="quantum1" name="entry.3344556677" value="none" required>
+                                    <input type="radio" id="quantum1" name="entry.949802710" value="No, never even heard of it" required>
                                     <label for="quantum1" class="radio-label">
                                         <span class="radio-custom"></span>
                                         No, never even heard of it
@@ -180,7 +204,7 @@
                                 </div>
 
                                 <div class="radio-option">
-                                    <input type="radio" id="quantum2" name="entry.3344556677" value="heard">
+                                    <input type="radio" id="quantum2" name="entry.949802710" value="Heard the name, but have no idea what it is">
                                     <label for="quantum2" class="radio-label">
                                         <span class="radio-custom"></span>
                                         Heard the name, but have no idea what it is
@@ -188,7 +212,7 @@
                                 </div>
 
                                 <div class="radio-option">
-                                    <input type="radio" id="quantum3" name="entry.3344556677" value="basic">
+                                    <input type="radio" id="quantum3" name="entry.949802710" value="Yes, I have some Basic knowledge">
                                     <label for="quantum3" class="radio-label">
                                         <span class="radio-custom"></span>
                                         Yes, I have some basic knowledge
@@ -196,7 +220,7 @@
                                 </div>
 
                                 <div class="radio-option">
-                                    <input type="radio" id="quantum4" name="entry.3344556677" value="comfortable">
+                                    <input type="radio" id="quantum4" name="entry.949802710" value="Yes, I am comfortable in Quantum Computing">
                                     <label for="quantum4" class="radio-label">
                                         <span class="radio-custom"></span>
                                         Yes, I am comfortable in Quantum Computing
@@ -209,6 +233,12 @@
 
                     <!-- Submit Section -->
                     <div class="form-submit">
+                        <div style="background: #f3f4f6; border: 1px solid #d1d5db; border-radius: 8px; padding: 16px; margin-bottom: 20px;">
+                            <p style="margin: 0; font-size: 14px; color: #374151;">
+                                <i class="fas fa-shield-alt" style="color: #059669; margin-right: 8px;"></i>
+                                <strong>Privacy Note:</strong> Your institute email will be automatically collected for verification purposes when you submit this form. Make sure you're signed in with your @iiserkol.ac.in account.
+                            </p>
+                        </div>
                         <button type="submit" class="submit-btn">
                             <span>Register Now</span>
                             <i class="fas fa-rocket"></i>
