@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Installation Guide | Qiskit Fall Fest 2025</title>
+    <link rel="stylesheet" href="styles_installation.css">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <nav class="navbar">
+            <div class="nav-container">
+                <div class="nav-logo">
+                    <img src="assets/qiskit logo.svg" alt="Qiskit Logo" style="height: 30px;">
+                    <span>Qiskit Fall Fest</span>
+                </div>
+                <ul class="nav-menu">
+                    <li class="nav-item">
+                        <a href="index.html" class="nav-link">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="index.html#about-institute" class="nav-link">About Us</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="index.html#event-details" class="nav-link">Event</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="index.html#organizers" class="nav-link">Organizers</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="registration.html" class="nav-link">Registration</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="archive.html" class="nav-link">Archive</a>
+                    </li>
+                </ul>
+                <div class="hamburger">
+                    <span class="bar"></span>
+                    <span class="bar"></span>
+                    <span class="bar"></span>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="installation-hero">
+        <div class="hero-background">
+            <div class="quantum-particles"></div>
+        </div>
+        <div class="hero-content">
+            <h1 class="hero-title">Qiskit Installation Guide</h1>
+            <p class="hero-subtitle">Get your quantum computing environment ready for Fall Fest 2025</p>
+        </div>
+    </section>
+
+    <!-- Main Content -->
+    <section class="installation-content">
+        <div class="container">
+            <!-- Platform Selector -->
+            <div class="platform-selector">
+                <h2>Select Your Operating System</h2>
+                <div class="platform-buttons">
+                    <button class="platform-btn active" data-platform="windows">
+                        <i class="fab fa-windows"></i>
+                        <span>Windows</span>
+                    </button>
+                    <button class="platform-btn" data-platform="macos">
+                        <i class="fab fa-apple"></i>
+                        <span>macOS</span>
+                    </button>
+                    <button class="platform-btn" data-platform="linux">
+                        <i class="fab fa-linux"></i>
+                        <span>Linux</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Prerequisites -->
+            <div class="guide-section">
+                <h2><i class="fas fa-check-circle"></i> Prerequisites</h2>
+                <div class="info-box">
+                    <p><strong>Python 3.9 or higher</strong> must be installed on your system.</p>
+                    <p>Basic knowledge of command line/terminal is helpful but not required.</p>
+                </div>
+            </div>
+
+            <!-- Package Manager Choice -->
+            <div class="guide-section">
+                <h2><i class="fas fa-box"></i> Virtual Environment Manager</h2>
+                <div class="info-box highlight">
+                    <p><strong>We recommend using <code>uv</code></strong> for this workshop as it's fast and easy to use.</p>
+                    <p>However, if you're already familiar with <strong>conda</strong> or <strong>venv</strong>, feel free to use those instead!</p>
+                </div>
+            </div>
+
+            <!-- Installation Steps - Windows -->
+            <div class="platform-content windows-content active">
+                <div class="guide-section">
+                    <h2><i class="fas fa-download"></i> Step 1: Install uv</h2>
+                    
+                    <div class="method-tabs">
+                        <button class="method-tab active" data-method="winget">WinGet (Recommended)</button>
+                        <button class="method-tab" data-method="scoop">Scoop</button>
+                        <button class="method-tab" data-method="standalone-win">Standalone Installer</button>
+                    </div>
+
+                    <div class="method-content winget-content active">
+                        <p>Open PowerShell as Administrator and run:</p>
+                        <pre><code class="language-powershell">winget install --id=astral-sh.uv -e</code></pre>
+                    </div>
+
+                    <div class="method-content scoop-content">
+                        <p>If you have Scoop installed:</p>
+                        <pre><code class="language-powershell">scoop install main/uv</code></pre>
+                    </div>
+
+                    <div class="method-content standalone-win-content">
+                        <p>Run this command in PowerShell:</p>
+                        <pre><code class="language-powershell">powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"</code></pre>
+                    </div>
+
+                    <div class="info-box">
+                        <p><strong>Verify installation:</strong> Open a new terminal and run:</p>
+                        <pre><code class="language-bash">uv --version</code></pre>
+                    </div>
+                </div>
+
+                <div class="guide-section">
+                    <h2><i class="fas fa-folder-plus"></i> Step 2: Create Your Project</h2>
+                    
+                    <div class="step-by-step">
+                        <div class="step">
+                            <h4>1. Create a Project Folder</h4>
+                            <ul>
+                                <li>Open File Explorer (Windows key + E)</li>
+                                <li>Navigate to your desired drive (e.g., C:, D:, or F:)</li>
+                                <li>Right-click in an empty space → New → Folder</li>
+                                <li>Name it: <code>slashdot_qiskit_fall_fest_2025</code></li>
+                            </ul>
+                        </div>
+
+                        <div class="step">
+                            <h4>2. Open Command Prompt</h4>
+                            <ul>
+                                <li>Right-click on the folder you created</li>
+                                <li>Select "Open in Terminal" or click in the address bar, type <code>cmd</code>, and press Enter</li>
+                            </ul>
+                        </div>
+
+                        <div class="step">
+                            <h4>3. Create Virtual Environment</h4>
+                            <pre><code class="language-bash">uv venv</code></pre>
+                            <p class="note">This creates a hidden <code>.venv</code> folder containing your isolated Python environment.</p>
+                        </div>
+
+                        <div class="step">
+                            <h4>4. Activate the Environment</h4>
+                            <pre><code class="language-bash">.venv\Scripts\activate</code></pre>
+                            <p class="note">You should see <code>(.venv)</code> at the beginning of your prompt.</p>
+                            
+                            <div class="troubleshoot">
+                                <strong>If activation fails:</strong>
+                                <ul>
+                                    <li>Make sure you're using Command Prompt (not PowerShell)</li>
+                                    <li>Or run Command Prompt as Administrator</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="guide-section">
+                    <h2><i class="fas fa-cube"></i> Step 3: Install Qiskit</h2>
+                    
+                    <p>Download the requirements file and install all dependencies:</p>
+                    <pre><code class="language-bash">uv pip install -r https://raw.githubusercontent.com/slashdot-iiserk/qiskit_fallfest/main/qiskit/requirements.txt</code></pre>
+                    
+                    <div class="info-box">
+                        <p><strong>What's being installed?</strong></p>
+                        <ul>
+                            <li>Qiskit - IBM's quantum computing framework</li>
+                            <li>NumPy - Numerical computing library</li>
+                            <li>Matplotlib - Plotting and visualization</li>
+                            <li>Jupyter - Interactive notebook environment</li>
+                            <li>IPyKernel - Jupyter kernel for Python</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Installation Steps - macOS -->
+            <div class="platform-content macos-content">
+                <div class="guide-section">
+                    <h2><i class="fas fa-download"></i> Step 1: Install uv</h2>
+                    
+                    <div class="method-tabs">
+                        <button class="method-tab active" data-method="homebrew">Homebrew (Recommended)</button>
+                        <button class="method-tab" data-method="standalone-mac">Standalone Installer</button>
+                    </div>
+
+                    <div class="method-content homebrew-content active">
+                        <p>Open Terminal and run:</p>
+                        <pre><code class="language-bash">brew install uv</code></pre>
+                        
+                        <div class="info-box">
+                            <h4>Update PATH for your shell</h4>
+                            <p>First, check which shell you're using:</p>
+                            <pre><code class="language-bash">echo $SHELL</code></pre>
+                            
+                            <p><strong>For zsh (default on macOS 10.15+):</strong></p>
+                            <pre><code class="language-bash">echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.zshrc
+source ~/.zshrc</code></pre>
+                            
+                            <p><strong>For bash:</strong></p>
+                            <pre><code class="language-bash">echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.bash_profile
+source ~/.bash_profile</code></pre>
+                            
+                            <p><strong>For fish:</strong></p>
+                            <pre><code class="language-bash">echo 'set -x PATH $HOME/.local/bin $PATH' >> ~/.config/fish/config.fish
+source ~/.config/fish/config.fish</code></pre>
+                        </div>
+                    </div>
+
+                    <div class="method-content standalone-mac-content">
+                        <p>Run this command in Terminal:</p>
+                        <pre><code class="language-bash">curl -LsSf https://astral.sh/uv/install.sh | sh</code></pre>
+                        <p>Then restart your terminal or run: <code>source ~/.bashrc</code></p>
+                    </div>
+
+                    <div class="info-box">
+                        <p><strong>Verify installation:</strong></p>
+                        <pre><code class="language-bash">uv --version</code></pre>
+                    </div>
+                </div>
+
+                <div class="guide-section">
+                    <h2><i class="fas fa-folder-plus"></i> Step 2: Create Your Project</h2>
+                    
+                    <div class="step-by-step">
+                        <div class="step">
+                            <h4>1. Create a Project Directory</h4>
+                            <pre><code class="language-bash">mkdir ~/slashdot_qiskit_fall_fest_2025
+cd ~/slashdot_qiskit_fall_fest_2025</code></pre>
+                        </div>
+
+                        <div class="step">
+                            <h4>2. Create Virtual Environment</h4>
+                            <pre><code class="language-bash">uv venv</code></pre>
+                        </div>
+
+                        <div class="step">
+                            <h4>3. Activate the Environment</h4>
+                            <pre><code class="language-bash">source .venv/bin/activate</code></pre>
+                            <p class="note">You should see <code>(.venv)</code> at the beginning of your prompt.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="guide-section">
+                    <h2><i class="fas fa-cube"></i> Step 3: Install Qiskit</h2>
+                    
+                    <pre><code class="language-bash">uv pip install -r https://raw.githubusercontent.com/slashdot-iiserk/qiskit_fallfest/main/qiskit/requirements.txt</code></pre>
+                </div>
+            </div>
+
+            <!-- Installation Steps - Linux -->
+            <div class="platform-content linux-content">
+                <div class="guide-section">
+                    <h2><i class="fas fa-download"></i> Step 1: Install uv</h2>
+                    
+                    <p>Open your terminal and run:</p>
+                    <pre><code class="language-bash">curl -LsSf https://astral.sh/uv/install.sh | sh</code></pre>
+                    
+                    <div class="info-box">
+                        <p>After installation, restart your terminal or run:</p>
+                        <pre><code class="language-bash">source ~/.bashrc  # or ~/.zshrc for zsh users</code></pre>
+                        
+                        <p><strong>Verify installation:</strong></p>
+                        <pre><code class="language-bash">uv --version</code></pre>
+                    </div>
+                </div>
+
+                <div class="guide-section">
+                    <h2><i class="fas fa-folder-plus"></i> Step 2: Create Your Project</h2>
+                    
+                    <div class="step-by-step">
+                        <div class="step">
+                            <h4>1. Create a Project Directory</h4>
+                            <pre><code class="language-bash">mkdir ~/slashdot_qiskit_fall_fest_2025
+cd ~/slashdot_qiskit_fall_fest_2025</code></pre>
+                        </div>
+
+                        <div class="step">
+                            <h4>2. Create Virtual Environment</h4>
+                            <pre><code class="language-bash">uv venv</code></pre>
+                        </div>
+
+                        <div class="step">
+                            <h4>3. Activate the Environment</h4>
+                            <pre><code class="language-bash">source .venv/bin/activate</code></pre>
+                            <p class="note">You should see <code>(.venv)</code> at the beginning of your prompt.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="guide-section">
+                    <h2><i class="fas fa-cube"></i> Step 3: Install Qiskit</h2>
+                    
+                    <pre><code class="language-bash">uv pip install -r https://raw.githubusercontent.com/slashdot-iiserk/qiskit_fallfest/main/qiskit/requirements.txt</code></pre>
+                </div>
+            </div>
+
+            <!-- Verification Section (Common for all platforms) -->
+            <div class="guide-section">
+                <h2><i class="fas fa-check-double"></i> Step 4: Verify Installation</h2>
+                
+                <p>Test your Qiskit installation by running Python:</p>
+                <pre><code class="language-bash">python</code></pre>
+                
+                <p>Then in the Python interpreter:</p>
+                <pre><code class="language-python">import qiskit
+print(f"Qiskit version: {qiskit.__version__}")
+
+# Create a simple quantum circuit
+from qiskit import QuantumCircuit
+qc = QuantumCircuit(2, 2)
+qc.h(0)
+qc.cx(0, 1)
+qc.measure_all()
+print("Success! Your quantum circuit is ready!")
+</code></pre>
+                
+                <p>Exit Python by typing: <code>exit()</code></p>
+            </div>
+
+            <!-- Jupyter Setup -->
+            <div class="guide-section">
+                <h2><i class="fas fa-book"></i> Step 5: Set Up Jupyter Notebook</h2>
+                
+                <div class="step-by-step">
+                    <div class="step">
+                        <h4>1. Install Jupyter Kernel</h4>
+                        <pre><code class="language-bash">python -m ipykernel install --user --name qiskit-env --display-name "Qiskit Fall Fest"</code></pre>
+                    </div>
+
+                    <div class="step">
+                        <h4>2. Start Jupyter Notebook</h4>
+                        <pre><code class="language-bash">jupyter notebook</code></pre>
+                        <p class="note">This will open Jupyter in your default web browser.</p>
+                    </div>
+
+                    <div class="step">
+                        <h4>3. Access the Interface</h4>
+                        <ul>
+                            <li>Jupyter will display a URL like <code>http://localhost:8888/tree?token=...</code></li>
+                            <li>Copy and paste this URL into your browser if it doesn't open automatically</li>
+                            <li>When creating a new notebook, select "Qiskit Fall Fest" as the kernel</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Alternative Methods -->
+            <div class="guide-section">
+                <h2><i class="fas fa-code-branch"></i> Alternative: Using Conda or Venv</h2>
+                
+                <div class="method-tabs">
+                    <button class="method-tab active" data-method="conda">Conda</button>
+                    <button class="method-tab" data-method="venv">Venv</button>
+                </div>
+
+                <div class="method-content conda-content active">
+                    <h4>Using Conda</h4>
+                    <pre><code class="language-bash"># Create environment
+conda create -n qiskit-env python=3.11
+conda activate qiskit-env
+
+# Install packages
+pip install -r https://raw.githubusercontent.com/slashdot-iiserk/qiskit_fallfest/main/qiskit/requirements.txt</code></pre>
+                </div>
+
+                <div class="method-content venv-content">
+                    <h4>Using Venv</h4>
+                    <pre><code class="language-bash"># Create environment
+python -m venv qiskit-env
+
+# Activate (Windows)
+qiskit-env\Scripts\activate
+
+# Activate (macOS/Linux)
+source qiskit-env/bin/activate
+
+# Install packages
+pip install -r https://raw.githubusercontent.com/slashdot-iiserk/qiskit_fallfest/main/qiskit/requirements.txt</code></pre>
+                </div>
+            </div>
+
+            <!-- Troubleshooting -->
+            <div class="guide-section">
+                <h2><i class="fas fa-tools"></i> Troubleshooting</h2>
+                
+                <div class="troubleshoot-grid">
+                    <div class="troubleshoot-item">
+                        <h4><i class="fas fa-exclamation-triangle"></i> Permission Errors (Windows)</h4>
+                        <p>Run PowerShell or Command Prompt as Administrator.</p>
+                    </div>
+                    
+                    <div class="troubleshoot-item">
+                        <h4><i class="fas fa-exclamation-triangle"></i> curl Not Found</h4>
+                        <p>On older systems, install curl first or use your package manager.</p>
+                    </div>
+                    
+                    <div class="troubleshoot-item">
+                        <h4><i class="fas fa-exclamation-triangle"></i> Python Version Too Old</h4>
+                        <p>Ensure Python 3.9+ is installed. Check with: <code>python --version</code></p>
+                    </div>
+                    
+                    <div class="troubleshoot-item">
+                        <h4><i class="fas fa-exclamation-triangle"></i> Import Errors</h4>
+                        <p>Make sure your virtual environment is activated before importing packages.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Resources -->
+            <div class="guide-section">
+                <h2><i class="fas fa-link"></i> Useful Resources</h2>
+                
+                <div class="resources-grid">
+                    <a href="https://qiskit.org/documentation/" class="resource-card" target="_blank">
+                        <i class="fas fa-book"></i>
+                        <h4>Qiskit Documentation</h4>
+                        <p>Official Qiskit tutorials and API reference</p>
+                    </a>
+                    
+                    <!-- <a href="https://github.com/slashdot-iiserk/qiskit_fallfest/tree/main/qiskit" class="resource-card" target="_blank">
+                        <i class="fab fa-github"></i>
+                        <h4>Workshop Materials</h4>
+                        <p>Download notebooks and requirements</p>
+                    </a>
+                     -->
+                    <a href="https://docs.astral.sh/uv/" class="resource-card" target="_blank">
+                        <i class="fas fa-file-code"></i>
+                        <h4>uv Documentation</h4>
+                        <p>Learn more about the uv package manager</p>
+                    </a>
+                    
+                    <a href="https://learning.quantum.ibm.com/" class="resource-card" target="_blank">
+                        <i class="fas fa-graduation-cap"></i>
+                        <h4>IBM Quantum Learning</h4>
+                        <p>Free quantum computing courses</p>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Need Help -->
+            <div class="guide-section help-section">
+                <h2><i class="fas fa-question-circle"></i> Need Help?</h2>
+                <p>If you encounter any issues during installation, don't hesitate to reach out!</p>
+                <div class="help-contact">
+                    <a href="mailto:slashdot@iiserkol.ac.in" class="help-btn">
+                        <i class="fas fa-envelope"></i>
+                        Contact Organizers
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>Qiskit Fall Fest 2025</h3>
+                    <p>Exploring the quantum frontier at IISER Kolkata</p>
+                    <div class="footer-links">
+                        <a href="index.html">Home</a>
+                        <a href="registration.html">Registration</a>
+                        <a href="installation_guide.html">Installation Guide</a>
+                        <a href="archive.html">Archive</a>
+                    </div>
+                </div>
+                <div class="footer-section">
+                    <h3>Contact</h3>
+                    <p><i class="fas fa-envelope"></i> slashdot@iiserkol.ac.in</p>
+                    <p><i class="fas fa-map-marker-alt"></i> IISER Kolkata, India</p>
+                </div>
+                <div class="footer-section">
+                    <h3>Follow Us</h3>
+                    <div class="social-links">
+                        <a href="#" class="social-link"><i class="fab fa-github"></i></a>
+                        <a href="#" class="social-link"><i class="fab fa-linkedin"></i></a>
+                        <a href="#" class="social-link"><i class="fab fa-twitter"></i></a>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 SlashDot - IISER Kolkata. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-powershell.min.js"></script>
+    <script src="installation.js"></script>
+</body>
+</html>
