@@ -1,4 +1,8 @@
 qiskit
+qiskit[visualization]
+qiskit-aer
+qiskit-ibm-runtime
+qiskit-qasm3-import
 matplotlib
 jupyter
 ipykernel
