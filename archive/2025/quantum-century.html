@@ -14,11 +14,29 @@
   <a href="../../index.html">Go to Fall Fest 2026 &rarr;</a>
 </div>
 <style>
-.qff-archive-banner{position:sticky;top:0;z-index:9999;display:flex;flex-wrap:wrap;gap:.35rem 1rem;
-  align-items:center;justify-content:center;padding:.55rem 1rem;font:500 13px/1.4 system-ui,sans-serif;
-  color:#fff;background:linear-gradient(90deg,#8a3ffc,#ff7eb6);text-align:center}
+:root { --qff-banner-h: 40px; }
+.qff-archive-banner{position:fixed;top:0;left:0;right:0;z-index:99999;display:flex;flex-wrap:wrap;
+  gap:.35rem 1rem;align-items:center;justify-content:center;min-height:var(--qff-banner-h);
+  padding:.5rem 1rem;font:500 13px/1.4 system-ui,sans-serif;color:#fff;
+  background:linear-gradient(90deg,#8a3ffc,#ff7eb6);text-align:center;box-sizing:border-box}
 .qff-archive-banner a{color:#fff;text-decoration:underline;text-underline-offset:.2em;white-space:nowrap}
+body{padding-top:var(--qff-banner-h)}
+.header{top:var(--qff-banner-h) !important}
 </style>
+<script>
+/* The banner's height depends on how its text wraps, so measure it rather than
+   guessing breakpoints — the 2025 header is position:fixed and must clear it. */
+(function () {
+  var el = document.querySelector('.qff-archive-banner');
+  if (!el) return;
+  var apply = function () {
+    document.documentElement.style.setProperty('--qff-banner-h', el.offsetHeight + 'px');
+  };
+  apply();
+  if (window.ResizeObserver) new ResizeObserver(apply).observe(el);
+  else window.addEventListener('resize', apply);
+})();
+</script>
 
     <!-- Header -->
     <header class="header">

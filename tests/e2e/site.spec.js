@@ -231,3 +231,36 @@ test.describe('archive', () => {
     await expect(page.locator('.qff-archive-banner')).toContainText('2025');
   });
 });
+
+test.describe('archived 2025 pages', () => {
+  const PAGES_2025 = ['/archive/2025/', '/archive/2025/registration.html',
+                      '/archive/2025/installation_guide.html', '/archive/2025/quantum-century.html',
+                      '/archive/2025/archive.html'];
+
+  for (const path of PAGES_2025) {
+    test(`${path} serves, is banner-marked, and loads its own assets`, async ({ page, baseURL }) => {
+      // The 2025 gallery pointed at a placeholder service that no longer
+      // resolves. That broken link is part of the historical record, but
+      // waiting on its DNS would stall `load`, so cut it off here.
+      await page.route((url) => !url.href.startsWith(baseURL), (route) => route.abort());
+
+      const missing = [];
+      page.on('response', (r) => {
+        if (r.status() === 404 && r.url().startsWith(`${baseURL}/archive/`)) missing.push(r.url());
+      });
+      await page.goto(path);
+      await expect(page.locator('.qff-archive-banner')).toContainText('Archived');
+      await page.waitForTimeout(600);
+      expect(missing, `${path} references assets of its own that are not there`).toEqual([]);
+    });
+  }
+
+  test('the banner does not sit under the 2025 fixed navbar', async ({ page }) => {
+    await page.goto('/archive/2025/');
+    const banner = await page.locator('.qff-archive-banner').boundingBox();
+    const header = await page.locator('.header').boundingBox();
+    expect(banner).not.toBeNull();
+    expect(header).not.toBeNull();
+    expect(header.y).toBeGreaterThanOrEqual(banner.y + banner.height - 1);
+  });
+});
