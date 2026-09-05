@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://slashdot-iiserk.github.io/qiskit_fallfest/sitemap.xml

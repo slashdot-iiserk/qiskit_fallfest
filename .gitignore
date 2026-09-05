@@ -1,0 +1,32 @@
+# Dependencies
+node_modules/
+
+# Test output
+test-results/
+playwright-report/
+blob-report/
+playwright/.cache/
+.playwright-mcp/
+
+# Asset pipeline scratch space (organiser zip is extracted here)
+.work/
+
+# Editor / OS
+.DS_Store
+Thumbs.db
+*.swp
+.idea/
+.vscode/
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+
+# Upstream Qiskit Fall Fest 2026 design kit — a separate clone, not vendored here.
+# Re-create with:
+#   git clone git@github.com:Qiskit-Fall-Fest-2026/materials-resources.git 2026_assets
+2026_assets/
+
+# Agent working notes
+plans/

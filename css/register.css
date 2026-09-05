@@ -1,0 +1,201 @@
+/* ==========================================================================
+   Registration — the multi-step form and its Google Forms embed twin
+   ========================================================================== */
+
+.reg { display: grid; gap: clamp(2rem, 5vw, 3.5rem); grid-template-columns: minmax(0, 1fr) 320px; align-items: start; }
+@media (max-width: 940px) { .reg { grid-template-columns: 1fr; } }
+
+.reg__panel {
+  padding: clamp(1.5rem, 4vw, 2.75rem);
+  border: 1px solid var(--line); border-radius: var(--r-xl);
+  background: var(--grad-ink);
+}
+
+/* --- Mode tabs: our form vs. the official embed --------------------------- */
+.mode-tabs {
+  display: inline-flex; gap: 0.3rem; padding: 0.3rem; margin-bottom: var(--sp-6);
+  border: 1px solid var(--line); border-radius: var(--r-pill);
+  background: color-mix(in srgb, var(--surface) 60%, transparent);
+}
+.mode-tab {
+  padding: 0.5rem 1.05rem; border-radius: var(--r-pill);
+  font-size: var(--step--2); font-weight: 500; letter-spacing: 0.03em;
+  color: var(--text-3); white-space: nowrap;
+  transition: color var(--dur-1), background var(--dur-2) var(--ease-out);
+}
+.mode-tab:hover { color: var(--text); }
+.mode-tab[aria-selected="true"] { background: var(--grad-brand); color: var(--on-accent); }
+
+/* --- Progress ------------------------------------------------------------- */
+.progress { margin-bottom: var(--sp-6); }
+.progress__track { height: 4px; border-radius: var(--r-pill); background: var(--surface-3); overflow: hidden; }
+.progress__fill {
+  height: 100%; width: 25%; border-radius: var(--r-pill);
+  background: var(--grad-brand);
+  box-shadow: 0 0 12px color-mix(in srgb, var(--pink) 60%, transparent);
+  transition: width var(--dur-3) var(--ease-out);
+}
+.progress__dots { display: flex; justify-content: space-between; gap: var(--sp-2); margin-top: var(--sp-3); }
+.progress__dot {
+  flex: 1; display: flex; flex-direction: column; gap: 0.2rem;
+  font-family: var(--font-mono); font-size: var(--step--2);
+  color: var(--text-3); text-align: left;
+  transition: color var(--dur-2);
+}
+.progress__dot::before {
+  content: ""; display: block; width: 100%; height: 2px; border-radius: 2px;
+  background: var(--surface-3);
+  transition: background var(--dur-3) var(--ease-out);
+}
+.progress__dot.is-done, .progress__dot.is-current { color: var(--pink); }
+.progress__dot.is-done::before, .progress__dot.is-current::before { background: var(--grad-brand); }
+
+/* --- Steps ---------------------------------------------------------------- */
+.step { animation: step-in var(--dur-4) var(--ease-out); }
+@keyframes step-in { from { opacity: 0; transform: translateX(18px); } to { opacity: 1; transform: none; } }
+
+.step__title { font-size: var(--step-2); margin-bottom: var(--sp-2); }
+.step__title:focus { outline: none; }
+.step__hint { color: var(--text-2); font-size: var(--step--1); margin-bottom: var(--sp-6); }
+
+/* --- Fields ---------------------------------------------------------------- */
+.field { margin-bottom: var(--sp-5); }
+.field__label { display: block; font-weight: 500; font-size: var(--step-0); margin-bottom: 0.15rem; }
+.field__label .req { color: var(--pink); }
+.field__help { display: block; font-size: var(--step--2); color: var(--text-3); margin-bottom: 0.6rem; }
+
+.input {
+  width: 100%; padding: 0.85rem 1rem;
+  color: var(--text);
+  background: color-mix(in srgb, var(--bg) 55%, transparent);
+  border: 1px solid var(--line-strong); border-radius: var(--r-md);
+  transition: border-color var(--dur-2), box-shadow var(--dur-2), background var(--dur-2);
+}
+.input::placeholder { color: var(--text-3); }
+.input:hover { border-color: color-mix(in srgb, var(--purple) 55%, transparent); }
+.input:focus {
+  outline: none; border-color: var(--pink);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--pink) 22%, transparent);
+}
+.has-error .input { border-color: #ff6b6b; }
+
+.field__error {
+  display: block; min-height: 1.1em; margin-top: 0.4rem;
+  font-size: var(--step--2); color: #ff8a8a;
+}
+
+/* --- Choice pills ----------------------------------------------------------- */
+.choice { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+.choice__opt {
+  padding: 0.7rem 1.4rem;
+  font-size: var(--step--1); font-weight: 500; color: var(--text-2);
+  border: 1px solid var(--line-strong); border-radius: var(--r-pill);
+  background: color-mix(in srgb, var(--surface-2) 60%, transparent);
+  transition: transform var(--dur-2) var(--ease-spring), color var(--dur-1),
+              border-color var(--dur-1), box-shadow var(--dur-2), background var(--dur-2);
+}
+.choice__opt:hover { color: var(--text); border-color: var(--purple); transform: translateY(-2px); }
+.choice__opt[aria-checked="true"] {
+  color: var(--on-accent); background: var(--grad-brand);
+  border-color: transparent; box-shadow: var(--glow-pink);
+}
+
+/* --- 1–5 experience scale ----------------------------------------------------- */
+.scale { display: flex; gap: 0.45rem; }
+.scale__opt {
+  flex: 1; min-width: 0;
+  display: flex; flex-direction: column; align-items: center; gap: 0.25rem;
+  padding: 0.7rem 0.3rem;
+  font-family: var(--font-mono); font-size: var(--step-1); font-weight: 600;
+  color: var(--text-2);
+  border: 1px solid var(--line-strong); border-radius: var(--r-md);
+  background: color-mix(in srgb, var(--surface-2) 60%, transparent);
+  transition: transform var(--dur-2) var(--ease-spring), color var(--dur-1),
+              border-color var(--dur-1), box-shadow var(--dur-2), background var(--dur-2);
+}
+.scale__opt small { font-family: var(--font-sans); font-size: 0.6rem; font-weight: 400; color: var(--text-3); text-align: center; line-height: 1.2; }
+.scale__opt:hover { color: var(--text); border-color: var(--purple); transform: translateY(-3px); }
+.scale__opt[aria-checked="true"] {
+  color: var(--on-accent); background: var(--grad-brand);
+  border-color: transparent; box-shadow: var(--glow-pink);
+}
+.scale__opt[aria-checked="true"] small { color: color-mix(in srgb, var(--on-accent) 75%, transparent); }
+.scale__ends {
+  display: flex; justify-content: space-between; margin-top: 0.45rem;
+  font-size: var(--step--2); color: var(--text-3);
+}
+
+/* --- Review ------------------------------------------------------------------- */
+.review { display: grid; gap: 0; margin: 0 0 var(--sp-6); }
+.review__row {
+  display: grid; grid-template-columns: minmax(0, 200px) minmax(0, 1fr); gap: var(--sp-4);
+  padding: 0.85rem 0; border-bottom: 1px solid var(--line);
+}
+.review__row dt { font-size: var(--step--1); color: var(--text-3); }
+.review__row dd { margin: 0; font-size: var(--step--1); font-weight: 500; }
+@media (max-width: 520px) { .review__row { grid-template-columns: 1fr; gap: 0.15rem; } }
+
+/* --- Actions & status ----------------------------------------------------------- */
+.step__actions { display: flex; flex-wrap: wrap; gap: var(--sp-3); margin-top: var(--sp-6); }
+
+[data-submit][data-busy] { pointer-events: none; }
+[data-submit][data-busy]::after {
+  content: ""; width: 15px; height: 15px; margin-left: 0.4rem;
+  border: 2px solid currentColor; border-right-color: transparent; border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+@keyframes spin { to { rotate: 360deg; } }
+
+.form-status {
+  display: flex; flex-direction: column; gap: 0.2rem;
+  margin-top: var(--sp-5); padding: var(--sp-4) var(--sp-5);
+  border-radius: var(--r-md); border: 1px solid var(--line-strong);
+  font-size: var(--step--1);
+  background: color-mix(in srgb, var(--surface-2) 70%, transparent);
+}
+.form-status span { color: var(--text-2); }
+.form-status[data-kind="pending"] { border-color: color-mix(in srgb, var(--blue) 55%, transparent); }
+.form-status[data-kind="error"]   { border-color: #ff6b6b; }
+.form-status[data-kind="error"] strong { color: #ff8a8a; }
+
+/* --- Success ----------------------------------------------------------------------- */
+.success { text-align: center; padding: var(--sp-7) var(--sp-4); }
+.success h2:focus { outline: none; }
+.success__seal {
+  width: 96px; height: 96px; margin: 0 auto var(--sp-5);
+  border-radius: 50%; display: grid; place-items: center;
+  background: var(--grad-brand); box-shadow: var(--glow-pink);
+  animation: seal-pop var(--dur-4) var(--ease-spring);
+}
+.success__seal svg { width: 46px; height: 46px; color: var(--on-accent); }
+@keyframes seal-pop { from { scale: 0.4; opacity: 0; rotate: -25deg; } to { scale: 1; opacity: 1; rotate: 0deg; } }
+.success p { color: var(--text-2); max-width: 52ch; margin-inline: auto; }
+.success__actions { display: flex; flex-wrap: wrap; gap: var(--sp-3); justify-content: center; margin-top: var(--sp-6); }
+
+/* --- Embed --------------------------------------------------------------------------- */
+.embed-frame {
+  width: 100%; height: min(78vh, 1100px);
+  border: 1px solid var(--line); border-radius: var(--r-md);
+  background: #fff;
+}
+.embed-note {
+  display: flex; gap: var(--sp-3); align-items: flex-start;
+  padding: var(--sp-4) var(--sp-5); margin-bottom: var(--sp-5);
+  border: 1px solid var(--line-strong); border-radius: var(--r-md);
+  background: color-mix(in srgb, var(--surface-2) 65%, transparent);
+  font-size: var(--step--1); color: var(--text-2);
+}
+.embed-note svg { flex: none; width: 20px; height: 20px; color: var(--pink); margin-top: 0.15em; }
+
+/* --- Aside ------------------------------------------------------------------------------ */
+.reg__aside { display: grid; gap: var(--sp-5); position: sticky; top: calc(var(--nav-h) + 1.5rem); }
+@media (max-width: 940px) { .reg__aside { position: static; } }
+.aside-card {
+  padding: var(--sp-5);
+  border: 1px solid var(--line); border-radius: var(--r-lg);
+  background: color-mix(in srgb, var(--surface) 55%, transparent);
+}
+.aside-card h3 { font-size: var(--step-0); margin-bottom: var(--sp-3); }
+.aside-card ul { list-style: none; padding: 0; display: grid; gap: 0.65rem; }
+.aside-card li { display: flex; gap: 0.6rem; font-size: var(--step--1); color: var(--text-2); }
+.aside-card li svg { flex: none; width: 16px; height: 16px; color: var(--pink); margin-top: 0.28em; }

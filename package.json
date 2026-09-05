@@ -1,0 +1,21 @@
+{
+  "name": "qiskit-fallfest-iiserk",
+  "version": "2026.1.0",
+  "private": true,
+  "description": "Website for the Qiskit Fall Fest at IISER Kolkata, maintained by SlashDot.",
+  "type": "module",
+  "scripts": {
+    "serve": "python3 -m http.server 4173 --bind 127.0.0.1",
+    "build": "python3 tools/build_assets.py && cd tools && python3 build_pages.py",
+    "build:pages": "cd tools && python3 build_pages.py",
+    "build:assets": "python3 tools/build_assets.py",
+    "test": "node --test tests/unit/*.test.js && playwright test",
+    "test:unit": "node --test tests/unit/*.test.js",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.49.0"
+  },
+  "engines": { "node": ">=20" }
+}

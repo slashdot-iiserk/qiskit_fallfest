@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>100 Years of Quantum Mechanics | Qiskit Fall Fest 2025</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+<div class="qff-archive-banner" role="note">
+  <span><strong>Archived —</strong> this is the Qiskit Fall Fest <strong>2025</strong> site, preserved as it shipped.</span>
+  <a href="../../index.html">Go to Fall Fest 2026 &rarr;</a>
+</div>
+<style>
+.qff-archive-banner{position:sticky;top:0;z-index:9999;display:flex;flex-wrap:wrap;gap:.35rem 1rem;
+  align-items:center;justify-content:center;padding:.55rem 1rem;font:500 13px/1.4 system-ui,sans-serif;
+  color:#fff;background:linear-gradient(90deg,#8a3ffc,#ff7eb6);text-align:center}
+.qff-archive-banner a{color:#fff;text-decoration:underline;text-underline-offset:.2em;white-space:nowrap}
+</style>
+
+    <!-- Header -->
+    <header class="header">
+        <nav class="navbar">
+            <div class="nav-container">
+                <div class="nav-logo">
+                    <img src="assets/qiskit logo.svg" alt="Qiskit Logo" style="height: 30px;">
+                    <span>Qiskit Fall Fest</span>
+                </div>
+                                <ul class="nav-menu">
+                    <li class="nav-item">
+                        <a href="index.html" class="nav-link">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="index.html#about-institute" class="nav-link">About Us</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="index.html#event-details" class="nav-link">Event</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="index.html#organizers" class="nav-link">Organizers</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="archive.html" class="nav-link">Archive</a>
+                    </li>
+                </ul>
+                <div class="hamburger">
+                    <span class="bar"></span>
+                    <span class="bar"></span>
+                    <span class="bar"></span>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Quantum Century Hero Section -->
+    <section class="quantum-century-hero">
+        <div class="century-hero-background">
+            <img src="graphics/Illustration Exports/Illustration Crops/Simplified_Illustration.webp" alt="Quantum Background" class="century-bg-illustration">
+            <div class="quantum-particles-century"></div>
+        </div>
+        <div class="century-hero-content">
+            <div class="century-text-images">
+                <img src="assets/Emojis/Text_Theme_02.webp" alt="Century of Quantum" class="century-main-text">
+                <div class="century-subtitle-row">
+                    <img src="assets/Emojis/Text_Quantum_02.webp" alt="Quantum" class="century-subtitle">
+                    <img src="assets/Emojis/Text_Computing_01.webp" alt="Computing" class="century-subtitle">
+                </div>
+                <div class="century-event-row">
+                    <img src="assets/Emojis/Text_Qiskit_01.webp" alt="Qiskit" class="century-event-text">
+                    <img src="assets/Emojis/Text_Fall Fest_02.webp" alt="Fall Fest" class="century-event-text">
+                    <img src="assets/Emojis/Text_2024_02.webp" alt="2025" class="century-event-text">
+                </div>
+            </div>
+            <div class="century-theme-logo">
+                <img src="assets/Emojis/Theme.webp" alt="100 Years of Quantum Theme">
+            </div>
+        </div>
+    </section>
+
+    <!-- Timeline Section -->
+    <section class="quantum-timeline">
+        <div class="container">
+            <h2 class="section-title">A Century of Quantum Breakthroughs</h2>
+            <p class="timeline-intro">From the birth of quantum theory to today's quantum computers, explore the revolutionary discoveries that shaped our understanding of the quantum world.</p>
+            
+            <div class="timeline-container">
+                <div class="timeline-milestone" data-year="1925">
+                    <div class="milestone-year">1925</div>
+                    <div class="milestone-content">
+                        <div class="milestone-image">
+                            <img src="graphics/Illustration Exports/Illustration Crops/Crop_Heisenbergpng.webp" alt="Werner Heisenberg">
+                        </div>
+                        <div class="milestone-text">
+                            <h3>Heisenberg's Matrix Mechanics</h3>
+                            <p>Werner Heisenberg formulated the first complete mathematical framework for quantum mechanics, introducing the famous uncertainty principle that bears his name.</p>
+                            <span class="milestone-impact">Foundation of Modern Quantum Theory</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="timeline-milestone" data-year="1926">
+                    <div class="milestone-year">1926</div>
+                    <div class="milestone-content">
+                        <div class="milestone-image">
+                            <img src="graphics/Illustration Exports/Illustration Crops/Crop_Schrodinger.webp" alt="Erwin Schrödinger">
+                        </div>
+                        <div class="milestone-text">
+                            <h3>Schrödinger's Wave Equation</h3>
+                            <p>Erwin Schrödinger developed wave mechanics and his famous equation that describes how quantum systems evolve over time, revolutionizing our understanding of atomic behavior.</p>
+                            <span class="milestone-impact">Mathematical Foundation of Quantum States</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="timeline-milestone" data-year="1927">
+                    <div class="milestone-year">1927</div>
+                    <div class="milestone-content">
+                        <div class="milestone-image">
+                            <img src="assets/Emojis/Atom_01.webp" alt="Bohr's Atomic Model">
+                        </div>
+                        <div class="milestone-text">
+                            <h3>Bohr's Complementarity Principle</h3>
+                            <p>Niels Bohr introduced the concept of complementarity, stating that particles can exhibit both wave-like and particle-like behavior depending on the experimental setup.</p>
+                            <span class="milestone-impact">Wave-Particle Duality Resolution</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="timeline-milestone" data-year="1935">
+                    <div class="milestone-year">1935</div>
+                    <div class="milestone-content">
+                        <div class="milestone-image">
+                            <img src="assets/Emojis/Entanglement.webp" alt="EPR Paradox">
+                        </div>
+                        <div class="milestone-text">
+                            <h3>EPR Paradox & Quantum Entanglement</h3>
+                            <p>Einstein, Podolsky, and Rosen challenged quantum mechanics with their paradox, inadvertently discovering quantum entanglement - the "spooky action at a distance."</p>
+                            <span class="milestone-impact">Foundation of Quantum Information</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="timeline-milestone" data-year="1947">
+                    <div class="milestone-year">1947</div>
+                    <div class="milestone-content">
+                        <div class="milestone-image">
+                            <img src="assets/Emojis/Circuit.webp" alt="Transistor">
+                        </div>
+                        <div class="milestone-text">
+                            <h3>Transistor Revolution</h3>
+                            <p>The invention of the transistor at Bell Labs marked the beginning of the semiconductor revolution, enabling modern computers and quantum devices.</p>
+                            <span class="milestone-impact">Birth of Semiconductor Technology</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="timeline-milestone" data-year="1964">
+                    <div class="milestone-year">1964</div>
+                    <div class="milestone-content">
+                        <div class="milestone-image">
+                            <img src="assets/Emojis/Timeline_01.webp" alt="Bell's Theorem">
+                        </div>
+                        <div class="milestone-text">
+                            <h3>Bell's Theorem</h3>
+                            <p>John Bell's theorem provided a way to test quantum mechanics against local hidden variable theories, experimentally confirming quantum entanglement.</p>
+                            <span class="milestone-impact">Experimental Validation of Quantum Theory</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="timeline-milestone" data-year="1981">
+                    <div class="milestone-year">1981</div>
+                    <div class="milestone-content">
+                        <div class="milestone-image">
+                            <img src="assets/Emojis/Atom_03.webp" alt="Quantum Optics">
+                        </div>
+                        <div class="milestone-text">
+                            <h3>Quantum Optics Revolution</h3>
+                            <p>The development of laser cooling and trapping techniques allowed scientists to control individual atoms, opening doors to quantum simulation and computation.</p>
+                            <span class="milestone-impact">Single Atom Manipulation</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="timeline-milestone" data-year="1995">
+                    <div class="milestone-year">1995</div>
+                    <div class="milestone-content">
+                        <div class="milestone-image">
+                            <img src="assets/Emojis/Qiskit_01.webp" alt="Shor's Algorithm">
+                        </div>
+                        <div class="milestone-text">
+                            <h3>Shor's Factoring Algorithm</h3>
+                            <p>Peter Shor's quantum algorithm demonstrated that quantum computers could factor large numbers exponentially faster than classical computers, threatening RSA encryption.</p>
+                            <span class="milestone-impact">Quantum Advantage Proven</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="timeline-milestone" data-year="1998">
+                    <div class="milestone-year">1998</div>
+                    <div class="milestone-content">
+                        <div class="milestone-image">
+                            <img src="assets/Emojis/Timeline_02.webp" alt="First Quantum Computer">
+                        </div>
+                        <div class="milestone-text">
+                            <h3>First 2-Qubit Quantum Computer</h3>
+                            <p>IBM researchers demonstrated the first quantum computer capable of performing simple calculations, marking the beginning of practical quantum computing.</p>
+                            <span class="milestone-impact">First Functional Quantum Computer</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="timeline-milestone" data-year="2025">
+                    <div class="milestone-year">2025</div>
+                    <div class="milestone-content">
+                        <div class="milestone-image">
+                            <img src="assets/Emojis/Qiskit_03.webp" alt="Modern Quantum Computing">
+                        </div>
+                        <div class="milestone-text">
+                            <h3>Quantum Computing Era</h3>
+                            <p>Today, we stand at the threshold of practical quantum computing, with IBM Qiskit leading the way in making quantum accessible to researchers, students, and developers worldwide.</p>
+                            <span class="milestone-impact">Democratizing Quantum Computing</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Quantum Impact Section -->
+    <section class="quantum-impact">
+        <div class="container">
+            <h2 class="section-title">The Quantum Revolution</h2>
+            <div class="impact-grid">
+                <div class="impact-card">
+                    <div class="impact-icon">
+                        <i class="fas fa-atom"></i>
+                    </div>
+                    <h3>Fundamental Physics</h3>
+                    <p>Quantum mechanics revolutionized our understanding of matter, energy, and the fundamental nature of reality at the smallest scales.</p>
+                </div>
+                
+                <div class="impact-card">
+                    <div class="impact-icon">
+                        <i class="fas fa-microchip"></i>
+                    </div>
+                    <h3>Modern Technology</h3>
+                    <p>From lasers and transistors to MRI machines and GPS systems, quantum principles power the technologies that define our modern world.</p>
+                </div>
+                
+                <div class="impact-card">
+                    <div class="impact-icon">
+                        <i class="fas fa-rocket"></i>
+                    </div>
+                    <h3>Future Computing</h3>
+                    <p>Quantum computers promise to solve complex problems in cryptography, drug discovery, optimization, and artificial intelligence.</p>
+                </div>
+                
+                <div class="impact-card">
+                    <div class="impact-icon">
+                        <i class="fas fa-network-wired"></i>
+                    </div>
+                    <h3>Quantum Internet</h3>
+                    <p>Quantum communication and networking will enable ultra-secure information transfer and distributed quantum computing.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Modern Quantum Technologies Section -->
+    <section class="quantum-technologies">
+        <div class="container">
+            <h2 class="section-title">Modern Quantum Technologies</h2>
+            <p class="tech-intro">From theoretical foundations to practical applications, quantum mechanics has evolved into cutting-edge technologies that are transforming our world.</p>
+
+            <div class="tech-grid">
+                <div class="tech-card">
+                    <div class="tech-icon">
+                        <i class="fas fa-microchip"></i>
+                    </div>
+                    <h3>Quantum Computers</h3>
+                    <p>Superconducting qubits, trapped ions, and photonic quantum computers are pushing the boundaries of computational power, with IBM's quantum processors leading the charge.</p>
+                    <div class="tech-stats">
+                        <span>127+ Qubits</span>
+                        <span>IBM Quantum</span>
+                    </div>
+                </div>
+
+                <div class="tech-card">
+                    <div class="tech-icon">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                    <h3>Quantum Cryptography</h3>
+                    <p>Quantum key distribution (QKD) and post-quantum cryptography are revolutionizing cybersecurity, making communications unhackable by quantum computers.</p>
+                    <div class="tech-stats">
+                        <span>Unbreakable Security</span>
+                        <span>QKD Networks</span>
+                    </div>
+                </div>
+
+                <div class="tech-card">
+                    <div class="tech-icon">
+                        <i class="fas fa-satellite"></i>
+                    </div>
+                    <h3>Quantum Sensors</h3>
+                    <p>Atomic clocks, quantum magnetometers, and gravitational wave detectors are achieving unprecedented precision in measurement and navigation.</p>
+                    <div class="tech-stats">
+                        <span>Atomic Precision</span>
+                        <span>GPS Enhancement</span>
+                    </div>
+                </div>
+
+                <div class="tech-card">
+                    <div class="tech-icon">
+                        <i class="fas fa-pills"></i>
+                    </div>
+                    <h3>Quantum Chemistry</h3>
+                    <p>Quantum simulations are accelerating drug discovery, materials science, and chemical research by modeling molecular interactions at the quantum level.</p>
+                    <div class="tech-stats">
+                        <span>Drug Discovery</span>
+                        <span>Materials Design</span>
+                    </div>
+                </div>
+
+                <div class="tech-card">
+                    <div class="tech-icon">
+                        <i class="fas fa-network-wired"></i>
+                    </div>
+                    <h3>Quantum Internet</h3>
+                    <p>Quantum teleportation and entanglement distribution are laying the foundation for a quantum internet that will enable ultra-secure, high-speed global communication.</p>
+                    <div class="tech-stats">
+                        <span>Quantum Networks</span>
+                        <span>Secure Communication</span>
+                    </div>
+                </div>
+
+                <div class="tech-card">
+                    <div class="tech-icon">
+                        <i class="fas fa-brain"></i>
+                    </div>
+                    <h3>Quantum Machine Learning</h3>
+                    <p>Quantum algorithms for machine learning promise exponential speedups in data analysis, pattern recognition, and artificial intelligence applications.</p>
+                    <div class="tech-stats">
+                        <span>AI Acceleration</span>
+                        <span>Pattern Recognition</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Quantum Principles Section -->
+    <section class="quantum-principles">
+        <div class="container">
+            <h2 class="section-title">Fundamental Quantum Principles</h2>
+            <div class="principles-grid">
+                <div class="principle-card">
+                    <div class="principle-icon">⚛️</div>
+                    <h3>Wave-Particle Duality</h3>
+                    <p>Particles can exhibit both wave-like and particle-like behavior depending on how we observe them.</p>
+                </div>
+                <div class="principle-card">
+                    <div class="principle-icon">🔗</div>
+                    <h3>Quantum Entanglement</h3>
+                    <p>Particles can be instantaneously connected, sharing properties regardless of distance.</p>
+                </div>
+                <div class="principle-card">
+                    <div class="principle-icon">📏</div>
+                    <h3>Uncertainty Principle</h3>
+                    <p>We cannot simultaneously know both the position and momentum of a particle with absolute precision.</p>
+                </div>
+                <div class="principle-card">
+                    <div class="principle-icon">🎲</div>
+                    <h3>Quantum Superposition</h3>
+                    <p>Particles can exist in multiple states simultaneously until measured.</p>
+                </div>
+                <div class="principle-card">
+                    <div class="principle-icon">💥</div>
+                    <h3>Quantum Tunneling</h3>
+                    <p>Particles can pass through energy barriers that would be impossible in classical physics.</p>
+                </div>
+                <div class="principle-card">
+                    <div class="principle-icon">⚡</div>
+                    <h3>Quantum Interference</h3>
+                    <p>Waves can constructively or destructively interfere, creating probability patterns.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Why Qiskit Section -->
+    <section class="why-qiskit">
+        <div class="container">
+            <h2 class="section-title">Why Qiskit Fall Fest Celebrates This Legacy</h2>
+            <div class="qiskit-content">
+                <div class="qiskit-text">
+                    <p class="highlight-text">As we commemorate 100 years of quantum mechanics, Qiskit Fall Fest 2025 embodies the spirit of those pioneering scientists.</p>
+                    <div class="qiskit-features">
+                        <div class="qiskit-feature">
+                            <i class="fas fa-graduation-cap"></i>
+                            <div>
+                                <h4>Educational Mission</h4>
+                                <p>Just as Einstein, Heisenberg, and Schrödinger shared their discoveries, we're democratizing quantum education for the next generation.</p>
+                            </div>
+                        </div>
+                        <div class="qiskit-feature">
+                            <i class="fas fa-users"></i>
+                            <div>
+                                <h4>Global Community</h4>
+                                <p>Building a worldwide community of quantum enthusiasts, researchers, and developers to tackle tomorrow's challenges.</p>
+                            </div>
+                        </div>
+                        <div class="qiskit-feature">
+                            <i class="fas fa-lightbulb"></i>
+                            <div>
+                                <h4>Innovation Spirit</h4>
+                                <p>Fostering the same curiosity and innovation that drove the quantum pioneers to explore the impossible.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="qiskit-visual">
+                    <img src="assets/Badge_Dark.webp" alt="Qiskit Fall Fest Badge" class="qiskit-badge">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Call to Action Section -->
+    <section class="quantum-cta">
+        <div class="container">
+            <div class="cta-content">
+                <h2>Join the Next Chapter of Quantum History</h2>
+                <p>Be part of the quantum revolution that began 100 years ago and continues today with IBM Qiskit Fall Fest 2025.</p>
+                <div class="cta-buttons">
+                    <a href="index.html#event-details" class="cta-btn primary">
+                        <span>View Event Schedule</span>
+                        <i class="fas fa-calendar-alt"></i>
+                    </a>
+                    <a href="index.html" class="cta-btn secondary">
+                        <span>Return to Main Event</span>
+                        <i class="fas fa-arrow-left"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>100 Years of Quantum</h3>
+                    <p>Celebrating a century of quantum mechanics and its impact on science, technology, and our understanding of the universe.</p>
+                    <div class="footer-social">
+                        <a href="#"><i class="fab fa-facebook"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                        <a href="#"><i class="fab fa-linkedin"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                    </div>
+                </div>
+                <div class="footer-section">
+                    <h4>Quick Links</h4>
+                    <ul>
+                        <li><a href="index.html">Main Event</a></li>
+                        <li><a href="index.html#about-event">About</a></li>
+                        <li><a href="index.html#event-details">Schedule</a></li>
+                        <li><a href="archive.html">Archive</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Quantum Pioneers</h4>
+                    <ul>
+                        <li><a href="#timeline">Einstein</a></li>
+                        <li><a href="#timeline">Heisenberg</a></li>
+                        <li><a href="#timeline">Schrödinger</a></li>
+                        <li><a href="#timeline">Modern Era</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Contact</h4>
+                    <p><i class="fas fa-envelope"></i> slashdot@iiserkol.ac.in</p>
+                    <p><i class="fas fa-map-marker-alt"></i> IISER Kolkata, Mohanpur, Nadia</p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 IBM Qiskit Fall Fest - Celebrating 100 Years of Quantum Mechanics. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
