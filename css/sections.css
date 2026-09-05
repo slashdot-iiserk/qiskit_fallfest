@@ -337,7 +337,7 @@
   font-family: var(--font-mono); font-size: var(--step--2); font-weight: 600;
   color: var(--pink); background: color-mix(in srgb, var(--purple) 16%, transparent);
 }
-.res-item h4 { font-size: var(--step-0); margin-bottom: 0.15rem; }
+.res-item h3 { font-size: var(--step-0); margin-bottom: 0.15rem; font-weight: 600; }
 .res-item p { font-size: var(--step--1); color: var(--text-2); }
 
 /* --- Venue ---------------------------------------------------------------- */
@@ -383,8 +383,8 @@
 .footer__brand { display: flex; align-items: center; gap: 0.7rem; margin-bottom: var(--sp-4); }
 .footer__brand img { width: 40px; height: 40px; }
 .footer p { font-size: var(--step--1); color: var(--text-2); max-width: 40ch; }
-.footer h4 {
-  font-family: var(--font-mono); font-size: var(--step--2);
+.footer__col-title {
+  font-family: var(--font-mono); font-size: var(--step--2); font-weight: 500;
   letter-spacing: 0.14em; text-transform: uppercase; color: var(--text-3);
   margin-bottom: var(--sp-3);
 }

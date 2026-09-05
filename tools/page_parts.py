@@ -87,7 +87,7 @@ def footer(prefix=""):
            Qiskit Fall Fest. Built and maintained in the open.</p>
       </div>
       <div>
-        <h4>Event</h4>
+        <h2 class="footer__col-title">Event</h2>
         <ul>
           <li><a href="{prefix}index.html#about">About</a></li>
           <li><a href="{prefix}index.html#schedule">Schedule</a></li>
@@ -96,7 +96,7 @@ def footer(prefix=""):
         </ul>
       </div>
       <div>
-        <h4>Material</h4>
+        <h2 class="footer__col-title">Material</h2>
         <ul>
           <li><a href="{prefix}register.html">Register</a></li>
           <li><a href="{prefix}resources.html">Resources</a></li>
@@ -105,7 +105,7 @@ def footer(prefix=""):
         </ul>
       </div>
       <div>
-        <h4>Elsewhere</h4>
+        <h2 class="footer__col-title">Elsewhere</h2>
         <ul>
           <li><a href="https://github.com/slashdot-iiserk/qiskit_fallfest" rel="noopener">GitHub repository</a></li>
           <li><a href="https://qiskit.org" rel="noopener">Qiskit</a></li>

@@ -298,27 +298,27 @@ print(AerSimulator().run(qc, shots=1024).result().get_counts())</code></pre>
       <div class="grid grid--2" data-reveal-group="70">
         <a class="res-item" data-reveal href="materials/2026/">
           <span class="res-item__badge">26</span>
-          <span><h4>Fall Fest 2026 material</h4><p>Day-by-day folders for the 2026 labs. Filling up as each session approaches.</p></span>
+          <span><h3>Fall Fest 2026 material</h3><p>Day-by-day folders for the 2026 labs. Filling up as each session approaches.</p></span>
         </a>
         <a class="res-item" data-reveal href="materials/requirements.txt">
           <span class="res-item__badge">ENV</span>
-          <span><h4>requirements.txt</h4><p>The exact package list the labs are tested against.</p></span>
+          <span><h3>requirements.txt</h3><p>The exact package list the labs are tested against.</p></span>
         </a>
         <a class="res-item" data-reveal href="materials/2025/day_1/session_0/Notebook-1.ipynb">
           <span class="res-item__badge">25</span>
-          <span><h4>2025 · Introduction to Quantum Computing</h4><p>Notebook 1 — circuits, gates and measurement from scratch.</p></span>
+          <span><h3>2025 · Introduction to Quantum Computing</h3><p>Notebook 1 — circuits, gates and measurement from scratch.</p></span>
         </a>
         <a class="res-item" data-reveal href="materials/2025/day_1/session_1/quantum-teleportation.ipynb">
           <span class="res-item__badge">25</span>
-          <span><h4>2025 · Quantum teleportation</h4><p>Entanglement in action, end to end.</p></span>
+          <span><h3>2025 · Quantum teleportation</h3><p>Entanglement in action, end to end.</p></span>
         </a>
         <a class="res-item" data-reveal href="materials/2025/day_2/steane_error_correction.ipynb">
           <span class="res-item__badge">25</span>
-          <span><h4>2025 · Steane code</h4><p>A worked quantum error-correction notebook.</p></span>
+          <span><h3>2025 · Steane code</h3><p>A worked quantum error-correction notebook.</p></span>
         </a>
         <a class="res-item" data-reveal href="materials/2025/day_2/Introduction%20to%20Quantum%20Error%20Correction%20-%20Pradeep-2.pdf">
           <span class="res-item__badge">PDF</span>
-          <span><h4>2025 · QEC slides</h4><p>Introduction to Quantum Error Correction.</p></span>
+          <span><h3>2025 · QEC slides</h3><p>Introduction to Quantum Error Correction.</p></span>
         </a>
       </div>
     </div>
@@ -339,19 +339,19 @@ print(AerSimulator().run(qc, shots=1024).result().get_counts())</code></pre>
       <div class="grid grid--2" data-reveal-group="70">
         <a class="res-item" data-reveal href="https://learning.quantum.ibm.com/course/basics-of-quantum-information" rel="noopener" target="_blank">
           <span class="res-item__badge">01</span>
-          <span><h4>Basics of Quantum Information</h4><p>IBM Quantum Learning. The single best free starting point — start with single systems.</p></span>
+          <span><h3>Basics of Quantum Information</h3><p>IBM Quantum Learning. The single best free starting point — start with single systems.</p></span>
         </a>
         <a class="res-item" data-reveal href="https://docs.quantum.ibm.com/guides" rel="noopener" target="_blank">
           <span class="res-item__badge">02</span>
-          <span><h4>Qiskit documentation</h4><p>The official guides. Skim “Build a circuit” before Day 2 and the labs will feel familiar.</p></span>
+          <span><h3>Qiskit documentation</h3><p>The official guides. Skim “Build a circuit” before Day 2 and the labs will feel familiar.</p></span>
         </a>
         <a class="res-item" data-reveal href="https://numpy.org/doc/stable/user/absolute_beginners.html" rel="noopener" target="_blank">
           <span class="res-item__badge">03</span>
-          <span><h4>NumPy for absolute beginners</h4><p>Arrays, indexing and matrix multiplication. Genuinely all the Python maths you need here.</p></span>
+          <span><h3>NumPy for absolute beginners</h3><p>Arrays, indexing and matrix multiplication. Genuinely all the Python maths you need here.</p></span>
         </a>
         <a class="res-item" data-reveal href="archive/2025/">
           <span class="res-item__badge">04</span>
-          <span><h4>The 2025 site</h4><p>Last year's sessions, schedule and material, preserved. The most honest preview of what is coming.</p></span>
+          <span><h3>The 2025 site</h3><p>Last year's sessions, schedule and material, preserved. The most honest preview of what is coming.</p></span>
         </a>
       </div>
     </div>
