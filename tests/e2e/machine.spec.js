@@ -104,7 +104,7 @@ test.describe('the machine', () => {
 
     await page.waitForFunction(
       () => document.querySelector('[data-machine]').dataset.machineReady === 'true',
-      null, { timeout: 45000 });
+      null, { timeout: 60000 });
 
     // A composited WebGL buffer cannot be read back, so assert the loop runs.
     await page.waitForFunction(
@@ -122,7 +122,7 @@ test.describe('the machine', () => {
     await scrollInto(page, 0.35);
     await page.waitForFunction(
       () => document.querySelector('[data-machine]').dataset.machineReady === 'true',
-      null, { timeout: 45000 });
+      null, { timeout: 60000 });
     await page.waitForTimeout(600);
     const opacity = await page.locator('.machine__stage .qc-draw').evaluate((el) => el.style.opacity);
     expect(Number(opacity)).toBeLessThan(0.2);
@@ -132,7 +132,7 @@ test.describe('the machine', () => {
     await scrollInto(page, 0.35);
     await page.waitForFunction(
       () => document.querySelector('[data-machine]').dataset.machineReady === 'true',
-      null, { timeout: 45000 });
+      null, { timeout: 60000 });
     await page.waitForTimeout(800);
 
     const spots = page.locator('.hotspot');

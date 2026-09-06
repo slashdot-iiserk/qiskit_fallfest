@@ -88,8 +88,13 @@ The `README.md` schedule table is a human-readable duplicate; update it in the s
   keep the line drawing and render the labels as a plain list. Test them; they are covered in
   `tests/e2e/machine.spec.js`.
 - **Hotspot anchors are in the model's normalised space** (`y = +1` top, `-1` bottom) and live under
-  the same pivot as the model, so they rotate with it. The label body is pinned to a screen gutter
-  and the leader line stretches — that is what `--lead` is, written per frame.
+  the same pivot as the model, so they rotate with it. Each frame the loop writes three custom
+  properties on the label: `--gut` (gutter width), `--bx` (where the body sits, measured from the
+  anchor) and `--lead` (what is left over for the leader line). Derive the body position from the
+  gutter and the leader from the body — never the other way round, or a label whose anchor rotates
+  past the gutter gets pushed off the edge. `tests/e2e/machine.spec.js` guards this on mobile.
+- **Labels carry a `short` form** used below 760px, where the descriptive line is hidden and the
+  chapter copy carries the detail. Keep both in `HOTSPOTS`.
 - **A composited WebGL buffer cannot be read back**, so the render loop publishes
   `data-machine-frames` on the section. That attribute exists for the tests; keep it.
 
