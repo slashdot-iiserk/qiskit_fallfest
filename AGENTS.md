@@ -139,6 +139,19 @@ Things worth knowing before touching it:
   reference shots, or a software renderer will make every round look worse than
   the last.
 
+### Reading on a phone
+
+Below 760px the label plates are hidden entirely and the nearest anchor's text
+is shown in one readable card above the chapter copy (`[data-saga-card]`).
+Shrinking the plates to chips instead loses the writing, which is the failure
+mode this replaced. Faces inside the sphere are pinned to their own anchors and
+scaled by distance rather than queued at a gutter, so they read as something you
+fly through.
+
+**Anything that positions the camera must apply `aspectWiden(aspect)`**, or that
+shot is framed for a laptop and cropped on a phone — the descent, the journey and
+the DOM drawing all go through it.
+
 ### Iterating on the look
 
 `.work/preview/shoot.mjs <outDir> <beat...>` captures the same beats on desktop
@@ -167,7 +180,10 @@ Three sets of copy live in `js/saga/timeline.js`, not in the HTML:
 - `PARTS` — what each stage of the machine is, shown during the descent.
 - `VALUES` — the six things the fest is. **Not cards in a grid**: they orbit the
   model as you descend it.
-- `STATIONS` — what rides the state vector inside the sphere.
+- `STATIONS` — what rides the state vector inside the sphere. A `people` stop is
+  expanded by `expandStations()` into one anchor per person, pulled from
+  `js/data/event.js`, so the team and the speakers can never drift out of sync
+  with the sphere. They are **not** also flat sections on the page.
 
 Plus `CHAPTERS`, the copy under the stage. The FAQ lives in
 `js/data/event.js` and is rendered onto its own page, `faq.html`.

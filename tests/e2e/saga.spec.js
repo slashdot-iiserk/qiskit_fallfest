@@ -299,6 +299,9 @@ test.describe('the saga', () => {
     await scrollSaga(page, 0.88);
     expect(await visible(page, '.hotspot--station')).toBeGreaterThan(0);
     await expect(page.locator('[data-saga-stations]')).toContainText('Three certificates');
+    // The people you fly through are in there, with their portraits.
+    await expect(page.locator('[data-saga-stations]')).toContainText('Manish Behera');
+    expect(await page.locator('[data-saga-stations] .hotspot__photo').count()).toBeGreaterThan(4);
 
     await scrollSaga(page, 0.99);
     // Everything else is out of the way and the register button stands alone.
@@ -318,7 +321,11 @@ test.describe('the saga', () => {
     await expect(page.locator('[data-saga]')).not.toHaveAttribute('data-saga-ready', 'true');
     await expect(page.locator('[data-qc-stage]')).toHaveAttribute('data-static', 'true');
     // The copy is still on the page, just as a list.
-    await expect(page.locator('.static-spot')).toHaveCount(14);
+    // Every part of the machine, everything the fest is, and every person
+    // in the sphere — the fallback must not quietly drop anyone.
+    const listed = await page.locator('.static-spot').count();
+    expect(listed).toBeGreaterThanOrEqual(24);
+    await expect(page.locator('[data-saga-stations]')).toContainText('Manish Behera');
     await context.close();
   });
 });
@@ -373,3 +380,41 @@ function visible(page, selector) {
     (sel) => [...document.querySelectorAll(sel)].filter((el) => Number(el.style.opacity) > 0.15).length,
     selector);
 }
+
+
+test.describe('on a phone', () => {
+  test.describe.configure({ timeout: 150_000 });
+
+  test('shows the nearest label as a readable card, not a chip', async ({ page, isMobile }) => {
+    test.skip(!isMobile, 'covered by the mobile project');
+    test.slow();
+    await page.goto('/');
+    await gone(page);
+    await scrollSaga(page, 0.32);
+    await renderUp(page);
+    await page.waitForTimeout(1200);
+
+    const card = page.locator('[data-saga-card]');
+    await expect(card).toBeVisible();
+    const text = (await card.innerText()).trim();
+    // A chip would be two words; the card carries the whole explanation.
+    expect(text.length).toBeGreaterThan(40);
+
+    // And the plates themselves are out of the way, not shrunk to nothing.
+    const plateShown = await page.evaluate(() =>
+      getComputedStyle(document.querySelector('.hotspot__plate')).display);
+    expect(plateShown).toBe('none');
+  });
+
+  test('carries the faces inside the sphere too', async ({ page, isMobile }) => {
+    test.skip(!isMobile, 'covered by the mobile project');
+    test.slow();
+    await page.goto('/');
+    await gone(page);
+    await scrollSaga(page, 0.90);
+    await renderUp(page);
+    await page.waitForTimeout(1500);
+    await expect(page.locator('[data-saga-card]')).toBeVisible();
+    expect((await page.locator('[data-saga-card]').innerText()).trim().length).toBeGreaterThan(10);
+  });
+});

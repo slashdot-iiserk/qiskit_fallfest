@@ -10,21 +10,63 @@
 
 const CLAMP = (v, lo, hi) => Math.min(hi, Math.max(lo, v));
 
+/** A portrait where we have one, initials where we do not — never a hole. */
+function photoMarkup(spec) {
+  if (spec.photo) return '<img class="hotspot__photo" alt="" width="256" height="256" decoding="async">';
+  if (!spec.person) return '';
+  const initials = spec.k.split(/\s+/).filter(Boolean).slice(0, 2).map((w) => w[0]).join('').toUpperCase();
+  return `<span class="hotspot__photo hotspot__photo--initials">${initials}</span>`;
+}
+
 export function createLabel(spec, kind) {
   const el = document.createElement('div');
   el.className = `hotspot hotspot--${spec.side || 'right'} hotspot--${kind}`;
+  if (spec.person) el.classList.add('hotspot--person');
   el.style.opacity = '0';
   el.innerHTML = `
     <span class="hotspot__dot"></span>
     <span class="hotspot__line"></span>
     <span class="hotspot__plate">
+      ${photoMarkup(spec)}
       <span class="hotspot__k"><b class="k-full"></b><b class="k-short"></b></span>
       <span class="hotspot__v"></span>
     </span>`;
+  if (spec.photo) {
+    const img = el.querySelector('.hotspot__photo');
+    img.src = spec.photo;
+    img.alt = `Portrait of ${spec.k}`;
+  }
   el.querySelector('.k-full').textContent = spec.k;
   el.querySelector('.k-short').textContent = spec.short || spec.k;
-  el.querySelector('.hotspot__v').textContent = spec.v;
+  el.querySelector('.hotspot__v').textContent = spec.v || '';
   return el;
+}
+
+/**
+ * On a phone the plates are hidden; whichever anchor is most relevant right
+ * now has its text shown in one readable card instead.
+ */
+export function paintCard(card, list) {
+  if (!card) return;
+  let best = null;
+  for (const entry of list) {
+    const alpha = Number(entry.el.style.opacity) || 0;
+    if (alpha > 0.35 && (!best || alpha > best.alpha)) best = { entry, alpha };
+  }
+  if (!best) {
+    card.classList.remove('is-on');
+    return;
+  }
+  const spec = best.entry.spec;
+  if (card.dataset.showing !== spec.k) {
+    card.dataset.showing = spec.k;
+    const photo = spec.photo ? `<img src="${spec.photo}" alt="" width="46" height="46">` : '';
+    card.innerHTML = `${photo}<span class="saga__card-k"></span><span class="saga__card-v"></span>`;
+    card.querySelector('.saga__card-k').textContent = spec.k;
+    card.querySelector('.saga__card-v').textContent = spec.v || '';
+  }
+  card.hidden = false;
+  card.classList.add('is-on');
 }
 
 /**
@@ -47,6 +89,9 @@ export function placeLabels(ctx, list, groupAlpha, nearness) {
 
     scratch.copy(entry.vec);
     if (entry.local !== false) pivot.localToWorld(scratch);
+    // Distance first: a face nearer the camera should be drawn larger, which is
+    // most of what makes the ring read as something you are flying through.
+    const distance = scratch.distanceTo(camera.position);
     scratch.project(camera);
 
     const x = (scratch.x * 0.5 + 0.5) * width;
@@ -57,7 +102,11 @@ export function placeLabels(ctx, list, groupAlpha, nearness) {
     // spans whatever gap is left. Deriving it the other way round pushes a
     // label off screen the moment its anchor rotates past the gutter.
     const side = entry.side || entry.spec?.side || 'right';
-    const offset = side === 'right' ? (width - gutter) - x : x - gutter;
+    // An anchor on a ring around the vector can project well outside the
+    // frame. The dot stays where the geometry is; the plate is measured from a
+    // clamped position so it is always on screen, and the leader spans the gap.
+    const px = CLAMP(x, 0, width);
+    const offset = side === 'right' ? (width - gutter) - px : px - gutter;
 
     // Tilt from the anchor's offset from centre: the further out and the
     // higher up, the more the plate turns away from the viewer.
@@ -70,7 +119,13 @@ export function placeLabels(ctx, list, groupAlpha, nearness) {
     el.style.setProperty('--gut', `${gutter.toFixed(0)}px`);
     el.style.setProperty('--rx', `${tiltX.toFixed(2)}deg`);
     el.style.setProperty('--ry', `${tiltY.toFixed(2)}deg`);
-    const alpha = behind ? 0 : groupAlpha * CLAMP(nearness(entry), 0, 1) * 0.98;
+    // Faces sit where they are in space rather than queueing at a gutter, so
+    // they need perspective of their own.
+    el.style.setProperty('--s', CLAMP(1.35 - distance * 0.42, 0.55, 1.15).toFixed(3));
+    const near = entry.spec?.person
+      ? CLAMP(1.9 - distance * 0.95, 0, 1) * CLAMP(nearness(entry), 0, 1)
+      : CLAMP(nearness(entry), 0, 1);
+    const alpha = behind ? 0 : groupAlpha * near * 0.98;
     el.style.transform = `translate3d(${x.toFixed(1)}px, ${y.toFixed(1)}px, 0)`;
     el.style.opacity = alpha.toFixed(3);
     // The plate slides in along its own leader as it fades up, so a label

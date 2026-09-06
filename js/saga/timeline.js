@@ -6,6 +6,8 @@
  * frame loop.
  */
 
+import { PEOPLE, SPEAKERS } from '../data/event.js';
+
 export const T = {
   /* Act I — the drawing becomes the machine */
   drawHold:   0.030,  // whole machine, sharp
@@ -100,12 +102,20 @@ export function cameraAt(p, aspect = 16 / 9) {
   // Act VI settles square on the button.
   const zButton = lerp(zJourney, 2.6, button);
 
-  // A portrait viewport crops the machine at the sides, so the camera steps
-  // back. The DOM drawing is fitted with the same value, which keeps the two
-  // framings identical right up to the hand-off.
-  const widen = Math.min(1.5, Math.max(1, 0.78 / aspect));
+  return { y, z: zButton * aspectWiden(aspect), fov: 32 };
+}
 
-  return { y, z: zButton * widen, fov: 32 };
+/**
+ * How much further back a viewport needs the camera.
+ *
+ * A portrait screen crops the machine at the sides, so everything steps back —
+ * the descent, the journey inside the sphere, and the DOM drawing, which is
+ * fitted with the same number so the two framings stay identical right up to
+ * the hand-off. Anything that positions the camera has to apply this or that
+ * shot will be framed for a laptop and cropped on a phone.
+ */
+export function aspectWiden(aspect) {
+  return Math.min(1.5, Math.max(1, 0.78 / aspect));
 }
 
 /* --------------------------------------------------------------------------
@@ -143,15 +153,23 @@ export const VALUES = [
 ];
 
 /**
- * Stations along the state vector, inside the sphere. `t` is how far along the
- * vector each one sits, 0 at the centre and 1 at the tip.
+ * What you pass on the way up the state vector, inside the sphere. `t` is how
+ * far along the vector each stop sits, 0 at the centre and 1 at the tip.
+ *
+ * A `people` stop is expanded by the saga into one anchor per person, arranged
+ * in a ring around the vector at that depth, so the camera flies through a
+ * circle of faces rather than past a list.
  */
 export const STATIONS = [
-  { t: 0.10, side: 'right', k: 'Five days', short: 'Five days',
+  { t: 0.08, side: 'right', k: 'Five days', short: 'Five days',
     v: '6 – 13 October at MN Saha. A primer, a kick-off, a full hands-on day, an advanced track, and an invited talk to close.' },
-  { t: 0.42, side: 'left', k: 'Three certificates', short: 'Certificates',
+  { t: 0.26, kind: 'people', group: 'team', ring: 0.80,
+    k: 'The people running it', short: 'The team' },
+  { t: 0.50, side: 'left', k: 'Three certificates', short: 'Certificates',
     v: 'Participation, Intermediate, Advanced — issued on attendance and submitted lab work. They stack.' },
-  { t: 0.74, side: 'right', k: 'One unnamed speaker', short: 'The speaker',
+  { t: 0.68, kind: 'people', group: 'speakers', ring: 0.72,
+    k: 'Who is talking', short: 'Speakers' },
+  { t: 0.88, side: 'right', k: 'One unnamed speaker', short: 'The speaker',
     v: 'An industry insider from the IBM Quantum world closes the fest on 13 October. The name is still unmeasured.' },
 ];
 
@@ -170,3 +188,39 @@ export const CHAPTERS = [
   { at: T.journeyIn, title: 'Come inside.',
     body: 'Five days, three certificates and one unnamed speaker, along the vector you just steered.' },
 ];
+
+
+/**
+ * Flattens the journey into one list of anchors.
+ *
+ * A `people` stop becomes one entry per person, carrying their portrait and
+ * placed on a ring around the vector at that depth, so the camera flies through
+ * a circle of faces rather than past a list. Shared by the render and by the
+ * no-WebGL fallback, so the two can never show different people.
+ */
+export function expandStations() {
+  const out = [];
+  for (const stop of STATIONS) {
+    if (stop.kind !== 'people') {
+      out.push({ ...stop, ring: 0, angle: 0 });
+      continue;
+    }
+    const roster = stop.group === 'team' ? PEOPLE : SPEAKERS;
+    roster.forEach((person, i) => {
+      const angle = (i / roster.length) * Math.PI * 2;
+      out.push({
+        k: person.name,
+        short: person.name.split(' ')[0],
+        v: person.org ? `${person.role} · ${person.org}` : person.role,
+        side: Math.cos(angle) >= 0 ? 'right' : 'left',
+        person: true,
+        photo: person.photo ? `assets/organisers/${person.photo}-256.webp` : null,
+        // Spread each ring a little in depth so faces do not stack up.
+        t: stop.t + (i / roster.length - 0.5) * 0.06,
+        ring: stop.ring,
+        angle,
+      });
+    });
+  }
+  return out;
+}

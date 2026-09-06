@@ -112,7 +112,7 @@
   -webkit-mask-image: linear-gradient(to top, transparent 0, #000 var(--saga-mask, 13%));
   mask-image: linear-gradient(to top, transparent 0, #000 var(--saga-mask, 13%));
 }
-@media (max-width: 860px) { .saga__canvas { --saga-mask: 22%; } }
+@media (max-width: 860px) { .saga__canvas { --saga-mask: 30%; } }
 
 .saga__labels { position: absolute; inset: 0; pointer-events: none; perspective: 900px; }
 
@@ -214,13 +214,12 @@
 }
 
 @media (max-width: 760px) {
-  /* No room for a full sentence beside the model — the key stays anchored and
-     the chapter copy below carries the explanation. */
-  .hotspot__v { display: none; }
-  .hotspot__k { font-size: 0.62rem; letter-spacing: 0.1em; }
-  .hotspot__k .k-full { display: none; }
-  .hotspot__k .k-short { display: inline; }
-  .hotspot__plate { padding: 0.45rem 0.55rem; }
+  /* Five plates cannot fit beside the model on a phone, and shrinking them to
+     chips loses the writing altogether. The anchors keep their dots and their
+     leaders; the nearest one's text moves to a card above the chapter copy. */
+  .hotspot__plate { display: none; }
+  .hotspot__line { width: 26px; opacity: 0.7; }
+  .hotspot--left .hotspot__line { left: -26px; }
   /* The fallback note carries real information, so it stays on small screens —
      only the drag hint, which is meaningless on touch, goes away. */
   .saga__hint { display: none; }
@@ -556,4 +555,65 @@
     width: min(420px, calc(100% - 2.5rem));
   }
   .gate-panel__note { display: none; }
+}
+
+
+/* --- The label card, on narrow screens ------------------------------------ */
+.saga__card {
+  position: absolute; left: 50%; translate: -50% 0;
+  bottom: clamp(9.5rem, 21vh, 13.5rem);
+  width: min(100% - 2.5rem, 440px);
+  padding: 0.85rem 1rem 0.95rem;
+  background: color-mix(in srgb, var(--ink-2) 74%, transparent);
+  border: 1px solid var(--line-strong);
+  backdrop-filter: blur(12px) saturate(120%);
+  -webkit-backdrop-filter: blur(12px) saturate(120%);
+  text-align: left;
+  opacity: 0;
+  transition: opacity var(--dur-2) var(--ease-out);
+}
+.saga__card.is-on { opacity: 1; }
+.saga__card-k {
+  display: block;
+  font-family: var(--font-mono); font-size: var(--step--2); font-weight: 500;
+  letter-spacing: 0.18em; text-transform: uppercase; color: var(--gold);
+}
+.saga__card-v { display: block; margin-top: 0.35rem; font-size: var(--step--1); color: var(--paper); line-height: 1.5; }
+.saga__card img {
+  width: 46px; height: 46px; object-fit: cover;
+  border: 1px solid var(--line-strong);
+  float: left; margin: 0 0.8rem 0.4rem 0;
+}
+@media (min-width: 761px) { .saga__card { display: none; } }
+
+/* --- Portraits on the plates ----------------------------------------------- */
+.hotspot__photo {
+  display: block; width: 100%; aspect-ratio: 1;
+  object-fit: cover; margin-bottom: 0.6rem;
+  border: 1px solid var(--line-strong);
+  filter: grayscale(1) contrast(1.05);
+}
+/* A face belongs where it is in space, not queued at the edge of the frame:
+   pinned to its own anchor, scaled by how close it is, with no leader. */
+.hotspot--person .hotspot__dot,
+.hotspot--person .hotspot__line { display: none; }
+.hotspot--person .hotspot__plate,
+.hotspot--person.hotspot--left .hotspot__plate {
+  left: 50%; right: auto; top: 50%;
+  width: clamp(112px, 13vw, 168px);
+  padding: 0.5rem 0.55rem 0.6rem;
+  text-align: left;
+  transform: translate(-50%, -50%) scale(var(--s, 1)) rotateX(var(--rx)) rotateY(var(--ry));
+  border-left: 1px solid var(--line);
+  border-right: 1px solid var(--line);
+  /* Nearly solid: a name has to read against fourteen thousand points. */
+  background: color-mix(in srgb, var(--ink) 92%, transparent);
+}
+.hotspot--person .hotspot__k { font-size: 0.62rem; letter-spacing: 0.1em; white-space: normal; }
+.hotspot--person .hotspot__v { font-size: 0.68rem; margin-top: 0.15rem; color: var(--paper-2); }
+.hotspot__photo--initials {
+  display: grid; place-items: center;
+  font-family: var(--font-mono); font-size: var(--step-2); color: var(--gold-dim);
+  background: var(--ink-3);
+  filter: none;
 }

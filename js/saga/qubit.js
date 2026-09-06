@@ -115,15 +115,36 @@ export function buildQubit(THREE, pivot) {
   const tip = new THREE.Mesh(new THREE.SphereGeometry(0.03, 16, 12), vecMat);
   group.add(shaft, tip);
 
-  /* --- The arc it sweeps -------------------------------------------------- */
+  /** Bloch (x, y, z) has z up; the scene has y up. */
+  const toScene = (v, out) => out.set(v.x, v.z, -v.y);
+
+  /* --- The arc it sweeps --------------------------------------------------
+     A line would do the geometry, but WebGL caps line width at one pixel and
+     the arc has to read against a shell of fourteen thousand points. So it is
+     a tube: built once when a gate is pressed, then revealed along its length
+     by walking the draw range, which is free. */
   const ARC_SEGMENTS = 72;
-  const arcPositions = new Float32Array((ARC_SEGMENTS + 1) * 3);
-  const arcGeo = new THREE.BufferGeometry();
-  arcGeo.setAttribute('position', new THREE.BufferAttribute(arcPositions, 3));
-  const arcMat = new THREE.LineBasicMaterial({ color: 0xff7eb6, transparent: true, opacity: 0 });
-  const arc = new THREE.Line(arcGeo, arcMat);
+  const arcMat = new THREE.MeshBasicMaterial({ color: 0xff7eb6, transparent: true, opacity: 0 });
+  const arc = new THREE.Mesh(new THREE.BufferGeometry(), arcMat);
   arc.frustumCulled = false;
   group.add(arc);
+  let arcIndexCount = 0;
+
+  function buildArc(from, axis, angle) {
+    const pts = [];
+    for (let i = 0; i <= ARC_SEGMENTS; i += 1) {
+      const v = rotateAbout(from, axis, angle * (i / ARC_SEGMENTS));
+      pts.push(toScene(v, new THREE.Vector3()).multiplyScalar(SPHERE_R));
+    }
+    const curve = new THREE.CatmullRomCurve3(pts);
+    const next = new THREE.TubeGeometry(curve, ARC_SEGMENTS, 0.011, 6, false);
+    arc.geometry.dispose();
+    arc.geometry = next;
+    // TubeGeometry emits its indices in order along the tube, so a draw range
+    // is a progressive reveal.
+    arcIndexCount = next.getIndex().count;
+    next.setDrawRange(0, 0);
+  }
 
   /* --- State ------------------------------------------------------------- */
   let state = GROUND_STATE();
@@ -136,9 +157,6 @@ export function buildQubit(THREE, pivot) {
     listeners.forEach((fn) => fn({ state, vector: blochVector(state), p0, p1 }));
   };
 
-  /** Bloch (x, y, z) has z up; the scene has y up. */
-  const toScene = (v, out) => out.set(v.x, v.z, -v.y);
-
   const scratch = new THREE.Vector3();
   const up = new THREE.Vector3(0, 1, 0);
 
@@ -149,18 +167,6 @@ export function buildQubit(THREE, pivot) {
     shaft.scale.set(1, length, 1);
     shaft.quaternion.setFromUnitVectors(up, scratch.clone().normalize());
     tip.position.copy(scratch);
-  }
-
-  function drawArc(from, axis, angle, upTo) {
-    for (let i = 0; i <= ARC_SEGMENTS; i += 1) {
-      const t = (i / ARC_SEGMENTS) * upTo;
-      const v = rotateAbout(from, axis, angle * t);
-      toScene(v, scratch).multiplyScalar(SPHERE_R);
-      arcPositions[i * 3] = scratch.x;
-      arcPositions[i * 3 + 1] = scratch.y;
-      arcPositions[i * 3 + 2] = scratch.z;
-    }
-    arcGeo.getAttribute('position').needsUpdate = true;
   }
 
   drawVector();
@@ -190,6 +196,7 @@ export function buildQubit(THREE, pivot) {
       if (!gate) return;
       const from = blochVector(state);
       state = applyGate(state, gate);
+      buildArc(from, gate.axis, gate.angle);
       sweep = { from, axis: gate.axis, angle: gate.angle, start: performance.now() };
       notify();
     },
@@ -199,6 +206,7 @@ export function buildQubit(THREE, pivot) {
       shown = blochVector(state);
       sweep = null;
       arcMat.opacity = 0;
+      arc.geometry.setDrawRange(0, 0);
       drawVector();
       notify();
     },
@@ -211,19 +219,22 @@ export function buildQubit(THREE, pivot) {
         const t = Math.min(1, (now - sweep.start) / ARC_MS);
         const eased = t * t * (3 - 2 * t);
         shown = rotateAbout(sweep.from, sweep.axis, sweep.angle * eased);
-        drawArc(sweep.from, sweep.axis, sweep.angle, eased);
-        arcMat.opacity = alpha * 0.85 * (t < 1 ? 1 : 1);
+        // Reveal the tube up to wherever the state has got to. The range has to
+        // land on a whole triangle or the last one is dropped.
+        const reveal = Math.floor((arcIndexCount * eased) / 3) * 3;
+        arc.geometry.setDrawRange(0, reveal);
+        arcMat.opacity = alpha;
         if (t >= 1) {
           shown = blochVector(state);
           sweep = null;
         }
-      } else if (arcMat.opacity > 0.001) {
+      } else if (arcMat.opacity > 0.002) {
         // The arc lingers, then fades, so the path stays readable for a beat.
-        arcMat.opacity *= 0.965;
+        arcMat.opacity *= 0.972;
       }
       drawVector();
     },
 
-    dispose() { listeners.clear(); },
+    dispose() { listeners.clear(); arc.geometry.dispose(); },
   };
 }

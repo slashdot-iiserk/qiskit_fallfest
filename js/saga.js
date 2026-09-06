@@ -23,12 +23,12 @@
 
 import { preloadAll, wants3D, MODEL_URL } from './assets.js';
 import {
-  T, SPHERE_X, SPHERE_Y, SPHERE_R, clamp, lerp, ramp, paced, cameraAt,
-  PARTS, VALUES, STATIONS, CHAPTERS,
+  T, SPHERE_X, SPHERE_Y, SPHERE_R, clamp, lerp, ramp, paced, cameraAt, aspectWiden,
+  PARTS, VALUES, STATIONS, CHAPTERS, expandStations,
 } from './saga/timeline.js';
 import { buildCloud, buildDust } from './saga/cloud.js';
 import { buildQubit, GATES } from './saga/qubit.js';
-import { createLabel, placeLabels, renderStatic } from './saga/labels.js';
+import { createLabel, placeLabels, paintCard, renderStatic } from './saga/labels.js';
 
 /** The drawing is laid out on a plane this far in front of the machine. */
 const DRAW_PLANE_Z = 0.85;
@@ -45,6 +45,7 @@ export function initSaga() {
   const chapterLayer = saga.querySelector('[data-saga-chapters]');
   const gatePanel = saga.querySelector('[data-saga-gates]');
   const ctaLayer = saga.querySelector('[data-saga-cta]');
+  const cardEl = saga.querySelector('[data-saga-card]');
   const fallback = saga.querySelector('[data-saga-fallback]');
   const hint = saga.querySelector('[data-saga-hint]');
 
@@ -126,7 +127,7 @@ export function initSaga() {
     gatePanel?.remove();
     renderStatic(labelLayer, PARTS);
     renderStatic(valueLayer, VALUES);
-    renderStatic(stationLayer, STATIONS);
+    renderStatic(stationLayer, expandStations());
     ctaLayer?.classList.add('is-on');
     const tick = () => { measure(); paintDrawing(); paintChapters(); raf = requestAnimationFrame(tick); };
     tick();
@@ -146,7 +147,7 @@ export function initSaga() {
     gatePanel?.remove();
     renderStatic(labelLayer, PARTS);
     renderStatic(valueLayer, VALUES);
-    renderStatic(stationLayer, STATIONS);
+    renderStatic(stationLayer, expandStations());
   });
 
   async function boot() {
@@ -250,11 +251,13 @@ export function initSaga() {
       };
     });
 
-    // Stations live along the state vector, inside the sphere.
-    const stations = STATIONS.map((spec) => {
+    /* What you pass on the way up the vector. An info stop is one anchor on
+       the vector itself; a people stop becomes a ring of faces around it, so
+       the camera flies through a circle rather than past a list. */
+    const stations = expandStations().map((spec) => {
       const el = createLabel(spec, 'station');
       stationLayer?.appendChild(el);
-      return { el, spec, side: spec.side, vec: new THREE.Vector3(), t: spec.t };
+      return { el, spec, side: spec.side, t: spec.t, ring: spec.ring, angle: spec.angle, vec: new THREE.Vector3() };
     });
 
     /* --- Drag -------------------------------------------------------------- */
@@ -338,6 +341,9 @@ export function initSaga() {
     const scratch = new THREE.Vector3();
     const vectorEnd = new THREE.Vector3();
     const sphereCentre = new THREE.Vector3(SPHERE_X, SPHERE_Y, 0);
+    const axis = new THREE.Vector3();
+    const sideA = new THREE.Vector3();
+    const sideB = new THREE.Vector3();
     let smooth = progress;
     let frames = 0;
     // The CTA's layout is only trustworthy once the browser has settled, so the
@@ -445,7 +451,11 @@ export function initSaga() {
         draw: drawMorph,
         sphere: ramp(p, T.qubitStart, T.qubitEnd),
         button: toButton,
-        opacity: cloudAlpha * (1 - ramp(p, T.solid, T.solid + 0.06) * (1 - toQubit)),
+        // The shell thins out while gates are being played, or fourteen
+        // thousand points drown the vector and the arc it sweeps.
+        opacity: cloudAlpha
+          * (1 - ramp(p, T.solid, T.solid + 0.06) * (1 - toQubit))
+          * lerp(1, 0.5, ramp(p, T.gatesIn - 0.03, T.gatesIn + 0.02) * (1 - ramp(p, T.gatesOut, T.journeyIn))),
         time: now / 1000,
         fog: scene.fog,
       });
@@ -476,7 +486,14 @@ export function initSaga() {
       qubit.setVisible(qubitAlpha);
       // Once it stands alone it keeps turning, slowly, so it reads as an object
       // rather than a diagram. It stops while a gate is being watched.
-      qubit.group.rotation.y = toQubit * 0.35 + (now / 26000) * (1 - ramp(p, T.gatesIn, T.gatesIn + 0.02));
+      const settled = ramp(p, T.gatesIn, T.gatesIn + 0.02);
+      const rideNow = ramp(p, T.journeyIn, T.journeyOut) * (1 - ramp(p, T.buttonIn, T.buttonOut));
+      // It turns slowly on its own until you start playing gates, then again —
+      // and tilts — through the journey, so the vector you are riding moves.
+      qubit.group.rotation.y = toQubit * 0.35
+        + (now / 26000) * (1 - settled)
+        + rideNow * 0.9;
+      qubit.group.rotation.z = Math.sin(now / 9000) * 0.14 * rideNow;
       qubit.tick(now, qubitAlpha);
       qubit.group.updateMatrixWorld(true);
 
@@ -485,20 +502,30 @@ export function initSaga() {
       // camera is free to travel along the state vector instead.
       camera.position.set(0, cam.y, cam.z);
       camera.lookAt(0, cam.y, 0);
-      // The ride up the vector unwinds again as the button forms, so the
-      // camera is back on the base path to meet it head on.
-      const ride = journey * (1 - toButton);
-      if (ride > 0.001) {
+      // Act V rides the state vector. The camera sits a fixed distance behind
+      // a point that climbs the vector, looking along it, so the stops come
+      // toward you and pass. The ride unwinds again as the button forms, so
+      // the camera is back on the base path to meet it head on.
+      const journeyRide = journey * (1 - toButton);
+      if (journeyRide > 0.001) {
         const tip = qubit.tipWorld(scratch);
         const centre = qubit.centreWorld(vectorEnd);
-        const dir = tip.clone().sub(centre).normalize();
-        const along = centre.clone().addScaledVector(dir, SPHERE_R * 0.55 * ride);
-        camera.position.lerp(along.clone().addScaledVector(dir, -0.9), ride);
-        const look = along.clone().addScaledVector(dir, 1.4);
+        const dir = tip.clone().sub(centre);
+        const reach = dir.length() || 1;
+        dir.normalize();
+
+        // Climb from just below the centre to just past the tip.
+        // Stops short of the tip: riding all the way into it fills the frame
+        // with the marker and there is nothing left to look at. The stand-off
+        // widens on a portrait screen, or the ring of faces falls outside it.
+        const back = 1.25 * aspectWiden(camera.aspect);
+        const along = centre.clone().addScaledVector(dir, reach * (journeyRide * 0.82 - 0.05));
+        camera.position.lerp(along.clone().addScaledVector(dir, -reach * back), journeyRide);
+        const look = along.clone().addScaledVector(dir, reach * 1.6);
         camera.lookAt(
-          lerp(0, look.x, ride),
-          lerp(cam.y, look.y, ride),
-          lerp(0, look.z, ride),
+          lerp(0, look.x, journeyRide),
+          lerp(cam.y, look.y, journeyRide),
+          lerp(0, look.z, journeyRide),
         );
       }
       camera.updateMatrixWorld();
@@ -537,17 +564,37 @@ export function initSaga() {
       placeLabels(ctx, values, valueAlpha, (a) => 1 - clamp(Math.abs(a.vec.y - cam.y) / 0.75));
 
       if (stationAlpha > 0.01) {
-        // Stations ride the state vector itself, so they move when you steer it.
+        // Everything here hangs off the state vector, so when the vector moves
+        // the whole journey moves with it — and so does the camera.
         const tip = qubit.tipWorld(scratch);
         const centre = qubit.centreWorld(vectorEnd);
+        axis.copy(tip).sub(centre);
+        const reach = axis.length() || 1;
+        axis.normalize();
+        // Any two directions perpendicular to the vector, to hang a ring on.
+        sideA.set(0, 1, 0);
+        if (Math.abs(sideA.dot(axis)) > 0.9) sideA.set(1, 0, 0);
+        sideB.crossVectors(axis, sideA).normalize();
+        sideA.crossVectors(sideB, axis).normalize();
+
         stations.forEach((st) => {
-          st.vec.copy(centre).lerp(tip, st.t);
+          st.vec.copy(centre).addScaledVector(axis, reach * st.t);
+          if (st.ring) {
+            st.vec.addScaledVector(sideA, Math.cos(st.angle) * st.ring * reach);
+            st.vec.addScaledVector(sideB, Math.sin(st.angle) * st.ring * reach);
+          }
           st.local = false; // already world space
         });
-        placeLabels(ctx, stations, stationAlpha, () => 1);
+        // Only what is near the camera's depth along the vector is shown, so
+        // you read one stop at a time as you rise through them.
+        const along = clamp((journeyRide - 0.06) / 0.88);
+        placeLabels(ctx, stations, stationAlpha,
+          (st) => 1 - clamp(Math.abs(st.t - along) / 0.22));
       } else {
         placeLabels(ctx, stations, 0, () => 0);
       }
+
+      if (W < 761) paintCard(cardEl, stations.concat(parts, values));
     };
 
     ready = true;
@@ -565,6 +612,8 @@ export function initSaga() {
 /* ==========================================================================
    Helpers
    ========================================================================== */
+
+/** The act the scroll is currently in, published for CSS and for the tests. */
 function phaseName(p) {
   if (p < T.push) return 'draw';
   if (p < T.assemble) return 'shatter';

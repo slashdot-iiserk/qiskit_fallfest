@@ -11,6 +11,8 @@
  * the number on screen tracks actual work rather than a timer.
  */
 
+import { PEOPLE, SPEAKERS } from './data/event.js';
+
 const REDUCED = window.matchMedia('(prefers-reduced-motion: reduce)');
 const SAVE_DATA = navigator.connection?.saveData === true;
 
@@ -20,17 +22,30 @@ const DRACO_PATH = 'vendor/three/draco/';
 /** Weights are rough byte shares, so the bar moves at a believable rate. */
 const TASKS = [
   { id: 'fonts', label: 'Typesetting', weight: 6 },
-  { id: 'images', label: 'Images', weight: 10 },
+  { id: 'images', label: 'Portraits and artwork', weight: 14 },
   { id: 'three', label: 'Renderer', weight: 34 },
   { id: 'model', label: 'Geometry', weight: 40 },
   { id: 'outline', label: 'Tracing the outline', weight: 10 },
 ];
+
+/**
+ * The portraits are not decoration: they are the faces you fly through inside
+ * the sphere, and a card that pops in half-loaded mid-journey would be worse
+ * than a slightly longer loading screen. They are collected from the event
+ * data so this list can never drift from who is actually on the page.
+ */
+const PORTRAITS = [...PEOPLE, ...SPEAKERS]
+  .map((person) => person.photo)
+  .filter(Boolean)
+  .filter((slug, i, all) => all.indexOf(slug) === i)
+  .map((slug) => `assets/organisers/${slug}-256.webp`);
 
 const IMAGES = [
   'assets/brand/badge-2026.svg',
   'assets/brand/iiserk.webp',
   'assets/brand/qiskit-logo.svg',
   'assets/brand/ibm-quantum.webp',
+  ...PORTRAITS,
 ];
 
 /** Resolved once, then shared by every caller. */

@@ -114,12 +114,12 @@ test.describe('home page', () => {
     await expect(page.locator('[data-countdown] .mystery__unit')).toHaveCount(4);
   });
 
-  test('renders the organising team and the speakers', async ({ page }) => {
-    await expect(page.locator('[data-team] .person')).toHaveCount(7);
-    await expect(page.locator('[data-team]')).toContainText('Manish Behera');
-    await expect(page.locator('[data-speakers] .person').first()).toBeVisible();
-    // Md Shayan Bari has no portrait yet and must fall back to initials.
-    await expect(page.locator('[data-team] .person__initials')).toHaveCount(1);
+  test('the team and the speakers are not duplicated as flat sections', async ({ page }) => {
+    // They are inside the sphere now, flown through along the state vector. A
+    // second copy on the page would be one more place to forget to update.
+    await expect(page.locator('[data-team]')).toHaveCount(0);
+    await expect(page.locator('[data-speakers]')).toHaveCount(0);
+    await expect(page.locator('[data-saga-stations]')).toBeAttached();
   });
 
 })
@@ -255,4 +255,31 @@ test.describe('archived 2025 pages', () => {
     expect(header).not.toBeNull();
     expect(header.y).toBeGreaterThanOrEqual(banner.y + banner.height - 1);
   });
+});
+
+
+test.describe('awkward viewports', () => {
+  // A bare `1fr` grid track has min-width auto, which is how a wide child
+  // silently pushes a whole page sideways on a narrow phone.
+  const SIZES = [
+    { name: 'ultrawide', width: 2560, height: 1080 },
+    { name: 'square', width: 900, height: 900 },
+    { name: 'landscape phone', width: 851, height: 393 },
+    { name: 'very narrow', width: 320, height: 568 },
+  ];
+
+  for (const size of SIZES) {
+    test(`nothing scrolls sideways at ${size.name}`, async ({ page }) => {
+      await page.setViewportSize({ width: size.width, height: size.height });
+      for (const path of ['/', '/register.html', '/resources.html', '/gallery.html', '/faq.html']) {
+        await page.goto(path);
+        await page.waitForTimeout(400);
+        const overflow = await page.evaluate(() => {
+          const d = document.documentElement;
+          return Math.max(0, d.scrollWidth - d.clientWidth);
+        });
+        expect(overflow, `${path} at ${size.name}`).toBeLessThanOrEqual(2);
+      }
+    });
+  }
 });

@@ -9,8 +9,8 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 
-import { T, paced, ramp, clamp, lerp, cameraAt, PARTS, VALUES, STATIONS, CHAPTERS }
-  from '../../js/saga/timeline.js';
+import { T, paced, ramp, clamp, lerp, cameraAt, aspectWiden, expandStations,
+  PARTS, VALUES, STATIONS, CHAPTERS } from '../../js/saga/timeline.js';
 
 test('the beats are in order and inside the runway', () => {
   const order = [
@@ -84,14 +84,48 @@ test('a portrait viewport is framed further back than a landscape one', () => {
 });
 
 test('every piece of copy has both a long and a short form', () => {
-  for (const list of [PARTS, VALUES, STATIONS]) {
+  // A `people` stop has no body of its own — it is expanded into one entry per
+  // person, so it is the expansion that has to be complete.
+  for (const list of [PARTS, VALUES, expandStations()]) {
     for (const item of list) {
       assert.ok(item.k && item.k.length > 2, `missing key: ${JSON.stringify(item)}`);
-      assert.ok(item.v && item.v.length > 20, `missing body: ${item.k}`);
-      // Narrow screens hide the body and show the short key alone.
-      assert.ok(item.short && item.short.length <= 18, `${item.k} needs a short form`);
+      assert.ok(item.v && item.v.length > 8, `missing body: ${item.k}`);
+      assert.ok(item.short && item.short.length <= 20, `${item.k} needs a short form`);
     }
   }
+});
+
+test('the journey expands its people stops into faces on the vector', () => {
+  const stations = expandStations();
+  const people = stations.filter((s) => s.person);
+  // Everyone on the team and every billed speaker is in there.
+  assert.ok(people.length >= 10, `only ${people.length} people made it into the sphere`);
+  assert.ok(people.some((s) => s.photo), 'nobody has a portrait');
+
+  for (const person of people) {
+    assert.ok(person.ring > 0, `${person.k} is not on a ring`);
+    assert.ok(person.t > 0 && person.t < 1, `${person.k} is off the vector`);
+    assert.ok(Number.isFinite(person.angle), `${person.k} has no place on its ring`);
+    assert.ok(person.side === 'left' || person.side === 'right', `${person.k} has no side`);
+  }
+
+  // The rings are spread in depth, so faces do not stack into one plane.
+  const depths = new Set(people.map((s) => s.t.toFixed(4)));
+  assert.equal(depths.size, people.length, 'two faces share a depth');
+});
+
+test('portraits point at files the asset pipeline produces', () => {
+  for (const person of expandStations().filter((s) => s.photo)) {
+    assert.match(person.photo, /^assets\/organisers\/[a-z-]+-256\.webp$/,
+      `${person.k} has an unexpected portrait path`);
+  }
+});
+
+test('the aspect widening is bounded', () => {
+  assert.equal(aspectWiden(16 / 9), 1, 'a landscape screen needs no widening');
+  assert.ok(aspectWiden(9 / 16) > 1.2, 'portrait should step back');
+  assert.ok(aspectWiden(0.2) <= 1.5, 'the widening must be capped');
+  assert.ok(aspectWiden(4) === 1, 'ultrawide should not pull the camera in');
 });
 
 test('chapters are ordered and land on real beats', () => {

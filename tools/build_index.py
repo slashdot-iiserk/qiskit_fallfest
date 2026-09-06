@@ -328,6 +328,13 @@ def build() -> str:
           <a class="btn btn--lg" href="register.html">Register for Fall Fest 2026 {ARROW}</a>
         </div>
 
+        <!-- On a phone there is no room for five plates beside the model, so
+             the nearest one is shown here instead, full size and readable. -->
+        <aside class="saga__card" data-saga-card hidden aria-live="polite">
+          <span class="saga__card-k"></span>
+          <span class="saga__card-v"></span>
+        </aside>
+
         <div class="saga__chapters" data-saga-chapters></div>
         <p class="saga__hint" data-saga-hint aria-hidden="true">Drag to turn</p>
         <p class="saga__fallback" data-saga-fallback hidden></p>
@@ -338,7 +345,7 @@ def build() -> str:
   <!-- ============================ SCHEDULE ============================ -->
   <section class="section" id="schedule">
     <div class="container">
-      <p class="section__index" data-drop="line"><b>03</b> <span>Schedule</span> <span>All times IST</span></p>
+      <p class="section__index" data-drop="line"><b>02</b> <span>Schedule</span> <span>All times IST</span></p>
       <div class="section__head">
         <h2 data-drop>Five days.</h2>
         <p class="lede" data-drop>
@@ -380,7 +387,7 @@ def build() -> str:
   <!-- ============================ CERTIFICATES ============================ -->
   <section class="section section--alt" id="certificates">
     <div class="container">
-      <p class="section__index" data-drop="line"><b>04</b> <span>Certification</span> <span>Three tiers</span></p>
+      <p class="section__index" data-drop="line"><b>03</b> <span>Certification</span> <span>Three tiers</span></p>
       <div class="section__head section__head--center">
         <h2 data-drop>Nobody walks away empty-handed.</h2>
         <p class="lede" style="margin-inline:auto" data-drop>
@@ -397,25 +404,10 @@ def build() -> str:
     </div>
   </section>
 
-  <!-- ============================ SPEAKERS ============================ -->
-  <section class="section" id="speakers">
-    <div class="container">
-      <p class="section__index" data-drop="line"><b>05</b> <span>Speakers</span> <span>More to be announced</span></p>
-      <div class="section__head">
-        <h2 data-drop>Who is talking</h2>
-        <p class="lede" data-drop>
-          The primer on Day 0 is run jointly with <strong>Gluon</strong>. Day 3's advanced speakers and
-          the Day 4 invited expert will be added here as they are confirmed.
-        </p>
-      </div>
-      <div class="grid grid--4" data-speakers data-drop-group="80"></div>
-    </div>
-  </section>
-
   <!-- ============================ RESOURCES ============================ -->
   <section class="section section--alt" id="resources">
     <div class="container">
-      <p class="section__index" data-drop="line"><b>06</b> <span>Before you arrive</span> <span>All public</span></p>
+      <p class="section__index" data-drop="line"><b>04</b> <span>Before you arrive</span> <span>All public</span></p>
       <div class="section__head">
         <h2 data-drop>Documentation, notebooks and prep</h2>
         <p class="lede" data-drop>
@@ -444,25 +436,10 @@ def build() -> str:
     </div>
   </section>
 
-  <!-- ============================ TEAM ============================ -->
-  <section class="section" id="team">
-    <div class="container">
-      <p class="section__index" data-drop="line"><b>07</b> <span>SlashDot</span> <span>The organising team</span></p>
-      <div class="section__head">
-        <h2 data-drop>The people running it</h2>
-        <p class="lede" data-drop>
-          Students of IISER Kolkata who put the fest together — and the people to find if anything on
-          the day is not working.
-        </p>
-      </div>
-      <div class="grid grid--4" data-team data-drop-group="70"></div>
-    </div>
-  </section>
-
   <!-- ============================ VENUE ============================ -->
   <section class="section section--alt" id="venue">
     <div class="container">
-      <p class="section__index" data-drop="line"><b>08</b> <span>Getting there</span> <span>Mohanpur campus</span></p>
+      <p class="section__index" data-drop="line"><b>05</b> <span>Getting there</span> <span>Mohanpur campus</span></p>
       <div class="venue">
         <div class="venue__img" data-drop>
           <img src="assets/brand/iiserk.webp" width="1280" height="800" loading="lazy" decoding="async"

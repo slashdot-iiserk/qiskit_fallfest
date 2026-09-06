@@ -175,6 +175,15 @@ html.is-loading { overflow: hidden; }
   .nav__link::after { display: none; }
 }
 
+/* At the very narrow end the bar cannot hold the wordmark, the theme toggle,
+   the button and the burger at once. The badge alone still links home, and
+   dropping the text is better than dropping the primary action. */
+@media (max-width: 380px) {
+  .nav__brand-text { display: none; }
+  .nav__inner { gap: var(--sp-2); }
+  .nav__actions { gap: 0.35rem; }
+}
+
 @media (max-width: 560px) {
   .nav__inner { gap: var(--sp-3); }
   .nav__brand { font-size: 0.95rem; }
