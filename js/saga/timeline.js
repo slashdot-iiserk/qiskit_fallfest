@@ -54,6 +54,22 @@ export function ramp(v, from, to) {
 }
 
 /**
+ * The descent, shaped.
+ *
+ * A straight glide past five stages reads as a lift with no floors. Folding a
+ * small sine into the curve slows the camera as it passes each plate and lets
+ * it run between them, which is what gives the ride its rhythm.
+ *
+ * It has to stay monotonic or scrolling down would visibly reverse. The
+ * derivative is 1 - 2*pi*stops*depth*cos(...), so the amplitude is capped at
+ * 1/(2*pi*stops) and taken slightly under it.
+ */
+export function paced(t, stops = 4) {
+  const depth = 0.85 / (2 * Math.PI * stops);
+  return clamp(t - Math.sin(t * Math.PI * 2 * stops) * depth);
+}
+
+/**
  * The camera path, as a pure function of progress.
  *
  * It always looks horizontally, which makes the descent read as an elevator
@@ -61,7 +77,7 @@ export function ramp(v, from, to) {
  * be fitted to the same framing with plain trigonometry, no matrices.
  */
 export function cameraAt(p, aspect = 16 / 9) {
-  const descent = ramp(p, T.assemble, T.chip);
+  const descent = paced(ramp(p, T.assemble, T.chip));
   const qubit = ramp(p, T.qubitStart, T.qubitEnd);
   const journey = ramp(p, T.journeyIn, T.journeyOut);
   const button = ramp(p, T.buttonIn, T.buttonOut);

@@ -176,8 +176,8 @@ export function buildQubit(THREE, pivot) {
     /** Fade the whole qubit in as the cloud settles into a sphere. */
     setVisible(amount) {
       group.visible = amount > 0.01;
-      ringMat.opacity = amount * 0.7;
-      poleMat.opacity = amount * 0.5;
+      ringMat.opacity = amount * 0.9;
+      poleMat.opacity = amount * 0.65;
       vecMat.opacity = amount;
       arcMat.opacity = Math.min(arcMat.opacity, amount);
     },

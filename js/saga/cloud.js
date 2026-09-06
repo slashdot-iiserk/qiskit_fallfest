@@ -30,8 +30,11 @@ const VERTEX = `
   uniform float uSize;
   uniform float uProj;
   uniform float uTime;
+  uniform vec2 uFog;          // near, far
 
   varying float vPhase;
+  varying float vFog;
+  varying float vSeed;
 
   // Each point sets off at its own moment, so a change sweeps through the
   // cloud instead of every particle moving at once.
@@ -46,9 +49,16 @@ const VERTEX = `
     vec3 sphere = (uPivot * vec4(aSphere + uSphereCentre, 1.0)).xyz;
 
     float t1 = staggered(uDraw, aSeed, 0.55);
-    // Bow the path outward so the drawing bursts rather than sliding.
+    // Bow the path outward so the drawing bursts rather than sliding, and add
+    // a little curl per point so the burst is a scatter, not a fan.
     vec3 lift = normalize(vec3(aDraw.x, aDraw.y, 1.0)) * 0.5 * sin(t1 * 3.14159);
-    vec3 p = mix(aDraw, model, t1) + lift * (1.0 - abs(t1 * 2.0 - 1.0));
+    float swirl = sin(t1 * 3.14159);
+    vec3 curl = vec3(
+      sin(aSeed * 61.0 + uTime * 0.6),
+      cos(aSeed * 43.0 + uTime * 0.5),
+      sin(aSeed * 29.0)
+    ) * 0.13 * swirl;   // enough to scatter, little enough to stay legible
+    vec3 p = mix(aDraw, model, t1) + (lift + curl) * (1.0 - abs(t1 * 2.0 - 1.0));
 
     float t2 = staggered(uSphere, aSeed, 0.45);
     p = mix(p, sphere, t2);
@@ -56,14 +66,29 @@ const VERTEX = `
     float t3 = staggered(uButton, aSeed, 0.35);
     p = mix(p, aButton, t3);
 
-    // A little life while the cloud is holding a shape.
-    float idle = (1.0 - abs(t1 * 2.0 - 1.0)) * 0.0 + 0.004;
-    p += vec3(sin(uTime * 0.7 + aSeed * 40.0), cos(uTime * 0.6 + aSeed * 31.0), 0.0) * idle;
+    // A slow shimmer while the cloud is holding a shape, so a settled sphere
+    // still breathes instead of freezing into a texture.
+    float held = min(t2, 1.0 - t3);
+    float idle = 0.0035 + held * 0.006;
+    p += vec3(
+      sin(uTime * 0.7 + aSeed * 40.0),
+      cos(uTime * 0.6 + aSeed * 31.0),
+      sin(uTime * 0.5 + aSeed * 53.0)
+    ) * idle;
 
     vPhase = max(t2, t3);
+    vSeed = aSeed;
 
     vec4 mv = modelViewMatrix * vec4(p, 1.0);
-    gl_PointSize = clamp(uSize * uProj / max(0.15, -mv.z), 1.0, 6.0);
+    float depth = -mv.z;
+
+    // Depth carries the volume: nearer points are bigger and brighter, so a
+    // shell of particles reads as a sphere rather than a flat disc of dots.
+    vFog = 1.0 - clamp((depth - uFog.x) / max(0.001, uFog.y - uFog.x), 0.0, 1.0);
+
+    // A little spread in size, or every point looks stamped from the same die.
+    float scale = 0.65 + aSeed * 0.8;
+    gl_PointSize = clamp(uSize * scale * uProj / max(0.15, depth), 1.0, 7.0);
     gl_Position = projectionMatrix * mv;
   }`;
 
@@ -147,8 +172,11 @@ export function buildCloud(THREE, wrap, outline) {
       uTime: { value: 0 },
       // A world radius, not a pixel count: uProj converts it to pixels per unit
       // of depth so the points keep a constant real size.
-      uSize: { value: 0.0038 },
+      // Slightly larger on a phone: the same world radius covers far fewer
+      // pixels there, and the shatter was reading as dust rather than a drawing.
+      uSize: { value: window.matchMedia('(pointer: coarse)').matches ? 0.0055 : 0.0042 },
       uProj: { value: 700 },
+      uFog: { value: new THREE.Vector2(2, 8) },
       uColor: { value: new THREE.Color(0xe8c87a) },
       uTip: { value: new THREE.Color(0xff7eb6) },
     },
@@ -206,7 +234,8 @@ export function buildCloud(THREE, wrap, outline) {
     layoutDrawing,
     layoutButton,
     setProjection(pixelsPerUnit) { material.uniforms.uProj.value = pixelsPerUnit; },
-    update({ pivotMatrix, sphereCentre, draw, sphere, button, opacity, time }) {
+    update({ pivotMatrix, sphereCentre, draw, sphere, button, opacity, time, fog }) {
+      if (fog) material.uniforms.uFog.value.set(fog.near, fog.far);
       material.uniforms.uPivot.value.copy(pivotMatrix);
       if (sphereCentre) material.uniforms.uSphereCentre.value.copy(sphereCentre);
       material.uniforms.uDraw.value = draw;

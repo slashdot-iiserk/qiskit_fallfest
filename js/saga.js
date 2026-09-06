@@ -23,7 +23,7 @@
 
 import { preloadAll, wants3D, MODEL_URL } from './assets.js';
 import {
-  T, SPHERE_X, SPHERE_Y, SPHERE_R, clamp, lerp, ramp, cameraAt,
+  T, SPHERE_X, SPHERE_Y, SPHERE_R, clamp, lerp, ramp, paced, cameraAt,
   PARTS, VALUES, STATIONS, CHAPTERS,
 } from './saga/timeline.js';
 import { buildCloud } from './saga/cloud.js';
@@ -154,19 +154,39 @@ export function initSaga() {
     if (!assets.three) throw new Error('renderer not available');
     const { THREE, GLTFLoader, DRACOLoader, RoomEnvironment, DRACO_PATH } = assets.three;
 
-    const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true, powerPreference: 'high-performance' });
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.75));
+    // Antialiasing is worth it on a desktop GPU and expensive on a phone, so
+    // the starting quality is guessed from the device and then corrected by
+    // what the frame timer actually reports.
+    const coarse = window.matchMedia('(pointer: coarse)').matches;
+    // ?dpr=<n> pins the buffer scale. Useful when capturing reference shots,
+    // where the adaptive path would otherwise degrade every screenshot on a
+    // software renderer and make each round look worse than the last.
+    const pinned = Number(new URLSearchParams(location.search).get('dpr')) || 0;
+    const maxDpr = pinned || (coarse ? 1.5 : 1.75);
+    const renderer = new THREE.WebGLRenderer({
+      canvas, alpha: true, antialias: !coarse, powerPreference: 'high-performance',
+    });
+    let dpr = Math.min(window.devicePixelRatio || 1, maxDpr);
+    renderer.setPixelRatio(dpr);
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.15;
+    renderer.toneMappingExposure = 1.28;
     renderer.outputColorSpace = THREE.SRGBColorSpace;
 
     const scene = new THREE.Scene();
     const pmrem = new THREE.PMREMGenerator(renderer);
     scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
 
-    const key = new THREE.DirectionalLight(0xfff2d8, 2.6); key.position.set(3, 5, 4); scene.add(key);
-    const rim = new THREE.DirectionalLight(0xffc978, 1.9); rim.position.set(-4, 1.5, -3); scene.add(rim);
-    scene.add(new THREE.AmbientLight(0x2a2418, 1.4));
+    const key = new THREE.DirectionalLight(0xfff2d8, 2.5); key.position.set(3, 5, 4); scene.add(key);
+    const fill = new THREE.DirectionalLight(0xffc978, 1.5); fill.position.set(-4, 1.5, -3); scene.add(fill);
+    // A hard rim from behind: without it the gold and the steel both dissolve
+    // into the black instead of holding an edge.
+    const rim = new THREE.DirectionalLight(0xfff6e6, 3.4); rim.position.set(-1.5, -2, -6); scene.add(rim);
+    scene.add(new THREE.AmbientLight(0x2a2418, 1.2));
+
+    // Atmosphere. Distances here are 1–5 units, so the range is re-derived
+    // from the shot each frame rather than fixed — without it the far side of
+    // the machine is as bright as the near side and the whole thing reads flat.
+    scene.fog = new THREE.Fog(0x08080a, 2, 8);
 
     const camera = new THREE.PerspectiveCamera(32, 1, 0.05, 100);
     const pivot = new THREE.Group();
@@ -194,7 +214,7 @@ export function initSaga() {
     model.traverse((o) => {
       if (!o.isMesh) return;
       o.frustumCulled = false;
-      if (o.material && 'envMapIntensity' in o.material) o.material.envMapIntensity = 1.25;
+      if (o.material && 'envMapIntensity' in o.material) o.material.envMapIntensity = 1.7;
     });
     draco.dispose();
 
@@ -235,8 +255,10 @@ export function initSaga() {
     /* --- Drag -------------------------------------------------------------- */
     let dragYaw = 0;
     let dragPitch = 0;
+    let dragVel = 0;
     let dragging = false;
     let last = null;
+    let lastDragAt = 0;
     const onDown = (e) => {
       if (e.target.closest('[data-saga-gates]')) return;
       dragging = true; last = { x: e.clientX, y: e.clientY };
@@ -244,9 +266,12 @@ export function initSaga() {
     };
     const onMove = (e) => {
       if (!dragging || !last) return;
-      dragYaw += (e.clientX - last.x) * 0.006;
+      const dx = (e.clientX - last.x) * 0.006;
+      dragYaw += dx;
+      dragVel = dx;                       // carried on after release
       dragPitch = clamp(dragPitch + (e.clientY - last.y) * 0.0025, -0.35, 0.35);
       last = { x: e.clientX, y: e.clientY };
+      lastDragAt = performance.now();
     };
     const onUp = (e) => { dragging = false; last = null; saga.releasePointerCapture?.(e.pointerId); };
     saga.addEventListener('pointerdown', onDown);
@@ -314,6 +339,34 @@ export function initSaga() {
     let lastTime = performance.now();
     let lastSolid = 1;
 
+    /* Adaptive quality ------------------------------------------------------
+       A phone that cannot hold the frame rate gets a smaller buffer rather
+       than a stuttering one. Measured over a window so a single slow frame —
+       shader compilation, a texture upload — never triggers it. */
+    const FLOOR = 0.75;
+    let sampleAt = performance.now();
+    let sampleFrames = 0;
+    let sampleTime = 0;
+
+    function adaptQuality(frameMs, now2) {
+      if (pinned) return;
+      sampleFrames += 1;
+      sampleTime += frameMs;
+      if (now2 - sampleAt < 1400) return;
+      const mean = sampleTime / Math.max(1, sampleFrames);
+      sampleAt = now2; sampleFrames = 0; sampleTime = 0;
+
+      let next = dpr;
+      if (mean > 34 && dpr > FLOOR) next = Math.max(FLOOR, dpr - 0.25);
+      else if (mean < 15 && dpr < maxDpr) next = Math.min(maxDpr, dpr + 0.25);
+      if (next !== dpr) {
+        dpr = next;
+        renderer.setPixelRatio(dpr);
+        resize();
+      }
+      saga.dataset.sagaCost = `${mean.toFixed(1)}ms dpr${dpr.toFixed(2)} calls${renderer.info.render.calls}`;
+    }
+
     cancelAnimationFrame(raf);
 
     const tick = (now = performance.now()) => {
@@ -328,6 +381,7 @@ export function initSaga() {
 
       frames += 1;
       if (frames === 1 || frames % 5 === 0) saga.dataset.sagaFrames = String(frames);
+      adaptQuality(dt * 1000, now);
 
       // Frame-rate independent: a fixed per-frame factor lags badly on a slow
       // device, putting the choreography out of step with the page.
@@ -341,13 +395,27 @@ export function initSaga() {
 
       /* Camera ------------------------------------------------------------- */
       const cam = cameraAt(p, camera.aspect);
-      const descent = ramp(p, T.assemble, T.chip);
+      const descent = paced(ramp(p, T.assemble, T.chip));
       const toQubit = ramp(p, T.qubitStart, T.qubitEnd);
       const journey = ramp(p, T.journeyIn, T.journeyOut);
       const toButton = ramp(p, T.buttonIn, T.buttonOut);
 
-      pivot.rotation.y = descent * 1.4 + dragYaw + toQubit * 0.5 - journey * 0.35;
-      pivot.rotation.x = dragPitch * 0.5 * (1 - toQubit);
+      // Atmosphere, re-derived from the shot: distances here are 1–5 units, so
+      // a fixed range would either haze everything out up close or do nothing
+      // at all out wide. Close in, the far side of the machine falls away.
+      scene.fog.near = cam.z * 0.5;
+      scene.fog.far = cam.z * 3.2;
+
+      // Spin down whatever the drag was carrying, then let it drift.
+      if (!dragging) {
+        dragYaw += dragVel;
+        dragVel *= Math.exp(-dt * 3.2);
+      }
+      const idle = performance.now() - lastDragAt > 2000 ? 1 : 0;
+      const sway = Math.sin(now / 5200) * 0.06 * idle;
+
+      pivot.rotation.y = descent * 1.4 + dragYaw + sway + toQubit * 0.5 - journey * 0.35;
+      pivot.rotation.x = dragPitch * 0.5 * (1 - toQubit) + Math.sin(now / 6700) * 0.018 * idle;
       pivot.updateMatrixWorld(true);
 
       // The qubit forms where the chip was, then moves aside for the gate
@@ -372,6 +440,7 @@ export function initSaga() {
         button: toButton,
         opacity: cloudAlpha * (1 - ramp(p, T.solid, T.solid + 0.06) * (1 - toQubit)),
         time: now / 1000,
+        fog: scene.fog,
       });
 
       /* The solid machine fades in under the particles, and back out at the chip */
@@ -391,6 +460,9 @@ export function initSaga() {
 
       qubit.setCentre(sphereCentre.x, sphereCentre.y);
       qubit.setVisible(qubitAlpha);
+      // Once it stands alone it keeps turning, slowly, so it reads as an object
+      // rather than a diagram. It stops while a gate is being watched.
+      qubit.group.rotation.y = toQubit * 0.35 + (now / 26000) * (1 - ramp(p, T.gatesIn, T.gatesIn + 0.02));
       qubit.tick(now, qubitAlpha);
       qubit.group.updateMatrixWorld(true);
 

@@ -103,7 +103,16 @@
   height: 100%;
   margin-inline: auto;
 }
-.saga__canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+.saga__canvas {
+  position: absolute; inset: 0; width: 100%; height: 100%;
+  /* The chapter copy lives in the bottom band and the machine reaches into it.
+     Rather than a scrim — the palette has no gradients to fade one in with —
+     the render itself dissolves into the dark there, which is also a better
+     composition. A mask, not a fill. */
+  -webkit-mask-image: linear-gradient(to top, transparent 0, #000 var(--saga-mask, 13%));
+  mask-image: linear-gradient(to top, transparent 0, #000 var(--saga-mask, 13%));
+}
+@media (max-width: 860px) { .saga__canvas { --saga-mask: 22%; } }
 
 .saga__labels { position: absolute; inset: 0; pointer-events: none; perspective: 900px; }
 
