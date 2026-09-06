@@ -70,8 +70,12 @@ export function placeLabels(ctx, list, groupAlpha, nearness) {
     el.style.setProperty('--gut', `${gutter.toFixed(0)}px`);
     el.style.setProperty('--rx', `${tiltX.toFixed(2)}deg`);
     el.style.setProperty('--ry', `${tiltY.toFixed(2)}deg`);
+    const alpha = behind ? 0 : groupAlpha * CLAMP(nearness(entry), 0, 1) * 0.98;
     el.style.transform = `translate3d(${x.toFixed(1)}px, ${y.toFixed(1)}px, 0)`;
-    el.style.opacity = behind ? '0' : (groupAlpha * CLAMP(nearness(entry), 0, 1) * 0.98).toFixed(3);
+    el.style.opacity = alpha.toFixed(3);
+    // The plate slides in along its own leader as it fades up, so a label
+    // arrives rather than simply appearing.
+    el.style.setProperty('--in', alpha.toFixed(3));
   }
 }
 

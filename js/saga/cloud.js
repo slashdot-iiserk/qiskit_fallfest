@@ -282,3 +282,100 @@ function collectTriangles(THREE, wrap) {
     new THREE.Vector3(-1, -1, 0), new THREE.Vector3(1, -1, 0), new THREE.Vector3(0, 1, 0), 1,
   ]];
 }
+
+
+/**
+ * Dust.
+ *
+ * A sparse field of motes drifting through the space the machine occupies.
+ * There is nothing between the parts otherwise, so the descent reads as a
+ * product render on black rather than a journey through somewhere; these give
+ * the camera something to move past, and they are what make the inside of the
+ * sphere feel like a volume rather than an empty shell.
+ *
+ * Cheap on purpose: a few hundred points, one draw call, no per-frame CPU work
+ * beyond a uniform.
+ */
+export function buildDust(THREE, { count = 700, radius = 2.6, height = 2.6 } = {}) {
+  const positions = new Float32Array(count * 3);
+  const seeds = new Float32Array(count);
+
+  for (let i = 0; i < count; i += 1) {
+    // Hollowed out in the middle so the motes read around the machine, not
+    // through the middle of it where they would just be noise.
+    const angle = Math.random() * Math.PI * 2;
+    const r = radius * (0.35 + 0.65 * Math.sqrt(Math.random()));
+    positions[i * 3] = Math.cos(angle) * r;
+    positions[i * 3 + 1] = (Math.random() * 2 - 1) * height;
+    positions[i * 3 + 2] = Math.sin(angle) * r;
+    seeds[i] = Math.random();
+  }
+
+  const geometry = new THREE.BufferGeometry();
+  geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+  geometry.setAttribute('aSeed', new THREE.BufferAttribute(seeds, 1));
+  geometry.boundingSphere = new THREE.Sphere(new THREE.Vector3(), radius + height);
+
+  const material = new THREE.ShaderMaterial({
+    transparent: true,
+    depthWrite: false,
+    uniforms: {
+      uTime: { value: 0 },
+      uOpacity: { value: 0 },
+      uProj: { value: 700 },
+      uFog: { value: new THREE.Vector2(2, 8) },
+      uColor: { value: new THREE.Color(0xe8c87a) },
+      uSpan: { value: height },
+    },
+    vertexShader: `
+      attribute float aSeed;
+      uniform float uTime;
+      uniform float uProj;
+      uniform float uSpan;
+      uniform vec2 uFog;
+      varying float vFog;
+      varying float vSeed;
+      void main() {
+        vec3 p = position;
+        // Drift upward and wrap, with a slow lateral sway per mote.
+        p.y = mod(p.y + uTime * (0.02 + aSeed * 0.05) + uSpan, uSpan * 2.0) - uSpan;
+        p.x += sin(uTime * 0.25 + aSeed * 30.0) * 0.06;
+        p.z += cos(uTime * 0.21 + aSeed * 21.0) * 0.06;
+
+        vec4 mv = modelViewMatrix * vec4(p, 1.0);
+        float depth = -mv.z;
+        vFog = 1.0 - clamp((depth - uFog.x) / max(0.001, uFog.y - uFog.x), 0.0, 1.0);
+        vSeed = aSeed;
+        gl_PointSize = clamp((0.0016 + aSeed * 0.0022) * uProj / max(0.15, depth), 0.8, 3.5);
+        gl_Position = projectionMatrix * mv;
+      }`,
+    fragmentShader: `
+      uniform vec3 uColor;
+      uniform float uOpacity;
+      varying float vFog;
+      varying float vSeed;
+      void main() {
+        vec2 d = gl_PointCoord - 0.5;
+        float r = dot(d, d);
+        if (r > 0.25) discard;
+        float edge = smoothstep(0.25, 0.0, r);
+        gl_FragColor = vec4(uColor, edge * edge * uOpacity * (0.25 + vFog * 0.75) * (0.5 + vSeed * 0.5));
+      }`,
+  });
+
+  const points = new THREE.Points(geometry, material);
+  points.frustumCulled = false;
+  points.visible = false;
+
+  return {
+    points,
+    setProjection(v) { material.uniforms.uProj.value = v; },
+    update({ time, opacity, fog }) {
+      material.uniforms.uTime.value = time;
+      material.uniforms.uOpacity.value = opacity;
+      if (fog) material.uniforms.uFog.value.set(fog.near, fog.far);
+      points.visible = opacity > 0.004;
+    },
+    dispose() { geometry.dispose(); material.dispose(); },
+  };
+}

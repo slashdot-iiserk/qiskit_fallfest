@@ -26,7 +26,7 @@ import {
   T, SPHERE_X, SPHERE_Y, SPHERE_R, clamp, lerp, ramp, paced, cameraAt,
   PARTS, VALUES, STATIONS, CHAPTERS,
 } from './saga/timeline.js';
-import { buildCloud } from './saga/cloud.js';
+import { buildCloud, buildDust } from './saga/cloud.js';
 import { buildQubit, GATES } from './saga/qubit.js';
 import { createLabel, placeLabels, renderStatic } from './saga/labels.js';
 
@@ -223,6 +223,11 @@ export function initSaga() {
     cloud.layoutDrawing(DRAW_PLANE_Z);
     scene.add(cloud.points);
 
+    // Motes drifting through the space, so the camera has something to move
+    // past and the inside of the sphere reads as a volume.
+    const dust = buildDust(THREE);
+    scene.add(dust.points);
+
     const qubit = buildQubit(THREE, pivot);
     wireGatePanel(gatePanel, qubit);
 
@@ -288,7 +293,9 @@ export function initSaga() {
       renderer.setSize(W, H, false);
       camera.aspect = W / H;
       camera.updateProjectionMatrix();
-      cloud.setProjection(H / (2 * Math.tan((camera.fov * Math.PI) / 360)));
+      const perUnit = H / (2 * Math.tan((camera.fov * Math.PI) / 360));
+      cloud.setProjection(perUnit);
+      dust.setProjection(perUnit);
       layoutButtonTarget();
     };
 
@@ -443,6 +450,13 @@ export function initSaga() {
         fog: scene.fog,
       });
 
+      dust.update({
+        time: now / 1000,
+        // Present through the machine and the journey, gone by the button.
+        opacity: ramp(p, T.shatter, T.assemble) * (1 - ramp(p, T.buttonIn, T.buttonOut)) * 0.85,
+        fog: scene.fog,
+      });
+
       /* The solid machine fades in under the particles, and back out at the chip */
       const solid = ramp(p, T.assemble + 0.01, T.solid) * (1 - ramp(p, T.qubitStart, T.qubitStart + 0.05));
       if (Math.abs(solid - lastSolid) > 0.004) {
@@ -543,7 +557,7 @@ export function initSaga() {
 
     window.addEventListener('pagehide', () => {
       cancelAnimationFrame(raf);
-      ro.disconnect(); vis.disconnect(); cloud.dispose(); qubit.dispose(); renderer.dispose();
+      ro.disconnect(); vis.disconnect(); cloud.dispose(); dust.dispose(); qubit.dispose(); renderer.dispose();
     }, { once: true });
   }
 }

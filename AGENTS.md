@@ -125,6 +125,25 @@ Things worth knowing before touching it:
 - **Particle size is a world radius** scaled by `uProj` (pixels per unit at unit
   depth, updated on resize), not a pixel count — that mistake produced 277px
   points and a white screen. Blending is normal, never additive.
+- **Depth is what sells it.** Fog range is re-derived from the shot every frame
+  (distances here are 1–5 units, so a fixed range is useless), a rim light holds
+  the silhouette against black, and both particle systems dim and shrink with
+  depth. Remove any one of those and the machine flattens into a cutout.
+- **`paced()` must stay monotonic.** It folds a sine into the descent so the
+  camera dwells at each plate; the amplitude is capped at `1/(2*pi*stops)`
+  because past that the page appears to scroll upward while you scroll down.
+  `tests/unit/timeline.test.js` guards it. `cameraAt` uses the same pacing, or
+  the DOM drawing and the render diverge during act I.
+- **Quality adapts** from the measured frame time, over a window so one slow
+  frame never triggers it. `?dpr=<n>` pins it — use that when capturing
+  reference shots, or a software renderer will make every round look worse than
+  the last.
+
+### Iterating on the look
+
+`.work/preview/shoot.mjs <outDir> <beat...>` captures the same beats on desktop
+and on a phone and reports renderer cost, so rounds can be compared side by
+side. Judge changes from those sheets rather than from one viewport.
 - **Label placement**: each frame writes `--gut`, `--bx`, `--lead`, `--rx` and
   `--ry`. Derive the plate from the gutter and the leader from the plate, never
   the reverse, or a label whose anchor rotates past the gutter is pushed off
