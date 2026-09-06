@@ -18,17 +18,26 @@ const MODEL_URL = 'assets/model/quantum-computer.glb';
 const DRACO_PATH = 'vendor/three/draco/';
 
 /** Anchors are in the model's normalised space: y = +1 top, -1 bottom. */
+/**
+ * `k` is the label; `short` is what fits beside the model on a phone, where
+ * the descriptive line is dropped and the chapter copy carries the detail.
+ */
 const HOTSPOTS = [
   { id: 'plate-top',  pos: [0.34,  0.94, 0.34], side: 'right',
-    k: '300 K flange',  v: 'Room temperature. Everything below is colder than deep space.' },
+    k: '300 K flange',  short: '300 K',
+    v: 'Room temperature. Everything below is colder than deep space.' },
   { id: 'plate-50k',  pos: [0.58,  0.26, 0.14], side: 'right',
-    k: '4 K stage',     v: 'Gold-plated copper — gold does not oxidise, and copper carries heat out fast.' },
+    k: '4 K stage',     short: '4 K',
+    v: 'Gold-plated copper — gold does not oxidise, and copper carries heat out fast.' },
   { id: 'wires',      pos: [-0.60, -0.06, 0.22], side: 'left',
-    k: 'Signal lines',  v: 'Coax runs carrying microwave pulses down. Each one is a gate you can apply.' },
+    k: 'Signal lines',  short: 'Wiring',
+    v: 'Coax runs carrying microwave pulses down. Each one is a gate you can apply.' },
   { id: 'mixing',     pos: [0.46, -0.58, 0.34], side: 'right',
-    k: '10 mK stage',   v: 'The mixing chamber. Colder than interstellar space, by a factor of thirty.' },
+    k: '10 mK stage',   short: '10 mK',
+    v: 'The mixing chamber. Colder than interstellar space, by a factor of thirty.' },
   { id: 'chip',       pos: [-0.44, -0.92, 0.26], side: 'left',
-    k: 'The processor', v: 'A fingernail of silicon. The only part that is actually the computer.' },
+    k: 'The processor', short: 'The chip',
+    v: 'A fingernail of silicon. The only part that is actually the computer.' },
 ];
 
 const CHAPTERS = [
@@ -335,10 +344,11 @@ function buildHotspot(h) {
     <span class="hotspot__dot"></span>
     <span class="hotspot__line"></span>
     <span class="hotspot__body">
-      <span class="hotspot__k"></span>
+      <span class="hotspot__k"><b class="k-full"></b><b class="k-short"></b></span>
       <span class="hotspot__v"></span>
     </span>`;
-  el.querySelector('.hotspot__k').textContent = h.k;
+  el.querySelector('.k-full').textContent = h.k;
+  el.querySelector('.k-short').textContent = h.short || h.k;
   el.querySelector('.hotspot__v').textContent = h.v;
   return el;
 }

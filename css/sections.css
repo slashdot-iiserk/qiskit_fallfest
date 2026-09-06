@@ -172,9 +172,12 @@
 .hotspot--left .hotspot__body { left: auto; right: var(--bx); text-align: right; }
 .hotspot__k {
   display: block;
-  font-family: var(--font-mono); font-size: var(--step--2);
+  font-family: var(--font-mono); font-size: var(--step--2); font-weight: 500;
   letter-spacing: 0.18em; text-transform: uppercase; color: var(--gold);
+  white-space: nowrap;
 }
+.hotspot__k b { font-weight: inherit; }
+.hotspot__k .k-short { display: none; }
 .hotspot__v { display: block; font-size: var(--step--1); color: var(--paper-2); margin-top: 0.25rem; line-height: 1.4; }
 .hotspot:hover .hotspot__dot::after { scale: 1.5; }
 
@@ -212,7 +215,9 @@
   /* No room for a full sentence beside the model — the key stays anchored and
      the chapter copy below carries the explanation. */
   .hotspot__v { display: none; }
-  .hotspot__k { font-size: 0.62rem; letter-spacing: 0.12em; }
+  .hotspot__k { font-size: 0.62rem; letter-spacing: 0.1em; }
+  .hotspot__k .k-full { display: none; }
+  .hotspot__k .k-short { display: inline; }
   /* The fallback note carries real information, so it stays on small screens —
      only the drag hint, which is meaningless on touch, goes away. */
   .machine__hint { display: none; }
