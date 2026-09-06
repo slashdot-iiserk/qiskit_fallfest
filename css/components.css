@@ -11,11 +11,23 @@
 .preloader[data-done] { pointer-events: none; }
 .preloader__inner {
   position: relative; z-index: 1;
-  display: grid; justify-items: center; gap: var(--sp-6);
-  width: min(90vw, 460px);
+  display: grid; justify-items: center; gap: clamp(2rem, 6vw, 3.25rem);
+  width: min(90vw, 420px);
 }
-.preloader__art { width: min(46vw, 210px); color: var(--gold); }
-.preloader__art svg { width: 100%; height: auto; }
+
+/* The machine draws itself inside a ring that fills as the assets arrive. */
+.preloader__ring {
+  position: relative;
+  width: min(64vw, 280px); aspect-ratio: 1;
+  display: grid; place-items: center;
+}
+.preloader__ring svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+.preloader__ring circle { fill: none; stroke-width: 1; transform: rotate(-90deg); transform-origin: 50% 50%; }
+.ring__track { stroke: var(--line); }
+.ring__arc {
+  stroke: var(--gold); stroke-linecap: round; opacity: 0;
+  transition: stroke-dashoffset 240ms linear;
+}
 
 /* Qubits streaming out of the machine, drawn behind the line work. */
 .preloader__field {
@@ -24,15 +36,27 @@
   pointer-events: none;
 }
 
-.preloader__meta {
-  display: flex; align-items: baseline; justify-content: space-between;
-  width: 100%;
+.preloader__meta { width: 100%; display: grid; justify-items: center; gap: 0.75rem; }
+.preloader__status {
   font-family: var(--font-mono); font-size: var(--step--2);
-  letter-spacing: 0.2em; text-transform: uppercase; color: var(--paper-3);
+  letter-spacing: 0.22em; text-transform: uppercase; color: var(--paper-3);
 }
-.preloader__pct { color: var(--gold); font-variant-numeric: tabular-nums; }
-.preloader__bar { width: 100%; height: 1px; background: var(--line); position: relative; }
-.preloader__bar i { position: absolute; inset: 0 auto 0 0; width: 0; background: var(--gold); }
+.preloader__count {
+  display: flex; align-items: baseline; gap: 0.2rem;
+  font-family: var(--font-mono); line-height: 1;
+}
+.preloader__pct {
+  font-size: clamp(2.4rem, 9vw, 3.6rem); font-weight: 500;
+  color: var(--gold); font-variant-numeric: tabular-nums;
+  letter-spacing: -0.03em;
+}
+.preloader__count small { font-size: var(--step--1); color: var(--paper-3); }
+.preloader__bar { width: min(100%, 260px); height: 1px; background: var(--line); position: relative; }
+.preloader__bar i { position: absolute; inset: 0 auto 0 0; width: 0; background: var(--gold); transition: width 200ms linear; }
+.preloader__name {
+  font-family: var(--font-mono); font-size: var(--step--2);
+  letter-spacing: 0.18em; text-transform: uppercase; color: var(--paper-3);
+}
 
 /* The curtain that lifts. Two panels so it reads as a shutter, not a fade. */
 .preloader__curtain { position: fixed; inset: 0; z-index: 499; pointer-events: none; }
@@ -329,7 +353,7 @@ html.is-loading { overflow: hidden; }
 .qc-draw { display: block; will-change: transform; }
 .qc-draw svg { width: 100%; height: auto; color: var(--gold); overflow: visible; }
 
-.preloader .qc-draw { width: min(44vw, 180px); opacity: 0; }
+.preloader .qc-draw { width: min(38vw, 158px); opacity: 0; }
 
 .qc-stage {
   position: fixed; inset: 0;

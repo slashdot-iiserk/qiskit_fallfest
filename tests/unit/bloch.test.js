@@ -1,11 +1,12 @@
 /**
- * The single-qubit simulator behind the interactive lab. If these drift, the
- * probabilities we show visitors stop matching what Qiskit would print.
+ * The single-qubit simulator behind the saga's gate playground. If these drift,
+ * the probabilities shown beside the qubit stop matching what Qiskit prints —
+ * and the arcs stop tracing the rotation the gate actually performs.
  */
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 
-import { GATES, applyGate, blochVector, GROUND_STATE } from '../../js/bloch.js';
+import { GATES, applyGate, blochVector, GROUND_STATE, rotateAbout, probabilities } from '../../js/saga/qubit.js';
 
 const close = (a, b, msg) => assert.ok(Math.abs(a - b) < 1e-9, `${msg}: ${a} != ${b}`);
 const norm = (s) => s.reduce((acc, c) => acc + c.re * c.re + c.im * c.im, 0);
@@ -64,5 +65,48 @@ test('the Bloch vector is always a unit vector for a pure state', () => {
   for (const seq of [['H'], ['H', 'S'], ['H', 'T'], ['X', 'H', 'T', 'S'], ['Y', 'H']]) {
     const v = blochVector(run(seq));
     close(Math.hypot(v.x, v.y, v.z), 1, `|r| after ${seq.join('')}`);
+  }
+});
+
+/* --------------------------------------------------------------------------
+   The arcs
+   --------------------------------------------------------------------------
+   Each gate is animated as a rotation of the Bloch vector about an axis. If the
+   axis/angle pair does not agree with the matrix, the state would slide along a
+   path that ends somewhere other than where the maths says it should.
+   -------------------------------------------------------------------------- */
+
+test("every gate's declared rotation matches what its matrix does", () => {
+  for (const [name, gate] of Object.entries(GATES)) {
+    for (const prefix of [[], ['H'], ['X'], ['H', 'T']]) {
+      const before = run(prefix);
+      const after = blochVector(applyGate(before, gate));
+      const swept = rotateAbout(blochVector(before), gate.axis, gate.angle);
+      const where = `${name} after ${prefix.join('') || '|0>'}`;
+      close(after.x, swept.x, `${where}: x`);
+      close(after.y, swept.y, `${where}: y`);
+      close(after.z, swept.z, `${where}: z`);
+    }
+  }
+});
+
+test('a rotation of zero leaves the vector alone', () => {
+  const v = { x: 0.3, y: -0.5, z: 0.81 };
+  const r = rotateAbout(v, [0, 1, 0], 0);
+  close(r.x, v.x, 'x'); close(r.y, v.y, 'y'); close(r.z, v.z, 'z');
+});
+
+test('rotating about an axis preserves length', () => {
+  const v = blochVector(run(['H', 'T']));
+  for (const axis of [[1, 0, 0], [0, 1, 0], [0, 0, 1], [1, 1, 0]]) {
+    const r = rotateAbout(v, axis, 0.7);
+    close(Math.hypot(r.x, r.y, r.z), 1, `|r| about ${axis}`);
+  }
+});
+
+test('probabilities sum to one after any sequence', () => {
+  for (const seq of [[], ['H'], ['H', 'S'], ['X', 'H', 'T'], ['Y', 'Z', 'H', 'S']]) {
+    const { p0, p1 } = probabilities(run(seq));
+    close(p0 + p1, 1, `sum after ${seq.join('')}`);
   }
 });

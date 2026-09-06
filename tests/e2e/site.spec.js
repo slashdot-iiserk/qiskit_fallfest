@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 
-const PAGES = ['/', '/register.html', '/resources.html', '/gallery.html', '/archive/', '/404.html'];
+const PAGES = ['/', '/register.html', '/resources.html', '/gallery.html', '/faq.html', '/archive/', '/404.html'];
 
 /** Fail a test on any console error or failed request the page produced. */
 function watchForProblems(page) {
@@ -122,52 +122,29 @@ test.describe('home page', () => {
     await expect(page.locator('[data-team] .person__initials')).toHaveCount(1);
   });
 
-  test('FAQ accordion opens one answer at a time', async ({ page }) => {
+})
+
+test.describe('the FAQ page', () => {
+  test.beforeEach(async ({ page }) => { await page.goto('/faq.html'); });
+
+  test('renders every question as its own disclosure', async ({ page }) => {
     const triggers = page.locator('[data-faq] .accordion__trigger');
     await expect(triggers).toHaveCount(8);
+    await expect(page.locator('[data-faq]')).toContainText('How much does it cost?');
+  });
+
+  test('opens one answer at a time', async ({ page }) => {
+    const triggers = page.locator('[data-faq] .accordion__trigger');
     await triggers.first().click();
     await expect(triggers.first()).toHaveAttribute('aria-expanded', 'true');
     await triggers.nth(1).click();
     await expect(triggers.first()).toHaveAttribute('aria-expanded', 'false');
     await expect(triggers.nth(1)).toHaveAttribute('aria-expanded', 'true');
   });
-});
 
-test.describe('quantum lab', () => {
-  // #lab sits next to the machine section, so this page may be bootstrapping
-  // three.js on a software GL backend while these assertions run.
-  test.describe.configure({ timeout: 90_000 });
-  test.beforeEach(async ({ page }) => { await page.goto('/#lab'); });
-
-  test('starts in |0> with certainty', async ({ page }) => {
-    await expect(page.locator('[data-p0-pct]')).toHaveText('100.0%');
-    await expect(page.locator('[data-p1-pct]')).toHaveText('0.0%');
-  });
-
-  test('H produces an even superposition and records the circuit', async ({ page }) => {
-    await page.locator('[data-gate="H"]').click();
-    await expect(page.locator('[data-p0-pct]')).toHaveText('50.0%');
-    await expect(page.locator('[data-p1-pct]')).toHaveText('50.0%');
-    await expect(page.locator('[data-circuit]')).toContainText('H');
-  });
-
-  test('X flips the qubit and reset restores it', async ({ page }) => {
-    await page.locator('[data-gate="X"]').click();
-    await expect(page.locator('[data-p1-pct]')).toHaveText('100.0%');
-    await page.locator('[data-gate-reset]').click();
-    await expect(page.locator('[data-p0-pct]')).toHaveText('100.0%');
-    await expect(page.locator('[data-circuit]')).toContainText('apply a gate');
-  });
-
-  test('paints the Bloch sphere onto its canvas', async ({ page }) => {
-    const painted = await page.evaluate(() => {
-      const c = document.querySelector('[data-bloch] canvas');
-      const d = c.getContext('2d').getImageData(0, 0, c.width, c.height).data;
-      let n = 0;
-      for (let i = 3; i < d.length; i += 4) if (d[i] > 10) n += 1;
-      return n;
-    });
-    expect(painted).toBeGreaterThan(1000);
+  test('is reachable from the navigation', async ({ page }) => {
+    await page.goto('/');
+    await expect(page.locator('.nav__menu').getByRole('link', { name: 'FAQ' })).toBeVisible();
   });
 });
 

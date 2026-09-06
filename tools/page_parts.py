@@ -44,6 +44,7 @@ def nav(current="", prefix=""):
         ("Certificates", f"{prefix}index.html#certificates", "certificates"),
         ("Resources", f"{prefix}resources.html", "resources"),
         ("Gallery", f"{prefix}gallery.html", "gallery"),
+        ("FAQ", f"{prefix}faq.html", "faq"),
     ]
     aria = ' aria-current="page"'
     links = "".join(
@@ -92,7 +93,7 @@ def footer(prefix=""):
           <li><a href="{prefix}index.html#about">About</a></li>
           <li><a href="{prefix}index.html#schedule">Schedule</a></li>
           <li><a href="{prefix}index.html#certificates">Certificates</a></li>
-          <li><a href="{prefix}index.html#faq">FAQ</a></li>
+          <li><a href="{prefix}faq.html">FAQ</a></li>
         </ul>
       </div>
       <div>

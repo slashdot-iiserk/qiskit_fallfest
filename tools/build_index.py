@@ -123,13 +123,19 @@ PRELOADER = """
 <div class="preloader" data-preloader role="status" aria-live="polite" aria-label="Loading">
   <canvas class="preloader__field" data-preloader-field aria-hidden="true"></canvas>
   <div class="preloader__inner">
-    {art}
-    <div data-preloader-fade style="width:100%">
+    <div class="preloader__ring" data-preloader-ring>
+      <svg viewBox="0 0 120 120" aria-hidden="true">
+        <circle class="ring__track" cx="60" cy="60" r="54" />
+        <circle class="ring__arc" cx="60" cy="60" r="54" />
+      </svg>
+      {art}
+    </div>
+
+    <div data-preloader-fade class="preloader__meta">
+      <p class="preloader__status" data-preloader-status>Starting up</p>
+      <p class="preloader__count"><span class="preloader__pct" data-preloader-pct>000</span><small>%</small></p>
       <div class="preloader__bar" data-preloader-bar><i></i></div>
-      <p class="preloader__meta">
-        <span>Qiskit Fall Fest 2026</span>
-        <span><span class="preloader__pct" data-preloader-pct>000</span> %</span>
-      </p>
+      <p class="preloader__name">Qiskit Fall Fest 2026 · IISER Kolkata</p>
     </div>
   </div>
 </div>
@@ -149,11 +155,11 @@ NAV = """
       <ul class="nav__menu" id="nav-menu">
         <li><a class="nav__link" href="#about">About</a></li>
         <li><a class="nav__link" href="#machine">The machine</a></li>
-        <li><a class="nav__link" href="#lab">Lab</a></li>
         <li><a class="nav__link" href="#schedule">Schedule</a></li>
         <li><a class="nav__link" href="#certificates">Certificates</a></li>
         <li><a class="nav__link" href="resources.html">Resources</a></li>
         <li><a class="nav__link" href="gallery.html">Gallery</a></li>
+        <li><a class="nav__link" href="faq.html">FAQ</a></li>
       </ul>
     </nav>
     <div class="nav__actions">
@@ -277,48 +283,26 @@ def build() -> str:
     <div class="saga__sticky">
       <div class="saga__stage">
         <canvas class="saga__canvas" data-saga-canvas aria-hidden="true"></canvas>
-        <div class="saga__labels" data-saga-labels aria-hidden="true"></div>
-        <div class="saga__values" data-saga-values aria-hidden="true"></div>
-        <div class="saga__chapters" data-saga-chapters></div>
-        <p class="saga__hint" data-saga-hint aria-hidden="true">Drag to turn</p>
-        <p class="saga__fallback" data-saga-fallback hidden></p>
-      </div>
-    </div>
-  </section>
 
-  <!-- ============================ QUANTUM LAB ============================ -->
-  <section class="section section--alt" id="lab">
-    <div class="container">
-      <p class="section__index" data-drop="line"><b>02</b> <span>Try it here</span> <span>No install required</span></p>
-      <div class="section__head section__head--center">
-        <h2 data-drop>One qubit, six gates.</h2>
-        <p class="lede" style="margin-inline:auto" data-drop>
-          A real single-qubit simulator — complex amplitudes, the actual 2&times;2 unitaries, and the
-          Bloch vector they produce. Apply a gate and watch the state move. Drag the sphere to look around.
-        </p>
-      </div>
-      <div class="lab" data-drop>
-        <div class="bloch" data-bloch tabindex="0" role="application"
-             aria-label="Interactive Bloch sphere. Drag or use the arrow keys to rotate the view.">
-          <canvas width="420" height="420"></canvas>
-        </div>
-        <div class="lab__controls">
-          <div>
-            <p class="eyebrow" style="margin-bottom:.9rem">Apply a gate</p>
-            <div class="gate-row">
-              <button class="gate-btn" type="button" data-gate="H">H<small>hadamard</small></button>
-              <button class="gate-btn" type="button" data-gate="X">X<small>not</small></button>
-              <button class="gate-btn" type="button" data-gate="Y">Y<small>pauli-y</small></button>
-              <button class="gate-btn" type="button" data-gate="Z">Z<small>phase flip</small></button>
-              <button class="gate-btn" type="button" data-gate="S">S<small>&radic;Z</small></button>
-              <button class="gate-btn" type="button" data-gate="T">T<small>&pi;/8</small></button>
-              <button class="gate-btn" type="button" data-gate-reset>&#8635;<small>reset</small></button>
-            </div>
+        <div class="saga__labels" data-saga-labels aria-hidden="true"></div>
+        <div class="saga__labels" data-saga-values aria-hidden="true"></div>
+        <div class="saga__labels" data-saga-stations aria-hidden="true"></div>
+
+        <!-- Gates, played by hand while the qubit sits to the left -->
+        <aside class="gate-panel" data-saga-gates hidden aria-label="Single-qubit gate playground">
+          <p class="gate-panel__eyebrow">Apply a gate</p>
+          <div class="gate-row">
+            <button class="gate-btn" type="button" data-gate="H">H<small>hadamard</small></button>
+            <button class="gate-btn" type="button" data-gate="X">X<small>not</small></button>
+            <button class="gate-btn" type="button" data-gate="Y">Y<small>pauli-y</small></button>
+            <button class="gate-btn" type="button" data-gate="Z">Z<small>phase</small></button>
+            <button class="gate-btn" type="button" data-gate="S">S<small>&radic;Z</small></button>
+            <button class="gate-btn" type="button" data-gate="T">T<small>&pi;/8</small></button>
+            <button class="gate-btn" type="button" data-gate-reset>&#8635;<small>reset</small></button>
           </div>
-          <div>
-            <p class="eyebrow" style="margin-bottom:.9rem">Your circuit</p>
-            <div class="circuit-strip" data-circuit aria-live="polite"></div>
-          </div>
+
+          <div class="circuit-strip" data-circuit aria-live="polite"></div>
+
           <div class="amp-readout" aria-live="polite">
             <div class="amp-row">
               <span class="amp-row__ket">|0&#10217;</span>
@@ -330,14 +314,23 @@ def build() -> str:
               <span class="amp-row__bar"><i data-p1-bar style="width:0%"></i></span>
               <span class="amp-row__pct" data-p1-pct>0.0%</span>
             </div>
-            <p class="mono" style="margin-top:1.1rem;font-size:var(--step--2);color:var(--paper-3);white-space:pre" data-bloch-coords></p>
           </div>
-          <p class="muted" style="font-size:var(--step--2)">
-            Measurement probabilities are |&#10216;0|&#968;&#10217;|&sup2; and |&#10216;1|&#968;&#10217;|&sup2; —
-            the same numbers Qiskit prints for this circuit. Try <span class="mono">H</span>,
-            <span class="mono">Z</span>, <span class="mono">H</span>.
+          <p class="gate-panel__note">
+            Every gate is a rotation. The arc is the path the state actually takes —
+            and these are the numbers Qiskit would print.
           </p>
+        </aside>
+
+        <!-- What everything finally becomes -->
+        <div class="saga__cta" data-saga-cta>
+          <p class="eyebrow">Registration is open</p>
+          <h2>Come and build one.</h2>
+          <a class="btn btn--lg" href="register.html">Register for Fall Fest 2026 {ARROW}</a>
         </div>
+
+        <div class="saga__chapters" data-saga-chapters></div>
+        <p class="saga__hint" data-saga-hint aria-hidden="true">Drag to turn</p>
+        <p class="saga__fallback" data-saga-fallback hidden></p>
       </div>
     </div>
   </section>
@@ -505,14 +498,6 @@ def build() -> str:
         <img src="assets/brand/slashdot-light.webp" alt="SlashDot, IISER Kolkata" width="512" height="512" style="height:46px;width:auto" loading="lazy" decoding="async">
         <img src="assets/brand/iiserk-slashdot.webp" alt="IISER Kolkata" width="1024" height="300" loading="lazy" decoding="async">
       </div>
-    </div>
-  </section>
-
-  <!-- ============================ FAQ ============================ -->
-  <section class="section" id="faq">
-    <div class="container container--narrow">
-      <p class="section__index" data-drop="line"><b>09</b> <span>Questions</span> <span>Before you ask us</span></p>
-      <div class="accordion" data-faq></div>
     </div>
   </section>
 

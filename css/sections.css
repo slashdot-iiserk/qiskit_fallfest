@@ -85,11 +85,12 @@
    ========================================================================== */
 .saga {
   position: relative;
-  /* The scroll runway the whole sequence plays across. */
-  height: 880svh;
+  /* The scroll runway the whole sequence plays across: drawing, machine,
+     qubit, gates, the journey inside the sphere, and the button. */
+  height: 1320svh;
   touch-action: pan-y;
 }
-@media (max-width: 720px) { .saga { height: 700svh; } }
+@media (max-width: 720px) { .saga { height: 1000svh; } }
 .saga__sticky {
   position: sticky; top: 0;
   height: 100svh;
@@ -104,12 +105,14 @@
 }
 .saga__canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
 
-.saga__labels, .saga__values { position: absolute; inset: 0; pointer-events: none; }
+.saga__labels { position: absolute; inset: 0; pointer-events: none; perspective: 900px; }
+
 .hotspot {
   position: absolute; top: 0; left: 0;
   display: block; text-align: left;
   pointer-events: auto;
   will-change: transform, opacity;
+  --lead: 88px; --gut: 210px; --bx: 100px; --rx: 0deg; --ry: 0deg;
 }
 .hotspot__dot {
   position: absolute; left: -4px; top: -4px;
@@ -119,19 +122,39 @@
 .hotspot__dot::after {
   content: ""; position: absolute; inset: 2px; border-radius: 50%;
   background: var(--gold);
-  transition: scale var(--dur-2) var(--ease-out);
 }
-/* machine.js writes both custom properties every frame: --lead is the distance
-   from the anchor on the model out to the text gutter (so the leader
-   stretches), and --gut is the gutter width the label has to live inside. */
-.hotspot { --lead: 88px; --gut: 210px; --bx: 100px; }
-.hotspot__line { position: absolute; left: 0; top: 0; height: 1px; width: var(--lead); background: var(--line-strong); }
-.hotspot__body {
-  position: absolute; left: var(--bx); top: -0.72em;
-  width: calc(var(--gut) - 26px);
+.hotspot__line {
+  position: absolute; left: 0; top: 0; height: 1px; width: var(--lead);
+  background: var(--line-strong);
 }
 .hotspot--left .hotspot__line { left: calc(var(--lead) * -1); }
-.hotspot--left .hotspot__body { left: auto; right: var(--bx); text-align: right; }
+
+/* The plate: a pane of glass tilted by where its anchor sits on screen, so it
+   catches the model's movement instead of lying flat on a 2D overlay. */
+.hotspot__plate {
+  position: absolute; left: var(--bx); top: -0.72em;
+  width: calc(var(--gut) - 26px);
+  display: block;
+  padding: 0.7rem 0.85rem 0.8rem;
+  background: color-mix(in srgb, var(--ink-2) 62%, transparent);
+  border: 1px solid var(--line);
+  border-left: 1px solid var(--line-strong);
+  backdrop-filter: blur(9px) saturate(115%);
+  -webkit-backdrop-filter: blur(9px) saturate(115%);
+  transform: rotateX(var(--rx)) rotateY(var(--ry));
+  transform-style: preserve-3d;
+  transition: background var(--dur-2), border-color var(--dur-2);
+}
+.hotspot--left .hotspot__plate {
+  left: auto; right: var(--bx); text-align: right;
+  border-left: 1px solid var(--line);
+  border-right: 1px solid var(--line-strong);
+}
+.hotspot:hover .hotspot__plate {
+  background: color-mix(in srgb, var(--ink-3) 78%, transparent);
+  border-color: var(--line-strong);
+}
+
 .hotspot__k {
   display: block;
   font-family: var(--font-mono); font-size: var(--step--2); font-weight: 500;
@@ -140,14 +163,10 @@
 }
 .hotspot__k b { font-weight: inherit; }
 .hotspot__k .k-short { display: none; }
-.hotspot__v { display: block; font-size: var(--step--1); color: var(--paper-2); margin-top: 0.3rem; line-height: 1.45; }
+.hotspot__v { display: block; font-size: var(--step--1); color: var(--paper-2); margin-top: 0.35rem; line-height: 1.45; }
 
-/* Value cards carry a sentence rather than a measurement, so they get more
-   room and a rule to sit against. */
-.hotspot--value .hotspot__k { color: var(--paper); letter-spacing: 0.12em; }
-.hotspot--value .hotspot__body { padding-top: 0.55rem; border-top: 1px solid var(--line-strong); }
-.hotspot--value .hotspot__dot { opacity: 0.55; }
-.hotspot:hover .hotspot__dot::after { scale: 1.5; }
+.hotspot--value .hotspot__k, .hotspot--station .hotspot__k { color: var(--paper); letter-spacing: 0.12em; }
+.hotspot--station .hotspot__plate { border-color: color-mix(in srgb, var(--gold) 30%, transparent); }
 
 /* Chaptered copy that changes as the machine turns. */
 .saga__chapters {
@@ -191,6 +210,7 @@
   .hotspot__k { font-size: 0.62rem; letter-spacing: 0.1em; }
   .hotspot__k .k-full { display: none; }
   .hotspot__k .k-short { display: inline; }
+  .hotspot__plate { padding: 0.45rem 0.55rem; }
   /* The fallback note carries real information, so it stays on small screens —
      only the drag hint, which is meaningless on touch, goes away. */
   .saga__hint { display: none; }
@@ -436,26 +456,7 @@
 }
 .static-spot { padding-top: var(--sp-3); border-top: 1px solid var(--line); }
 
-/* --- Quantum lab ------------------------------------------------------------ */
-.lab {
-  display: grid; gap: clamp(2rem, 5vw, 4rem);
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-  align-items: center;
-  padding: clamp(1.75rem, 4vw, 3rem);
-  border: 1px solid var(--line);
-  background: var(--void);
-}
-@media (max-width: 880px) { .lab { grid-template-columns: 1fr; } }
-
-.bloch {
-  position: relative; aspect-ratio: 1; width: 100%; max-width: 420px;
-  margin-inline: auto; touch-action: none; cursor: grab;
-}
-.bloch:active { cursor: grabbing; }
-.bloch canvas { width: 100%; height: 100%; }
-
-.lab__controls { display: flex; flex-direction: column; gap: var(--sp-5); }
-
+/* --- Gate controls, used by the saga panel -------------------------------- */
 .gate-row { display: flex; flex-wrap: wrap; gap: 0.4rem; }
 .gate-btn {
   min-width: 3.2rem; padding: 0.7rem 0.9rem;
@@ -499,3 +500,50 @@
 .amp-row__bar { flex: 1; height: 6px; background: var(--ink-4); overflow: hidden; }
 .amp-row__bar i { display: block; height: 100%; background: var(--gold); transition: width var(--dur-3) var(--ease-out); }
 .amp-row__pct { min-width: 4.4rem; text-align: right; color: var(--gold); font-variant-numeric: tabular-nums; }
+
+/* --- Gates, beside the qubit ---------------------------------------------- */
+.gate-panel {
+  position: absolute; top: 50%; right: clamp(1.25rem, 6vw, 5rem);
+  translate: 0 -50%;
+  width: min(360px, 38vw);
+  padding: clamp(1.1rem, 2.5vw, 1.6rem);
+  background: color-mix(in srgb, var(--ink-2) 66%, transparent);
+  border: 1px solid var(--line-strong);
+  backdrop-filter: blur(12px) saturate(120%);
+  -webkit-backdrop-filter: blur(12px) saturate(120%);
+  opacity: 0;
+  transition: opacity var(--dur-3) var(--ease-out);
+}
+.gate-panel__eyebrow {
+  font-family: var(--font-mono); font-size: var(--step--2);
+  letter-spacing: 0.22em; text-transform: uppercase; color: var(--gold);
+  margin-bottom: 0.85rem;
+}
+.gate-panel .gate-row { margin-bottom: 1rem; }
+.gate-panel .circuit-strip { margin-bottom: 1rem; }
+.gate-panel .amp-readout { padding: 0.9rem 1rem; }
+.gate-panel__note {
+  margin-top: 0.9rem;
+  font-size: var(--step--2); color: var(--paper-3); line-height: 1.5;
+}
+
+/* --- What everything becomes ----------------------------------------------- */
+.saga__cta {
+  position: absolute; inset: 0;
+  display: grid; place-content: center; justify-items: center;
+  gap: var(--sp-4);
+  text-align: center;
+  opacity: 0; pointer-events: none;
+  transition: opacity var(--dur-3) var(--ease-out);
+}
+.saga__cta h2 { font-size: var(--step-4); }
+.saga__cta .btn { margin-top: var(--sp-3); }
+
+@media (max-width: 860px) {
+  .gate-panel {
+    top: auto; bottom: clamp(9rem, 22vh, 13rem); right: 50%;
+    translate: 50% 0;
+    width: min(420px, calc(100% - 2.5rem));
+  }
+  .gate-panel__note { display: none; }
+}

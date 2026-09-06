@@ -12,6 +12,7 @@
  */
 
 import { animate, createTimeline, svg, utils } from '../vendor/anime/anime.esm.min.js';
+import { preloadAll } from './assets.js';
 
 const REDUCED = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 const MIN_MS = 1700;
@@ -25,6 +26,8 @@ export function initPreloader() {
   const field = root.querySelector('[data-preloader-field]');
   const pct = root.querySelector('[data-preloader-pct]');
   const bar = root.querySelector('[data-preloader-bar] i');
+  const ringArc = root.querySelector('[data-preloader-ring] .ring__arc');
+  const status = root.querySelector('[data-preloader-status]');
   const curtain = document.querySelector('[data-curtain]');
   const stageSlot = document.querySelector('[data-qc-stage]');
 
@@ -40,6 +43,8 @@ export function initPreloader() {
     if (stageSlot && art) stageSlot.appendChild(art);
     root.remove();
     curtain?.remove();
+    // Still warm the caches, just without the show.
+    void preloadAll();
     finish();
     return Promise.resolve();
   }
@@ -47,30 +52,43 @@ export function initPreloader() {
   const qubits = field ? startQubitField(field) : null;
   const started = performance.now();
 
-  /* --- Progress ---------------------------------------------------------- */
+  /* --- Progress -----------------------------------------------------------
+     Real work, not a timer: fonts, images, the renderer, the compressed model
+     and the traced outline all report through one weighted callback, so by the
+     time the shutter lifts the saga has nothing left to fetch. */
   let shown = 0;
   let realDone = false;
+  let realFraction = 0;
+
+  const RING = 2 * Math.PI * 54;
+  if (ringArc) ringArc.style.strokeDasharray = `${RING}`;
 
   const assetsReady = Promise.all([
-    document.fonts?.ready ?? Promise.resolve(),
+    preloadAll((fraction, label) => {
+      realFraction = fraction;
+      if (status && label) status.textContent = label;
+    }),
     new Promise((resolve) => {
       if (document.readyState === 'complete') resolve();
       else window.addEventListener('load', resolve, { once: true });
     }),
-  ]).then(() => { realDone = true; });
+  ]).then(() => { realDone = true; realFraction = 1; });
 
   const counter = { value: 0 };
   const ticker = animate(counter, {
     value: 100,
     duration: MAX_MS,
-    ease: 'outQuad',
+    ease: 'linear',
     onUpdate: () => {
-      const ceiling = realDone ? 100 : 92;
-      shown = Math.min(ceiling, Math.max(shown, counter.value));
+      // Track real progress, but never run ahead of it and never go backwards.
+      const target = realDone ? 100 : Math.min(realFraction * 100, 97);
+      shown = Math.max(shown, Math.min(target, shown + (target - shown) * 0.12 + 0.15));
       if (pct) pct.textContent = String(Math.round(shown)).padStart(3, '0');
       if (bar) bar.style.width = `${shown}%`;
-      if (shown >= 100 && performance.now() - started >= MIN_MS) {
+      if (ringArc) ringArc.style.strokeDashoffset = `${RING * (1 - shown / 100)}`;
+      if (shown >= 99.6 && performance.now() - started >= MIN_MS) {
         ticker.pause();
+        if (pct) pct.textContent = '100';
         void handoff();
       }
     },
@@ -80,9 +98,10 @@ export function initPreloader() {
   const intro = createTimeline({ defaults: { ease: 'outQuart' } });
   if (art) {
     const drawables = svg.createDrawable(art.querySelectorAll('path'));
-    intro.add(drawables, { draw: ['0 0', '0 1'], duration: 2300, ease: 'inOutQuad' }, 0);
+    intro.add(drawables, { draw: ['0 0', '0 1'], duration: 2400, ease: 'inOutQuad' }, 0);
     intro.add(art, { opacity: [0, 1], duration: 600 }, 0);
   }
+  if (ringArc) intro.add(ringArc, { opacity: [0, 1], duration: 700 }, 200);
 
   /* --- Handoff ------------------------------------------------------------ */
   let handedOff = false;
@@ -93,6 +112,8 @@ export function initPreloader() {
 
     if (pct) pct.textContent = '100';
     if (bar) bar.style.width = '100%';
+    if (ringArc) ringArc.style.strokeDashoffset = '0';
+    if (status) status.textContent = 'Ready';
     qubits?.burst();
 
     // FLIP the drawing into the fixed stage so it reads as one object moving

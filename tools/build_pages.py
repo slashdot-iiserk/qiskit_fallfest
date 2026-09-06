@@ -443,6 +443,45 @@ print(AerSimulator().run(qc, shots=1024).result().get_counts())</code></pre>
     print("  resources.html")
 
 
+def build_faq() -> None:
+    body = f"""{P.nav("faq")}
+<main id="main">
+  <section class="section" style="padding-top:calc(var(--nav-h) + 4rem)">
+    <div class="container container--narrow">
+      <p class="section__index" data-drop="line"><b>FAQ</b> <span>Before you ask us</span> <span>Qiskit Fall Fest 2026</span></p>
+      <div class="section__head">
+        <h2 data-drop>Questions</h2>
+        <p class="lede" data-drop>
+          If something here does not answer it, open an issue on the repository or write to the
+          SlashDot team — we would rather hear from you than have you guess.
+        </p>
+      </div>
+      <div class="accordion" data-faq></div>
+    </div>
+  </section>
+
+  <section class="section section--tight">
+    <div class="container container--narrow">
+      <div class="cta-band" data-drop>
+        <h2>Still unsure? Register anyway.</h2>
+        <p>It is free, it commits you to nothing, and it is how we reach you with everything else.</p>
+        <a class="btn btn--lg" href="register.html">Register for Fall Fest 2026</a>
+      </div>
+    </div>
+  </section>
+</main>
+{P.footer()}"""
+
+    page = P.head(
+        "FAQ · Qiskit Fall Fest 2026 · IISER Kolkata",
+        "Answers about Qiskit Fall Fest 2026 at IISER Kolkata: prerequisites, the participation fee, "
+        "certificates, what to bring, and how the material is published.",
+        f"{BASE}/faq.html",
+    ) + body
+    (ROOT / "faq.html").write_text(page, encoding="utf-8")
+    print("  faq.html")
+
+
 def build_archive_index() -> None:
     body = f"""{P.nav("archive", prefix="../")}
 <main id="main">
@@ -543,6 +582,7 @@ def build_sitemap() -> None:
         ("register.html", "0.9", "weekly"),
         ("resources.html", "0.8", "weekly"),
         ("gallery.html", "0.6", "monthly"),
+        ("faq.html", "0.7", "monthly"),
         ("archive/", "0.4", "yearly"),
         ("archive/2025/", "0.3", "yearly"),
     ]
@@ -582,6 +622,7 @@ if __name__ == "__main__":
     print("Building pages:")
     build_gallery()
     build_resources()
+    build_faq()
     build_archive_index()
     build_404()
     build_sitemap()

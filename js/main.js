@@ -9,7 +9,6 @@
 import { animate } from '../vendor/anime/anime.esm.min.js';
 import { EVENT, SCHEDULE, PEOPLE, SPEAKERS, TIERS, FAQ } from './data/event.js';
 import { initAmbient } from './ambient.js';
-import { initBloch, GATES } from './bloch.js';
 import { initPreloader } from './preloader.js';
 import { initSaga } from './saga.js';
 
@@ -362,64 +361,6 @@ function initCountdown() {
   const id = setInterval(() => { if (paint()) clearInterval(id); }, 1000);
 }
 
-/* ==========================================================================
-   Quantum lab (Bloch sphere + gate strip)
-   ========================================================================== */
-function initLab() {
-  const root = $('[data-bloch]');
-  if (!root) return;
-
-  const strip = $('[data-circuit]');
-  const p0bar = $('[data-p0-bar]');
-  const p1bar = $('[data-p1-bar]');
-  const p0pct = $('[data-p0-pct]');
-  const p1pct = $('[data-p1-pct]');
-  const coords = $('[data-bloch-coords]');
-  const applied = [];
-
-  const sphere = initBloch(root, {
-    onChange: ({ p0, p1, vector }) => {
-      if (p0bar) p0bar.style.width = `${(p0 * 100).toFixed(1)}%`;
-      if (p1bar) p1bar.style.width = `${(p1 * 100).toFixed(1)}%`;
-      if (p0pct) p0pct.textContent = `${(p0 * 100).toFixed(1)}%`;
-      if (p1pct) p1pct.textContent = `${(p1 * 100).toFixed(1)}%`;
-      if (coords) {
-        coords.textContent =
-          `⟨X⟩ ${fmt(vector.x)}   ⟨Y⟩ ${fmt(vector.y)}   ⟨Z⟩ ${fmt(vector.z)}`;
-      }
-    },
-  });
-  if (!sphere) return;
-
-  const paintStrip = () => {
-    if (!strip) return;
-    strip.innerHTML = applied.length
-      ? `<span class="circuit-strip__empty">q₀ ─</span>${
-          applied.map((g) => `<span class="circuit-strip__gate">${esc(g)}</span>`).join('')
-        }<span class="circuit-strip__empty">─ ⟨M⟩</span>`
-      : '<span class="circuit-strip__empty">q₀ ─ (apply a gate to build a circuit) ─ ⟨M⟩</span>';
-  };
-  paintStrip();
-
-  $$('[data-gate]').forEach((btn) => {
-    const name = btn.dataset.gate;
-    if (GATES[name]) btn.title = GATES[name].title;
-    btn.addEventListener('click', () => {
-      sphere.apply(name);
-      applied.push(name);
-      if (applied.length > 12) applied.shift();
-      paintStrip();
-    });
-  });
-
-  $('[data-gate-reset]')?.addEventListener('click', () => {
-    sphere.reset();
-    applied.length = 0;
-    paintStrip();
-  });
-}
-
-const fmt = (n) => (Math.abs(n) < 1e-9 ? '0.00' : n.toFixed(2)).padStart(5, ' ');
 
 /* ==========================================================================
    Boot
@@ -433,7 +374,6 @@ function boot() {
   renderTiers();
   renderFaq();
   initCountdown();
-  initLab();
   initDrops();
   initFigures();
   initAmbient($('.ambient'));

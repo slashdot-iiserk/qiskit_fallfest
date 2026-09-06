@@ -154,13 +154,18 @@ test.describe('the saga', () => {
 
   test('loads the Draco model and keeps rendering frames', async ({ page }) => {
     test.slow();
-    const modelRequest = page.waitForResponse((r) => r.url().endsWith('quantum-computer.glb'));
-    await scrollSaga(page, 0.35);
-    const res = await modelRequest;
-    expect(res.status()).toBe(200);
-    // The compressed model has to stay small enough to ship on a landing page.
-    expect(Number(res.headers()['content-length'] || 0)).toBeLessThan(1_200_000);
+    // The model is fetched by the preloader, before this test's beforeEach has
+    // even returned, so it is checked from the timeline rather than awaited.
+    const entry = await page.evaluate(() => {
+      const r = performance.getEntriesByType('resource')
+        .find((e) => e.name.endsWith('quantum-computer.glb'));
+      return r ? { size: r.transferSize || r.encodedBodySize } : null;
+    });
+    expect(entry, 'the model should be preloaded, not fetched mid-scroll').not.toBeNull();
+    // It has to stay small enough to ship on a landing page.
+    if (entry.size) expect(entry.size).toBeLessThan(1_200_000);
 
+    await scrollSaga(page, 0.35);
     await renderUp(page);
     // A composited WebGL buffer cannot be read back, so prove the loop keeps
     // running instead. The software backend used in CI manages only a couple
@@ -182,7 +187,25 @@ test.describe('the saga', () => {
     }));
     expect(state.stage).toBeLessThan(0.05);
     expect(state.canvas).toBeGreaterThan(0.9);
-    expect(state.phase).toBe('render');
+    expect(state.phase).toBe('machine');
+  });
+
+  test('the drawing disintegrates into particles before the machine appears', async ({ page }) => {
+    test.slow();
+    await scrollSaga(page, 0.35);
+    await renderUp(page);
+
+    // Mid-shatter the drawing is on its way out and the particles are carrying
+    // it: the render is up, but the solid model has not arrived yet.
+    await scrollSaga(page, 0.17);
+    const mid = await page.evaluate(() => ({
+      phase: document.querySelector('[data-saga]').dataset.sagaPhase,
+      stage: Number(document.querySelector('[data-qc-stage]').style.opacity),
+      canvas: Number(document.querySelector('[data-saga-canvas]').style.opacity),
+    }));
+    expect(mid.phase).toBe('shatter');
+    expect(mid.stage).toBeLessThan(0.05);
+    expect(mid.canvas).toBeGreaterThan(0.8);
   });
 
   test('shows the part labels first, then the six things the fest is', async ({ page }) => {
@@ -190,13 +213,13 @@ test.describe('the saga', () => {
     await scrollSaga(page, 0.35);
     await renderUp(page);
 
-    await scrollSaga(page, 0.36);
+    await scrollSaga(page, 0.32);
     const parts = await visible(page, '.hotspot--part');
     expect(parts).toBeGreaterThan(0);
     expect(await visible(page, '.hotspot--value')).toBe(0);
     await expect(page.locator('[data-saga-labels]')).toContainText('10 mK stage');
 
-    await scrollSaga(page, 0.68);
+    await scrollSaga(page, 0.52);
     expect(await visible(page, '.hotspot--value')).toBeGreaterThan(0);
     await expect(page.locator('[data-saga-values]')).toContainText('Start from zero');
     await expect(page.locator('[data-saga-values]')).toContainText('Three certificate tiers');
@@ -206,10 +229,10 @@ test.describe('the saga', () => {
     test.slow();
     await scrollSaga(page, 0.35);
     await renderUp(page);
-    await scrollSaga(page, 0.36);
+    await scrollSaga(page, 0.32);
     const spot = page.locator('.hotspot--part').first();
     const before = await spot.evaluate((el) => el.style.transform);
-    await scrollSaga(page, 0.46);
+    await scrollSaga(page, 0.40);
     const after = await spot.evaluate((el) => el.style.transform);
     expect(after).not.toBe(before);
     expect(after).toMatch(/translate3d/);
@@ -218,27 +241,71 @@ test.describe('the saga', () => {
   test('advances the chapter copy through the descent', async ({ page }) => {
     await scrollSaga(page, 0.30);
     const first = await page.locator('.saga__chapter.is-on h3').textContent();
-    await scrollSaga(page, 0.95);
+    await scrollSaga(page, 0.90);
     const last = await page.locator('.saga__chapter.is-on h3').textContent();
     expect(first).not.toBe(last);
-    expect(last).toContain('one qubit');
+    expect(last).toContain('Come inside');
   });
 
-  test('transforms the machine into a qubit at the end', async ({ page }) => {
+  test('runs the machine, the qubit, the gates, the journey and the button in order', async ({ page }) => {
     test.slow();
     await scrollSaga(page, 0.35);
     await renderUp(page);
 
-    await scrollSaga(page, 0.80);
-    await expect(page.locator('[data-saga]')).toHaveAttribute('data-saga-phase', 'render');
+    const phase = () => page.locator('[data-saga]').getAttribute('data-saga-phase');
+    await scrollSaga(page, 0.50);
+    expect(await phase()).toBe('machine');
+    await scrollSaga(page, 0.70);
+    expect(await phase()).toBe('qubit');
+    await scrollSaga(page, 0.79);
+    expect(await phase()).toBe('gates');
+    await scrollSaga(page, 0.90);
+    expect(await phase()).toBe('journey');
+    await scrollSaga(page, 0.99);
+    expect(await phase()).toBe('register');
+  });
 
-    await scrollSaga(page, 0.93);
-    await expect(page.locator('[data-saga]')).toHaveAttribute('data-saga-phase', 'transform');
+  test('hands the qubit over for gates, then puts the panel away', async ({ page }) => {
+    test.slow();
+    await scrollSaga(page, 0.35);
+    await renderUp(page);
+
+    const panel = page.locator('[data-saga-gates]');
+    await scrollSaga(page, 0.70);
+    expect(Number(await panel.evaluate((el) => el.style.opacity || 0))).toBeLessThan(0.2);
+
+    await scrollSaga(page, 0.79);
+    await expect(panel).toBeVisible();
+    await expect(panel.locator('[data-gate="H"]')).toBeVisible();
+
+    // A gate really moves the state: H takes |0> to an even superposition.
+    await panel.locator('[data-gate="H"]').click();
+    await expect(panel.locator('[data-p0-pct]')).toHaveText('50.0%');
+    await expect(panel.locator('[data-p1-pct]')).toHaveText('50.0%');
+    await expect(panel.locator('[data-circuit]')).toContainText('H');
+
+    await panel.locator('[data-gate-reset]').click();
+    await expect(panel.locator('[data-p0-pct]')).toHaveText('100.0%');
+
+    await scrollSaga(page, 0.90);
+    expect(Number(await panel.evaluate((el) => el.style.opacity || 0))).toBeLessThan(0.2);
+  });
+
+  test('carries the fest inside the sphere, then becomes the button', async ({ page }) => {
+    test.slow();
+    await scrollSaga(page, 0.35);
+    await renderUp(page);
+
+    await scrollSaga(page, 0.88);
+    expect(await visible(page, '.hotspot--station')).toBeGreaterThan(0);
+    await expect(page.locator('[data-saga-stations]')).toContainText('Three certificates');
 
     await scrollSaga(page, 0.99);
-    await expect(page.locator('[data-saga]')).toHaveAttribute('data-saga-phase', 'qubit');
-    // Every label is out of the way by the time the qubit stands alone.
+    // Everything else is out of the way and the register button stands alone.
     expect(await visible(page, '.hotspot')).toBe(0);
+    const cta = page.locator('[data-saga-cta]');
+    await expect(cta).toHaveClass(/is-on/);
+    await expect(cta.getByRole('link', { name: /Register/ })).toBeVisible();
   });
 
   test('falls back to the drawing under reduced motion', async ({ browser }) => {
@@ -251,7 +318,7 @@ test.describe('the saga', () => {
     await expect(page.locator('[data-saga]')).not.toHaveAttribute('data-saga-ready', 'true');
     await expect(page.locator('[data-qc-stage]')).toHaveAttribute('data-static', 'true');
     // The copy is still on the page, just as a list.
-    await expect(page.locator('.static-spot')).toHaveCount(11);
+    await expect(page.locator('.static-spot')).toHaveCount(14);
     await context.close();
   });
 });
@@ -264,7 +331,7 @@ test.describe('the saga on a narrow screen', () => {
     test.slow();
     await page.goto('/');
     await gone(page);
-    await scrollSaga(page, 0.36);
+    await scrollSaga(page, 0.32);
     await renderUp(page);
     await page.waitForTimeout(1200);
 
@@ -273,7 +340,7 @@ test.describe('the saga on a narrow screen', () => {
       return [...document.querySelectorAll('.hotspot')]
         .filter((el) => Number(el.style.opacity) > 0.15)
         .map((el) => {
-          const b = el.querySelector('.hotspot__body').getBoundingClientRect();
+          const b = el.querySelector('.hotspot__plate').getBoundingClientRect();
           return { text: el.querySelector('.hotspot__k').textContent, left: b.left, right: b.right, w };
         })
         .filter((b) => b.left < -1 || b.right > b.w + 1);

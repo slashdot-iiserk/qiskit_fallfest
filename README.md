@@ -55,6 +55,7 @@ first-timer who finds the advanced day heavy still leaves with the Intermediate 
 ├── register.html           Multi-step registration wired to the official Google Form
 ├── resources.html          Install guide, notebooks, pre-reading, certificate criteria   (generated)
 ├── gallery.html            Filterable gallery with a lightbox                            (generated)
+├── faq.html                Every question, on its own page                               (generated)
 ├── 404.html                                                                              (generated)
 ├── archive/
 │   ├── index.html          Archive hub                                                   (generated)
@@ -76,10 +77,14 @@ first-timer who finds the advanced day heavy still leaves with the Intermediate 
 ├── js/
 │   ├── data/event.js       Single source of truth: schedule, people, tiers, FAQ
 │   ├── main.js             Nav, theme, scroll choreography, renderers
+│   ├── assets.js           Preloads everything during the loading screen
 │   ├── preloader.js        anime.js draw-on + qubits streaming out of the machine
-│   ├── saga.js             The whole scroll sequence: drawing → render → qubit
+│   ├── saga.js             Orchestrates the whole scroll sequence
+│   ├── saga/timeline.js    The score: every beat, the camera path, the copy
+│   ├── saga/cloud.js       One particle system with four shapes to hold
+│   ├── saga/qubit.js       Single-qubit simulator, Bloch sphere, gate arcs
+│   ├── saga/labels.js      Glass plates anchored to points in the scene
 │   ├── ambient.js          Canvas circuit rails and falling motes
-│   ├── bloch.js            Single-qubit simulator and Bloch-sphere renderer
 │   ├── registration.js     Google Forms field map, validation, submission
 │   └── gallery.js          Filters and lightbox
 ├── vendor/                 Self-hosted three.js, its Draco decoder, and anime.js
@@ -223,41 +228,62 @@ IBM.
 ## The machine
 
 The centrepiece is a dilution refrigerator — the gold chandelier that houses a
-superconducting quantum processor. The whole first half of the page is one
-continuous sequence built around it, and it is the *same object* throughout.
+superconducting quantum processor. The first two thirds of the page are one
+continuous sequence built around it, and nothing in that sequence ever
+cross-fades with a copy of itself.
 
 ```
-preloader   the machine draws itself on, stroke by stroke, while qubits
-            stream out of its core toward you
-    ↓       the drawing is handed — the same DOM node — to a fixed stage
+preloader   the machine draws itself on while qubits stream out of its core;
+            meanwhile every asset the page needs is fetched
+    ↓       the drawing — the same DOM node — moves to a fixed stage
 hero        it sits behind the type, out of focus
-    ↓       it sharpens, grows and comes forward as you scroll
-figures     the numbers pass over it
-    ↓       it fills the frame, then pushes in on the top plate
-handoff     the line drawing becomes the real render, framed to match
-    ↓       the camera descends the machine, stage by stage
-labels      first what each part is; then those clear and the six things
-            the fest is orbit the model as you keep going down
-    ↓       down to the chip at the very bottom
-transform   the machine dissolves into its own surface points, and those
-            points reassemble into a single qubit on a Bloch sphere
-    ↓
-lab         which is the qubit you can then play with, by hand
+    ↓       it sharpens as the page comes down
+act I       the camera pushes in on the top plate, then the drawing
+            disintegrates into its own particles and those take the machine's
+            shape; the render fades in underneath them
+act II      the camera descends the machine. Glass plates name each stage,
+            then name what the fest is
+act III     at the chip the machine dissolves again and reassembles as a qubit
+act IV      the qubit moves aside and you drive it by hand: every gate is a
+            rotation, drawn as the arc the state actually sweeps
+act V       the camera rides up the state vector, inside the sphere, past what
+            the fest offers
+act VI      everything converges into the register button
 ```
 
-The drawing is never duplicated and never cross-faded with a copy of itself: it
-lives on one fixed layer (`.qc-stage`) whose focus, scale and framing are a pure
-function of scroll, until the render takes over. `js/saga.js` owns all of it
-from a single rAF loop — one scroll read per frame, not one listener per effect.
+### One particle system, four shapes
 
-### The transform
+`js/saga/cloud.js` holds fourteen thousand points, and every point knows four
+places it can be: a point on the **line drawing**, a point on the **machine's
+surface**, a point on the **qubit's sphere**, and a point inside the **register
+button**. Three uniforms slide between them in order, with a per-point delay so
+each change sweeps through rather than snapping.
 
-The dissolve is a real geometric morph, not a cross-fade. Every mesh in the
-model is sampled by area into ~11,000 points; each point knows both where it sat
-on the machine and where it belongs on the sphere, and a single uniform slides
-between the two along a bowed path with a per-point delay, so the change sweeps
-downward through the machine rather than snapping. The Bloch rings and state
-vector fade in once the cloud has essentially become a sphere.
+That is why the hand-offs are seamless. The drawing's points are traced from the
+SVG itself during the loading screen (`traceOutline` in `js/assets.js`, which
+measures each subpath once instead of walking the combined path 14,000 times),
+and laid out on a plane exactly two world units tall — the machine's own height
+— so at the moment it disintegrates the particles are already precisely where
+its lines were.
+
+### One camera, fitted to both
+
+Act I is a **camera move, not a CSS zoom**. `cameraAt(p, aspect)` in
+`js/saga/timeline.js` is a pure function, and both the WebGL camera and the DOM
+drawing are driven by it: the drawing is scaled and offset to match where a
+two-unit plane would project. The camera always looks horizontally, which makes
+the descent read as an elevator ride and keeps that fit to plain trigonometry.
+On a portrait viewport the camera steps back so the machine still fits — and
+because the drawing uses the same function, the two framings never diverge.
+
+### Gates are real rotations
+
+Each gate carries both its 2x2 unitary and the axis/angle it turns the Bloch
+vector through. Applying one animates the state along **the actual arc of that
+rotation** via Rodrigues' formula, and leaves the arc behind for a beat.
+`tests/unit/bloch.test.js` asserts the declared rotation agrees with the matrix
+for every gate from several starting states, so the arc can never lie about
+where the state ends up.
 
 ### How the assets are derived
 
@@ -291,7 +317,10 @@ QC_SOURCE=/path/to/Quantum_Computer.glb ./tools/build_model.sh
 
 ### Runtime cost
 
-three.js, its Draco decoder and the model are **lazily imported** — nothing is fetched until the
-saga is within 60% of a viewport, and nothing at all under `prefers-reduced-motion` or where WebGL
-is unavailable. Both of those fall back to the still drawing behind the page, with the part
-descriptions and the six points laid out as plain text. The initial page load never touches them.
+three.js, its Draco decoder, the model and the traced outline are all fetched **during the loading
+screen**, by `js/assets.js`, with a weighted progress callback so the number on screen tracks real
+work rather than a timer. By the time the shutter lifts the saga has nothing left to wait for.
+
+None of it is fetched at all under `prefers-reduced-motion`, on a metered connection
+(`navigator.connection.saveData`), or where WebGL is unavailable. Those fall back to the still
+drawing behind the page, with every part description, value and station laid out as plain text.
