@@ -28,8 +28,7 @@
 </head>
 <body>
 <a class="skip-link" href="#main">Skip to content</a>
-<div class="aurora" aria-hidden="true"></div>
-<canvas class="quantum-field" aria-hidden="true"></canvas>
+<canvas class="ambient" aria-hidden="true"></canvas>
 <div class="scroll-rail" aria-hidden="true"><div class="scroll-rail__fill"></div><span class="scroll-rail__qubit"></span></div>
 <header class="nav">
   <div class="nav__inner">
@@ -40,11 +39,12 @@
     <nav aria-label="Primary">
       <ul class="nav__menu" id="nav-menu">
         <li><a class="nav__link" href="index.html#about">About</a></li>
+        <li><a class="nav__link" href="index.html#machine">The machine</a></li>
+        <li><a class="nav__link" href="index.html#lab">Lab</a></li>
         <li><a class="nav__link" href="index.html#schedule">Schedule</a></li>
         <li><a class="nav__link" href="index.html#certificates">Certificates</a></li>
         <li><a class="nav__link" href="resources.html" aria-current="page">Resources</a></li>
         <li><a class="nav__link" href="gallery.html">Gallery</a></li>
-        <li><a class="nav__link" href="archive/">Archive</a></li>
         </ul>
     </nav>
     <div class="nav__actions">
@@ -86,29 +86,29 @@
         </p>
       </div>
 
-      <div class="grid grid--2" data-reveal-group="80">
-        <article class="card" data-reveal>
+      <div class="grid grid--2" data-drop-group="80">
+        <article class="card" data-drop>
           <h3>1 · Python 3.10 or newer</h3>
           <p>Check what you have:</p>
-          <pre class="mono" style="overflow-x:auto;padding:1rem;border-radius:var(--r-sm);background:color-mix(in srgb,var(--bg) 70%,transparent);border:1px solid var(--line);font-size:var(--step--2);margin-top:.75rem"><code>python3 --version</code></pre>
+          <pre class="mono codeblock"><code>python3 --version</code></pre>
           <p style="margin-top:.75rem">Anything from 3.10 upward is fine. On Windows, install from python.org
              and tick <strong>Add Python to PATH</strong>.</p>
         </article>
 
-        <article class="card" data-reveal>
+        <article class="card" data-drop>
           <h3>2 · A virtual environment</h3>
           <p>Keep the fest's packages away from the rest of your system:</p>
-          <pre class="mono" style="overflow-x:auto;padding:1rem;border-radius:var(--r-sm);background:color-mix(in srgb,var(--bg) 70%,transparent);border:1px solid var(--line);font-size:var(--step--2);margin-top:.75rem"><code>python3 -m venv qff
+          <pre class="mono codeblock"><code>python3 -m venv qff
 # macOS / Linux
 source qff/bin/activate
 # Windows PowerShell
 qff\Scripts\Activate.ps1</code></pre>
         </article>
 
-        <article class="card" data-reveal>
+        <article class="card" data-drop>
           <h3>3 · Qiskit and friends</h3>
           <p>With the environment active:</p>
-          <pre class="mono" style="overflow-x:auto;padding:1rem;border-radius:var(--r-sm);background:color-mix(in srgb,var(--bg) 70%,transparent);border:1px solid var(--line);font-size:var(--step--2);margin-top:.75rem"><code>pip install --upgrade pip
+          <pre class="mono codeblock"><code>pip install --upgrade pip
 pip install qiskit "qiskit[visualization]" \
     qiskit-aer qiskit-ibm-runtime \
     matplotlib jupyter ipykernel</code></pre>
@@ -116,10 +116,10 @@ pip install qiskit "qiskit[visualization]" \
              <a href="materials/requirements.txt"><code class="mono">materials/requirements.txt</code></a>.</p>
         </article>
 
-        <article class="card" data-reveal>
+        <article class="card" data-drop>
           <h3>4 · Check it works</h3>
           <p>This should print a two-line dictionary of counts:</p>
-          <pre class="mono" style="overflow-x:auto;padding:1rem;border-radius:var(--r-sm);background:color-mix(in srgb,var(--bg) 70%,transparent);border:1px solid var(--line);font-size:var(--step--2);margin-top:.75rem"><code>from qiskit import QuantumCircuit
+          <pre class="mono codeblock"><code>from qiskit import QuantumCircuit
 from qiskit_aer import AerSimulator
 
 qc = QuantumCircuit(2, 2)
@@ -130,9 +130,9 @@ print(AerSimulator().run(qc, shots=1024).result().get_counts())</code></pre>
         </article>
       </div>
 
-      <div class="card" style="margin-top:2rem" data-reveal>
+      <div class="card" style="margin-top:2rem" data-drop>
         <h3>Common failures we saw last year</h3>
-        <ul style="color:var(--text-2);font-size:var(--step--1);display:grid;gap:.6rem;margin-top:.75rem">
+        <ul style="color:var(--paper-2);font-size:var(--step--1);display:grid;gap:.6rem;margin-top:.75rem">
           <li><strong>“pip is not recognised”</strong> on Windows — Python was installed without PATH. Reinstall and tick the box.</li>
           <li><strong>Matplotlib windows never appear</strong> in a plain terminal — run inside Jupyter, or call <code class="mono">plt.show()</code> explicitly.</li>
           <li><strong>Version clashes with an old Anaconda base</strong> — always work in a fresh virtual environment, never in <code class="mono">base</code>.</li>
@@ -155,28 +155,28 @@ print(AerSimulator().run(qc, shots=1024).result().get_counts())</code></pre>
         </p>
       </div>
 
-      <div class="grid grid--2" data-reveal-group="70">
-        <a class="res-item" data-reveal href="materials/2026/">
+      <div class="grid grid--2" data-drop-group="70">
+        <a class="res-item" data-drop href="materials/2026/">
           <span class="res-item__badge">26</span>
           <span><h3>Fall Fest 2026 material</h3><p>Day-by-day folders for the 2026 labs. Filling up as each session approaches.</p></span>
         </a>
-        <a class="res-item" data-reveal href="materials/requirements.txt">
+        <a class="res-item" data-drop href="materials/requirements.txt">
           <span class="res-item__badge">ENV</span>
           <span><h3>requirements.txt</h3><p>The exact package list the labs are tested against.</p></span>
         </a>
-        <a class="res-item" data-reveal href="materials/2025/day_1/session_0/Notebook-1.ipynb">
+        <a class="res-item" data-drop href="materials/2025/day_1/session_0/Notebook-1.ipynb">
           <span class="res-item__badge">25</span>
           <span><h3>2025 · Introduction to Quantum Computing</h3><p>Notebook 1 — circuits, gates and measurement from scratch.</p></span>
         </a>
-        <a class="res-item" data-reveal href="materials/2025/day_1/session_1/quantum-teleportation.ipynb">
+        <a class="res-item" data-drop href="materials/2025/day_1/session_1/quantum-teleportation.ipynb">
           <span class="res-item__badge">25</span>
           <span><h3>2025 · Quantum teleportation</h3><p>Entanglement in action, end to end.</p></span>
         </a>
-        <a class="res-item" data-reveal href="materials/2025/day_2/steane_error_correction.ipynb">
+        <a class="res-item" data-drop href="materials/2025/day_2/steane_error_correction.ipynb">
           <span class="res-item__badge">25</span>
           <span><h3>2025 · Steane code</h3><p>A worked quantum error-correction notebook.</p></span>
         </a>
-        <a class="res-item" data-reveal href="materials/2025/day_2/Introduction%20to%20Quantum%20Error%20Correction%20-%20Pradeep-2.pdf">
+        <a class="res-item" data-drop href="materials/2025/day_2/Introduction%20to%20Quantum%20Error%20Correction%20-%20Pradeep-2.pdf">
           <span class="res-item__badge">PDF</span>
           <span><h3>2025 · QEC slides</h3><p>Introduction to Quantum Error Correction.</p></span>
         </a>
@@ -196,20 +196,20 @@ print(AerSimulator().run(qc, shots=1024).result().get_counts())</code></pre>
         </p>
       </div>
 
-      <div class="grid grid--2" data-reveal-group="70">
-        <a class="res-item" data-reveal href="https://learning.quantum.ibm.com/course/basics-of-quantum-information" rel="noopener" target="_blank">
+      <div class="grid grid--2" data-drop-group="70">
+        <a class="res-item" data-drop href="https://learning.quantum.ibm.com/course/basics-of-quantum-information" rel="noopener" target="_blank">
           <span class="res-item__badge">01</span>
           <span><h3>Basics of Quantum Information</h3><p>IBM Quantum Learning. The single best free starting point — start with single systems.</p></span>
         </a>
-        <a class="res-item" data-reveal href="https://docs.quantum.ibm.com/guides" rel="noopener" target="_blank">
+        <a class="res-item" data-drop href="https://docs.quantum.ibm.com/guides" rel="noopener" target="_blank">
           <span class="res-item__badge">02</span>
           <span><h3>Qiskit documentation</h3><p>The official guides. Skim “Build a circuit” before Day 2 and the labs will feel familiar.</p></span>
         </a>
-        <a class="res-item" data-reveal href="https://numpy.org/doc/stable/user/absolute_beginners.html" rel="noopener" target="_blank">
+        <a class="res-item" data-drop href="https://numpy.org/doc/stable/user/absolute_beginners.html" rel="noopener" target="_blank">
           <span class="res-item__badge">03</span>
           <span><h3>NumPy for absolute beginners</h3><p>Arrays, indexing and matrix multiplication. Genuinely all the Python maths you need here.</p></span>
         </a>
-        <a class="res-item" data-reveal href="archive/2025/">
+        <a class="res-item" data-drop href="archive/2025/">
           <span class="res-item__badge">04</span>
           <span><h3>The 2025 site</h3><p>Last year's sessions, schedule and material, preserved. The most honest preview of what is coming.</p></span>
         </a>
@@ -228,15 +228,15 @@ print(AerSimulator().run(qc, shots=1024).result().get_counts())</code></pre>
           Certificates are emailed after the fest to the address on your registration.
         </p>
       </div>
-      <div class="grid grid--3" data-tiers data-reveal-group="110"></div>
+      <div class="grid grid--3" data-tiers data-drop-group="110"></div>
     </div>
   </section>
 
   <section class="section section--tight">
     <div class="container">
-      <div class="cta-band" data-reveal>
+      <div class="cta-band" data-drop>
         <h2>Set up now, register in ninety seconds.</h2>
-        <p>Registration is free and open to students from any institute.</p>
+        <p>Registering is free and open to students from any institute. A participation fee for the fest applies; the amount is announced before the event.</p>
         <a class="btn btn--lg" href="register.html">Register for Fall Fest 2026</a>
       </div>
     </div>

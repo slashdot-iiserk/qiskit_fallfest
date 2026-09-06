@@ -1,105 +1,106 @@
 /* ==========================================================================
    Design tokens — Qiskit Fall Fest 2026 @ IISER Kolkata
-   Palette sampled from the official 2026 Qiskit Fall Fest illustration kit
-   (birds-in-the-sky theme): periwinkle sky, deep indigo ink, magenta accent.
+   ==========================================================================
+   Art direction: the machine itself. A dilution refrigerator photographs as
+   warm gold against near-black, so the palette is exactly that — flat ink,
+   flat gold, one magenta accent carried over from Qiskit's own identity.
+   No gradients, no blue cast. Colour does the least work; type, rule weight
+   and negative space do the rest.
    ========================================================================== */
 
 :root {
   color-scheme: dark;
 
-  /* --- Brand ------------------------------------------------------------ */
-  --pink:        #ff7eb6;
-  --pink-soft:   #f3aed7;
-  --purple:      #a56eff;
-  --purple-deep: #8a3ffc;
-  --blue:        #598ef6;
-  --blue-bright: #4589ff;
-  --cyan:        #3ddbd9;
-  --sky:         #dde6fa;
+  /* --- Ink ---------------------------------------------------------------
+     Neutral, very slightly warm. Deliberately not blue-black. */
+  --void:      #08080a;
+  --ink:       #0d0d0f;
+  --ink-2:     #131315;
+  --ink-3:     #1b1b1e;
+  --ink-4:     #242427;
 
-  /* --- Surfaces (dark, default) ----------------------------------------- */
-  --bg:          #08040f;
-  --bg-alt:      #0d0720;
-  --surface:     #130b29;
-  --surface-2:   #1a1036;
-  --surface-3:   #241748;
-  --line:        rgba(165, 110, 255, 0.16);
-  --line-strong: rgba(165, 110, 255, 0.34);
+  /* --- Gold, sampled from the chandelier -------------------------------- */
+  --gold:      #e8c87a;
+  --gold-lit:  #f7e2ab;
+  --gold-dim:  #a2854a;
+  --gold-deep: #6b5730;
 
-  /* --- Type ------------------------------------------------------------- */
-  --text:        #ece9fb;
-  --text-2:      #b9b2dc;
-  --text-3:      #837aa8;
-  --on-accent:   #1a0b33;
+  /* --- Accents ----------------------------------------------------------- */
+  --magenta:   #ff7eb6;   /* Qiskit's own; used sparingly, for signal only */
+  --copper:    #d98553;
 
-  /* --- Effects ---------------------------------------------------------- */
-  --glow-pink:   0 0 0 1px rgba(255, 126, 182, 0.35), 0 8px 40px -8px rgba(255, 126, 182, 0.45);
-  --glow-purple: 0 0 0 1px rgba(165, 110, 255, 0.30), 0 8px 40px -8px rgba(165, 110, 255, 0.40);
-  --shadow-sm:   0 1px 2px rgba(0, 0, 0, 0.4);
-  --shadow-md:   0 10px 30px -12px rgba(0, 0, 0, 0.7);
-  --shadow-lg:   0 30px 70px -25px rgba(0, 0, 0, 0.85);
-  --grad-brand:  linear-gradient(115deg, var(--pink) 0%, var(--purple) 48%, var(--blue) 100%);
-  --grad-ink:    linear-gradient(180deg, var(--surface) 0%, var(--bg-alt) 100%);
+  /* --- Paper -------------------------------------------------------------- */
+  --paper:     #f2efe8;
+  --paper-2:   #a29e94;
+  --paper-3:   #6d6a63;
+  --on-gold:   #14120c;
 
-  /* --- Typography ------------------------------------------------------- */
+  /* --- Rules -------------------------------------------------------------- */
+  --line:        rgba(232, 200, 122, 0.14);
+  --line-strong: rgba(232, 200, 122, 0.32);
+  --line-paper:  rgba(242, 239, 232, 0.10);
+
+  /* --- Type ---------------------------------------------------------------- */
   --font-sans: "IBM Plex Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   --font-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace;
 
-  --step--2: clamp(0.71rem, 0.69rem + 0.09vw, 0.76rem);
-  --step--1: clamp(0.83rem, 0.80rem + 0.16vw, 0.92rem);
-  --step-0:  clamp(1.00rem, 0.96rem + 0.22vw, 1.13rem);
-  --step-1:  clamp(1.20rem, 1.13rem + 0.34vw, 1.41rem);
-  --step-2:  clamp(1.44rem, 1.33rem + 0.54vw, 1.76rem);
-  --step-3:  clamp(1.73rem, 1.56rem + 0.83vw, 2.20rem);
-  --step-4:  clamp(2.07rem, 1.82rem + 1.25vw, 2.75rem);
-  --step-5:  clamp(2.49rem, 2.11rem + 1.86vw, 3.43rem);
-  --step-6:  clamp(2.99rem, 2.44rem + 2.72vw, 4.29rem);
+  --step--2: clamp(0.72rem, 0.70rem + 0.09vw, 0.78rem);
+  --step--1: clamp(0.84rem, 0.81rem + 0.16vw, 0.94rem);
+  --step-0:  clamp(1.00rem, 0.96rem + 0.22vw, 1.14rem);
+  --step-1:  clamp(1.22rem, 1.14rem + 0.38vw, 1.45rem);
+  --step-2:  clamp(1.49rem, 1.36rem + 0.63vw, 1.86rem);
+  --step-3:  clamp(1.81rem, 1.61rem + 1.00vw, 2.38rem);
+  --step-4:  clamp(2.21rem, 1.90rem + 1.56vw, 3.05rem);
+  --step-5:  clamp(2.70rem, 2.22rem + 2.38vw, 3.90rem);
+  --step-6:  clamp(3.29rem, 2.57rem + 3.58vw, 5.00rem);
+  --step-7:  clamp(4.01rem, 2.93rem + 5.38vw, 6.40rem);
 
-  /* --- Space & shape ---------------------------------------------------- */
+  /* --- Space & shape -------------------------------------------------------- */
   --sp-1: 0.25rem;  --sp-2: 0.5rem;   --sp-3: 0.75rem;  --sp-4: 1rem;
   --sp-5: 1.5rem;   --sp-6: 2rem;     --sp-7: 3rem;     --sp-8: 4rem;
-  --sp-9: 6rem;     --sp-10: 8rem;
+  --sp-9: 6rem;     --sp-10: 9rem;
 
-  --r-sm: 6px;  --r-md: 12px;  --r-lg: 20px;  --r-xl: 28px;  --r-pill: 999px;
+  /* Squared-off, architectural. Nothing rounder than a small radius except pills. */
+  --r-sm: 2px;  --r-md: 4px;  --r-lg: 6px;  --r-xl: 8px;  --r-pill: 999px;
 
-  --container: 1200px;
-  --container-wide: 1400px;
-  --nav-h: 68px;
+  --container: 1180px;
+  --container-wide: 1440px;
+  --nav-h: 72px;
 
-  /* --- Motion ----------------------------------------------------------- */
-  --ease-out:  cubic-bezier(0.16, 1, 0.3, 1);
+  /* --- Motion ---------------------------------------------------------------- */
+  --ease-out:    cubic-bezier(0.16, 1, 0.3, 1);
   --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
-  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
-  --dur-1: 140ms;  --dur-2: 260ms;  --dur-3: 420ms;  --dur-4: 700ms;
+  /* "Drop": falls fast, lands with a small settle. Used by the scroll reveals. */
+  --ease-drop:   cubic-bezier(0.2, 0.9, 0.25, 1.06);
+  --dur-1: 140ms;  --dur-2: 260ms;  --dur-3: 440ms;  --dur-4: 760ms;
 }
 
 /* --------------------------------------------------------------------------
-   Light theme — the "daylight sky" half of the 2026 illustration palette.
-   Applied only on an explicit opt-in so the dark identity stays the default.
+   Light theme — the same drawing on paper rather than in the dark.
+   Gold reads muddy on white, so it darkens to a bronze that still holds.
    -------------------------------------------------------------------------- */
 [data-theme="light"] {
   color-scheme: light;
 
-  --bg:          #f4f7fe;
-  --bg-alt:      #e7eefc;
-  --surface:     #ffffff;
-  --surface-2:   #f0f4fd;
-  --surface-3:   #dfe8fa;
-  --line:        rgba(52, 22, 98, 0.12);
-  --line-strong: rgba(52, 22, 98, 0.24);
+  --void:      #f6f4ef;
+  --ink:       #ffffff;
+  --ink-2:     #f1eee7;
+  --ink-3:     #e7e3d9;
+  --ink-4:     #dbd6c9;
 
-  --text:        #1c0f3a;
-  --text-2:      #4a3d70;
-  --text-3:      #6f659a;
-  --on-accent:   #ffffff;
+  --gold:      #8a6c22;
+  --gold-lit:  #6d5417;
+  --gold-dim:  #a89460;
+  --gold-deep: #cbbf9c;
 
-  --pink:        #d62f80;
-  --purple:      #7b3ff2;
-  --blue:        #2b6cd4;
+  --magenta:   #c62a76;
 
-  --glow-pink:   0 0 0 1px rgba(214, 47, 128, 0.22), 0 10px 34px -14px rgba(214, 47, 128, 0.45);
-  --glow-purple: 0 0 0 1px rgba(123, 63, 242, 0.20), 0 10px 34px -14px rgba(123, 63, 242, 0.40);
-  --shadow-md:   0 10px 30px -14px rgba(28, 15, 58, 0.28);
-  --shadow-lg:   0 30px 70px -30px rgba(28, 15, 58, 0.35);
-  --grad-ink:    linear-gradient(180deg, #ffffff 0%, var(--bg-alt) 100%);
+  --paper:     #16150f;
+  --paper-2:   #55524a;
+  --paper-3:   #7d7970;
+  --on-gold:   #fffdf6;
+
+  --line:        rgba(22, 21, 15, 0.12);
+  --line-strong: rgba(22, 21, 15, 0.30);
+  --line-paper:  rgba(22, 21, 15, 0.08);
 }

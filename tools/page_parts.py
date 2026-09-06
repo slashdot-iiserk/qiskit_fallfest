@@ -30,8 +30,7 @@ def head(title, description, canonical, *, extra_css=(), prefix=""):
 {css}</head>
 <body>
 <a class="skip-link" href="#main">Skip to content</a>
-<div class="aurora" aria-hidden="true"></div>
-<canvas class="quantum-field" aria-hidden="true"></canvas>
+<canvas class="ambient" aria-hidden="true"></canvas>
 <div class="scroll-rail" aria-hidden="true"><div class="scroll-rail__fill"></div><span class="scroll-rail__qubit"></span></div>
 """
 
@@ -39,11 +38,12 @@ def head(title, description, canonical, *, extra_css=(), prefix=""):
 def nav(current="", prefix=""):
     items = [
         ("About", f"{prefix}index.html#about", "about"),
+        ("The machine", f"{prefix}index.html#machine", "machine"),
+        ("Lab", f"{prefix}index.html#lab", "lab"),
         ("Schedule", f"{prefix}index.html#schedule", "schedule"),
         ("Certificates", f"{prefix}index.html#certificates", "certificates"),
         ("Resources", f"{prefix}resources.html", "resources"),
         ("Gallery", f"{prefix}gallery.html", "gallery"),
-        ("Archive", f"{prefix}archive/", "archive"),
     ]
     aria = ' aria-current="page"'
     links = "".join(

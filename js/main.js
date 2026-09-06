@@ -6,9 +6,12 @@
  * bundle can be loaded by every page without per-page branching.
  */
 
+import { animate } from '../vendor/anime/anime.esm.min.js';
 import { EVENT, SCHEDULE, PEOPLE, SPEAKERS, TIERS, FAQ } from './data/event.js';
-import { initQuantumField } from './quantum-field.js';
+import { initAmbient } from './ambient.js';
 import { initBloch, GATES } from './bloch.js';
+import { initPreloader } from './preloader.js';
+import { initMachine } from './machine.js';
 
 const $  = (sel, ctx = document) => ctx.querySelector(sel);
 const $$ = (sel, ctx = document) => Array.from(ctx.querySelectorAll(sel));
@@ -111,74 +114,75 @@ function initScrollRail() {
   window.addEventListener('resize', update);
 }
 
-function initReveal() {
-  const items = $$('[data-reveal]');
+/**
+ * Scroll reveals: everything arrives from above and settles, as though it
+ * dropped into place. Groups cascade, and split headings drop line by line.
+ *
+ * The transition itself lives in CSS so the page is correct without JS; anime
+ * only supplies the per-item timing and the heavier one-off flourishes.
+ */
+function initDrops() {
+  const items = $$('[data-drop]');
   if (!items.length) return;
   if (!('IntersectionObserver' in window)) {
-    items.forEach((el) => el.classList.add('is-visible'));
+    items.forEach((el) => el.classList.add('is-in'));
     return;
   }
+
+  // Stagger anything sharing a [data-drop-group] parent.
+  $$('[data-drop-group]').forEach((group) => {
+    const step = Number(group.dataset.dropGroup) || 70;
+    $$('[data-drop]', group).forEach((child, i) => {
+      child.style.setProperty('--drop-delay', `${i * step}ms`);
+    });
+  });
+
+  // Split headings into lines that drop on their own beat.
+  $$('[data-split]').forEach((heading) => {
+    $$('.split-line', heading).forEach((line, i) => {
+      line.style.setProperty('--drop-delay', `${i * 90}ms`);
+    });
+  });
+
   const io = new IntersectionObserver((entries) => {
     entries.forEach((entry) => {
       if (!entry.isIntersecting) return;
-      entry.target.classList.add('is-visible');
+      entry.target.classList.add('is-in');
       io.unobserve(entry.target);
     });
-  }, { rootMargin: '0px 0px -12% 0px', threshold: 0.08 });
+  }, { rootMargin: '0px 0px -10% 0px', threshold: 0.05 });
   items.forEach((el) => io.observe(el));
 }
 
-/** Stagger children of any [data-reveal-group] so lists cascade in. */
-function initRevealGroups() {
-  $$('[data-reveal-group]').forEach((group) => {
-    const stepMs = Number(group.dataset.revealGroup) || 70;
-    $$('[data-reveal]', group).forEach((child, i) => {
-      child.style.setProperty('--reveal-delay', `${i * stepMs}ms`);
-    });
-  });
-}
-
-/** Pointer-tracked spotlight on cards — cheap, and only while hovered. */
-function initCardSpotlight() {
-  if (window.matchMedia('(hover: none)').matches) return;
-  $$('.card, .tier').forEach((card) => {
-    card.addEventListener('pointermove', (e) => {
-      const r = card.getBoundingClientRect();
-      card.style.setProperty('--mx', `${e.clientX - r.left}px`);
-      card.style.setProperty('--my', `${e.clientY - r.top}px`);
-    });
-  });
-}
-
-/** Count-up for stat tiles, once, when they scroll into view. */
-function initCounters() {
+/**
+ * The figure row counts up once, on arrival. anime.js drives the number so the
+ * easing matches everything else on the page.
+ */
+function initFigures() {
   const nodes = $$('[data-count-to]');
-  if (!nodes.length || !('IntersectionObserver' in window)) {
-    nodes.forEach((n) => { n.textContent = n.dataset.countTo; });
+  if (!nodes.length) return;
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const paint = (el, value) => {
+    el.textContent = `${Math.round(value)}${el.dataset.countSuffix || ''}`;
+  };
+  if (reduced || !('IntersectionObserver' in window)) {
+    nodes.forEach((n) => paint(n, Number(n.dataset.countTo)));
     return;
   }
-  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const io = new IntersectionObserver((entries) => {
     entries.forEach((entry) => {
       if (!entry.isIntersecting) return;
       const el = entry.target;
       io.unobserve(el);
       const target = Number(el.dataset.countTo);
-      const suffix = el.dataset.countSuffix || '';
-      if (reduced || !Number.isFinite(target)) { el.textContent = `${el.dataset.countTo}${suffix}`; return; }
-      const dur = 1100;
-      const t0 = performance.now();
-      const frame = (now) => {
-        const p = Math.min(1, (now - t0) / dur);
-        const eased = 1 - (1 - p) ** 3;
-        el.textContent = `${Math.round(target * eased)}${suffix}`;
-        if (p < 1) requestAnimationFrame(frame);
-      };
-      requestAnimationFrame(frame);
+      if (!Number.isFinite(target)) { el.textContent = el.dataset.countTo; return; }
+      const box = { n: 0 };
+      animate(box, { n: target, duration: 1300, ease: 'outExpo', onUpdate: () => paint(el, box.n) });
     });
-  }, { threshold: 0.4 });
+  }, { threshold: 0.5 });
   nodes.forEach((n) => io.observe(n));
 }
+
 
 /* ==========================================================================
    Schedule
@@ -217,7 +221,7 @@ function renderSchedule() {
               </p>
               ${s.note ? `<p class="tl-item__note">${esc(s.note)}</p>` : ''}
               ${s.speakers.length ? `<p class="tl-item__people">${
-                s.speakers.map((p) => `<span class="chip chip--purple">${esc(p)}</span>`).join('')
+                s.speakers.map((p) => `<span class="chip chip--gold">${esc(p)}</span>`).join('')
               }</p>` : ''}
             </div>
           </li>`).join('')}
@@ -277,7 +281,7 @@ function personCard(p) {
             alt="Portrait of ${esc(p.name)}">`
     : `<span class="person__initials" aria-hidden="true">${esc(initials(p.name))}</span>`;
   return `
-    <article class="person" data-reveal>
+    <article class="person" data-drop>
       <div class="person__frame">${src}</div>
       <p class="person__name">${esc(p.name)}</p>
       <p class="person__role">${esc(p.role)}</p>
@@ -296,7 +300,7 @@ function renderTiers() {
   const mount = $('[data-tiers]');
   if (!mount) return;
   mount.innerHTML = TIERS.map((t) => `
-    <article class="tier${t.featured ? ' tier--featured' : ''}" data-reveal>
+    <article class="tier${t.featured ? ' tier--featured' : ''}" data-drop>
       <span class="tier__seal" aria-hidden="true">${esc(t.seal)}</span>
       <p class="tier__rank">${esc(t.rank)}</p>
       <h3 class="tier__name">${esc(t.name)} Certificate</h3>
@@ -430,15 +434,24 @@ function boot() {
   renderFaq();
   initCountdown();
   initLab();
-  initRevealGroups();
-  initReveal();
-  initCardSpotlight();
-  initCounters();
-  initQuantumField($('.quantum-field'));
+  initDrops();
+  initFigures();
+  initAmbient($('.ambient'));
+  initMachine();
 
   const year = $('[data-year]');
   if (year) year.textContent = String(new Date().getFullYear());
   document.documentElement.classList.add('js-ready');
+
+  // The preloader owns the first beat of the page; the hero waits for it.
+  const hero = $('[data-hero]');
+  if (hero) {
+    initPreloader().then(() => {
+      hero.classList.add('is-in');
+      $$('[data-hero-in]', hero).forEach((el, i) => el.style.setProperty('--drop-delay', `${i * 90}ms`));
+      hero.querySelectorAll('[data-hero-in]').forEach((el) => el.classList.add('is-in'));
+    });
+  }
 }
 
 if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);

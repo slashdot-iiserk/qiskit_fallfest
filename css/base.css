@@ -1,9 +1,8 @@
 /* ==========================================================================
-   Base — reset, document rhythm, primitives, accessibility helpers
+   Base — reset, document rhythm, layout primitives, accessibility helpers
    ========================================================================== */
 
 *, *::before, *::after { box-sizing: border-box; }
-
 * { margin: 0; }
 
 html {
@@ -15,9 +14,9 @@ html {
 body {
   font-family: var(--font-sans);
   font-size: var(--step-0);
-  line-height: 1.65;
-  color: var(--text);
-  background: var(--bg);
+  line-height: 1.6;
+  color: var(--paper);
+  background: var(--void);
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
   overflow-x: hidden;
@@ -25,20 +24,25 @@ body {
 }
 
 img, svg, video, canvas { display: block; max-width: 100%; }
+img { height: auto; }
 
 /* Components below set `display` on classes, which outranks the user-agent
    `[hidden] { display: none }` rule. Make the attribute authoritative so
    toggling `el.hidden` always works. */
 [hidden] { display: none !important; }
-img { height: auto; }
 
 input, button, textarea, select { font: inherit; color: inherit; }
 button { background: none; border: 0; cursor: pointer; }
 
-a { color: var(--pink); text-decoration-color: color-mix(in srgb, var(--pink) 40%, transparent); text-underline-offset: 0.22em; }
-a:hover { text-decoration-color: currentColor; }
+a {
+  color: var(--gold);
+  text-decoration-color: color-mix(in srgb, var(--gold) 38%, transparent);
+  text-underline-offset: 0.22em;
+  transition: color var(--dur-1) var(--ease-out);
+}
+a:hover { color: var(--gold-lit); text-decoration-color: currentColor; }
 
-h1, h2, h3, h4 { line-height: 1.12; font-weight: 600; letter-spacing: -0.022em; text-wrap: balance; }
+h1, h2, h3, h4 { line-height: 1.06; font-weight: 600; letter-spacing: -0.028em; text-wrap: balance; }
 h1 { font-size: var(--step-6); }
 h2 { font-size: var(--step-4); }
 h3 { font-size: var(--step-2); }
@@ -47,73 +51,56 @@ p  { text-wrap: pretty; }
 
 ul, ol { padding-left: 1.15em; }
 
-::selection { background: var(--pink); color: var(--on-accent); }
+::selection { background: var(--gold); color: var(--on-gold); }
 
-:focus-visible {
-  outline: 2px solid var(--pink);
-  outline-offset: 3px;
-  border-radius: var(--r-sm);
-}
+:focus-visible { outline: 2px solid var(--gold); outline-offset: 3px; border-radius: var(--r-sm); }
 
-/* --- Scrollbar: a thin luminous "quantum wire" ------------------------- */
+/* --- Scrollbar: a hairline, like the rest of the drawing ------------------ */
 @supports selector(::-webkit-scrollbar) {
-  ::-webkit-scrollbar { width: 10px; height: 10px; }
-  ::-webkit-scrollbar-track { background: var(--bg-alt); }
-  ::-webkit-scrollbar-thumb {
-    background: linear-gradient(180deg, var(--purple), var(--pink));
-    border-radius: var(--r-pill);
-    border: 3px solid var(--bg-alt);
-  }
-  ::-webkit-scrollbar-thumb:hover { background: linear-gradient(180deg, var(--pink), var(--blue)); }
+  ::-webkit-scrollbar { width: 9px; height: 9px; }
+  ::-webkit-scrollbar-track { background: var(--ink); }
+  ::-webkit-scrollbar-thumb { background: var(--gold-deep); border: 3px solid var(--ink); border-radius: var(--r-pill); }
+  ::-webkit-scrollbar-thumb:hover { background: var(--gold-dim); }
 }
-html { scrollbar-color: var(--purple) var(--bg-alt); scrollbar-width: thin; }
+html { scrollbar-color: var(--gold-deep) var(--ink); scrollbar-width: thin; }
 
-/* --- Layout primitives -------------------------------------------------- */
+/* --- Layout primitives ---------------------------------------------------- */
 .container { width: min(100% - 2.5rem, var(--container)); margin-inline: auto; }
 .container--wide { width: min(100% - 2.5rem, var(--container-wide)); }
-.container--narrow { width: min(100% - 2.5rem, 760px); }
+.container--narrow { width: min(100% - 2.5rem, 720px); }
 
-.section { padding-block: clamp(4rem, 9vw, 8rem); position: relative; }
-.section--tight { padding-block: clamp(2.5rem, 5vw, 4rem); }
-.section--alt { background: var(--bg-alt); }
-
-.stack > * + * { margin-top: var(--flow, 1rem); }
+.section { padding-block: clamp(5rem, 11vw, 10rem); position: relative; }
+.section--tight { padding-block: clamp(3rem, 6vw, 5rem); }
+.section--alt { background: var(--ink); }
 
 .grid { display: grid; gap: var(--sp-5); }
 .grid--2 { grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
 .grid--3 { grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
 .grid--4 { grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); }
 
-/* Pin the column counts once there is room, so a 6-item grid reads as 3x2
-   rather than auto-fit's ragged 4+2. */
 @media (min-width: 1040px) {
   .grid--3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .grid--4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 }
 
-/* --- Text utilities ----------------------------------------------------- */
+/* --- Text utilities -------------------------------------------------------- */
 .eyebrow {
-  display: inline-flex; align-items: center; gap: 0.55em;
+  display: inline-flex; align-items: baseline; gap: 0.7em;
   font-family: var(--font-mono);
-  font-size: var(--step--1);
+  font-size: var(--step--2);
   font-weight: 500;
-  letter-spacing: 0.14em;
+  letter-spacing: 0.24em;
   text-transform: uppercase;
-  color: var(--pink);
+  color: var(--gold);
 }
-.eyebrow::before {
-  content: ""; width: 1.6em; height: 1px;
-  background: linear-gradient(90deg, transparent, var(--pink));
-}
+.eyebrow::before { content: "❯"; color: var(--gold-dim); font-size: 0.85em; }
 
-.lede { font-size: var(--step-1); color: var(--text-2); max-width: 62ch; }
-.muted { color: var(--text-2); }
+.lede { font-size: var(--step-1); color: var(--paper-2); max-width: 60ch; line-height: 1.55; }
+.muted { color: var(--paper-2); }
 .mono { font-family: var(--font-mono); }
-.gradient-text {
-  background: var(--grad-brand);
-  -webkit-background-clip: text; background-clip: text;
-  color: transparent;
-}
+.gold { color: var(--gold); }
+
+.rule { height: 1px; background: var(--line); border: 0; }
 
 .sr-only {
   position: absolute; width: 1px; height: 1px; padding: 0;
@@ -123,14 +110,14 @@ html { scrollbar-color: var(--purple) var(--bg-alt); scrollbar-width: thin; }
 
 .skip-link {
   position: absolute; top: 0; left: 50%; translate: -50% -150%;
-  z-index: 200; padding: 0.7rem 1.4rem;
-  background: var(--pink); color: var(--on-accent);
-  font-weight: 600; border-radius: 0 0 var(--r-md) var(--r-md);
+  z-index: 400; padding: 0.7rem 1.4rem;
+  background: var(--gold); color: var(--on-gold);
+  font-weight: 600;
   transition: translate var(--dur-2) var(--ease-out);
 }
 .skip-link:focus-visible { translate: -50% 0; }
 
-/* --- Reduced motion ----------------------------------------------------- */
+/* --- Reduced motion --------------------------------------------------------- */
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
   *, *::before, *::after {

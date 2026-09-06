@@ -228,10 +228,16 @@ export const FAQ = [
        'installation clinic where volunteers get your environment working.',
   },
   {
-    q: 'Is the fest free? Is it open to students from outside IISER Kolkata?',
-    a: 'The fest itself is free and open to students from any institute. If you are travelling in and need ' +
-       'accommodation on campus, say so on the registration form — a small accommodation fee applies and we will ' +
-       'follow up over email with the details.',
+    q: 'How much does it cost?',
+    a: 'There is a participation fee, and the amount has not been announced yet. It will be published on this ' +
+       'site and emailed to everyone who has registered, well before the first session. Registering itself is ' +
+       'free and commits you to nothing — it is simply how we reach you. Campus accommodation for participants ' +
+       'travelling in is charged separately; ask for it on the registration form and we will follow up by email.',
+  },
+  {
+    q: 'Is it open to students from outside IISER Kolkata?',
+    a: 'Yes, students from any institute are welcome. The registration form branches so that visiting ' +
+       'participants can give us their institute and request campus accommodation.',
   },
   {
     q: 'What do I need to bring?',

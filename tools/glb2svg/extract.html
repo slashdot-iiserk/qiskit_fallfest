@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<title>GLB to SVG line extractor</title>
+<style>html,body{margin:0;background:#000}canvas{display:block}</style>
+<script type="importmap">
+{ "imports": { "three": "/vendor/three/three.module.min.js", "three/addons/": "/vendor/three/" } }
+</script>
+<script type="module">
+import * as THREE from 'three';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { mergeVertices } from 'three/addons/utils/BufferGeometryUtils.js';
+
+/**
+ * Hidden-line vector extraction.
+ *
+ * Feature edges come straight from the geometry (EdgesGeometry at a dihedral
+ * threshold). Each edge is then sampled along its length and tested against a
+ * depth pre-pass, so edges hidden behind the model are dropped exactly as they
+ * would be in a technical drawing. What survives is emitted as polylines — real
+ * vectors derived from the mesh, not a raster trace.
+ */
+
+const W = 1400, H = 2000;
+
+function packDepthMaterial() {
+  return new THREE.MeshDepthMaterial({ depthPacking: THREE.RGBADepthPacking });
+}
+
+window.extract = async function extract(opts) {
+  const { url, azimuth, elevation, thresholdAngle, minLenPx, samplesPerPx, bias } = opts;
+
+  const renderer = new THREE.WebGLRenderer({ antialias: false, preserveDrawingBuffer: true });
+  renderer.setPixelRatio(1);
+  renderer.setSize(W, H);
+  document.body.appendChild(renderer.domElement);
+
+  const scene = new THREE.Scene();
+  const gltf = await new GLTFLoader().loadAsync(url);
+  const root = gltf.scene;
+
+  // Normalise: centre at the origin and scale into a unit-ish box.
+  const box = new THREE.Box3().setFromObject(root);
+  const size = box.getSize(new THREE.Vector3());
+  const centre = box.getCenter(new THREE.Vector3());
+  const scale = 2 / Math.max(size.x, size.y, size.z);
+  root.position.sub(centre);
+  const holder = new THREE.Group();
+  holder.add(root);
+  holder.scale.setScalar(scale);
+  scene.add(holder);
+
+  const camera = new THREE.PerspectiveCamera(28, W / H, 0.1, 100);
+  const r = 6.2;
+  const az = THREE.MathUtils.degToRad(azimuth);
+  const el = THREE.MathUtils.degToRad(elevation);
+  camera.position.set(r * Math.cos(el) * Math.sin(az), r * Math.sin(el), r * Math.cos(el) * Math.cos(az));
+  camera.lookAt(0, 0, 0);
+  camera.updateMatrixWorld(true);
+
+  // ---- Depth pre-pass -------------------------------------------------
+  const target = new THREE.WebGLRenderTarget(W, H, { type: THREE.UnsignedByteType });
+  const depthMat = packDepthMaterial();
+  depthMat.side = THREE.FrontSide;
+  // Push the solid surfaces very slightly away from the camera so an edge
+  // lying exactly on a face still reads as being in front of it.
+  depthMat.polygonOffset = true;
+  depthMat.polygonOffsetFactor = 2;
+  depthMat.polygonOffsetUnits = 4;
+  scene.overrideMaterial = depthMat;
+  renderer.setRenderTarget(target);
+  renderer.setClearColor(0xffffff, 1);
+  renderer.clear();
+  renderer.render(scene, camera);
+  const depthBuf = new Uint8Array(W * H * 4);
+  renderer.readRenderTargetPixels(target, 0, 0, W, H, depthBuf);
+  renderer.setRenderTarget(null);
+  scene.overrideMaterial = null;
+
+  const depthTexel = (x, y) => {
+    if (x < 0 || y < 0 || x >= W || y >= H) return 1;
+    const i = ((H - 1 - y) * W + x) * 4;
+    // three's packDepthToRGBA puts the coarsest term in alpha and the finest
+    // in red, scaled by UnpackDownscale = 255/256.
+    return (255 / 256) * (
+      (depthBuf[i]     / 255) / 256 +
+      (depthBuf[i + 1] / 255) / 65536 +
+      (depthBuf[i + 2] / 255) / 16777216 +
+      (depthBuf[i + 3] / 255)
+    );
+  };
+
+  /**
+   * Silhouette edges sit exactly on the depth discontinuity, so a single
+   * texel lookup rounds them away. Taking the farthest depth in a small
+   * neighbourhood keeps outlines while still hiding genuinely occluded lines.
+   */
+  const depthAt = (px, py) => {
+    const x = Math.round(px), y = Math.round(py);
+    let far = 0;
+    for (let dy = -1; dy <= 1; dy += 1) {
+      for (let dx = -1; dx <= 1; dx += 1) far = Math.max(far, depthTexel(x + dx, y + dy));
+    }
+    return far;
+  };
+
+  // ---- Collect feature edges ------------------------------------------
+  const segments = [];
+  const a = new THREE.Vector3(), b = new THREE.Vector3();
+  root.updateMatrixWorld(true);
+  holder.updateMatrixWorld(true);
+
+  scene.traverse((o) => {
+    if (!o.isMesh || !o.geometry) return;
+    let geo = o.geometry;
+    if (geo.attributes.position) {
+      try { geo = mergeVertices(geo.clone(), 1e-4); } catch { geo = o.geometry; }
+    }
+    const edges = new THREE.EdgesGeometry(geo, thresholdAngle);
+    const pos = edges.attributes.position;
+    for (let i = 0; i < pos.count; i += 2) {
+      a.fromBufferAttribute(pos, i).applyMatrix4(o.matrixWorld);
+      b.fromBufferAttribute(pos, i + 1).applyMatrix4(o.matrixWorld);
+      segments.push([a.clone(), b.clone()]);
+    }
+    edges.dispose();
+    if (geo !== o.geometry) geo.dispose();
+  });
+
+  // ---- Visibility test + polyline assembly ----------------------------
+  const toScreen = (v) => {
+    const p = v.clone().project(camera);
+    return { x: (p.x * 0.5 + 0.5) * W, y: (1 - (p.y * 0.5 + 0.5)) * H, z: p.z * 0.5 + 0.5 };
+  };
+
+  const paths = [];
+  for (const [p0, p1] of segments) {
+    const s0 = toScreen(p0);
+    const s1 = toScreen(p1);
+    const lenPx = Math.hypot(s1.x - s0.x, s1.y - s0.y);
+    if (!Number.isFinite(lenPx) || lenPx < minLenPx) continue;
+
+    const n = Math.max(2, Math.min(160, Math.ceil(lenPx * samplesPerPx)));
+    let run = null;
+    for (let i = 0; i < n; i += 1) {
+      const t = i / (n - 1);
+      const x = s0.x + (s1.x - s0.x) * t;
+      const y = s0.y + (s1.y - s0.y) * t;
+      const z = s0.z + (s1.z - s0.z) * t;
+      const visible = x >= 0 && y >= 0 && x < W && y < H && z <= depthAt(x, y) + bias;
+      if (visible) {
+        if (!run) run = [];
+        run.push([x, y]);
+      } else if (run) {
+        if (run.length > 1) paths.push(run);
+        run = null;
+      }
+    }
+    if (run && run.length > 1) paths.push(run);
+  }
+
+  // ---- Simplify: collapse near-collinear samples back to straight runs --
+  const simplified = paths.map((pts) => {
+    const out = [pts[0]];
+    for (let i = 1; i < pts.length - 1; i += 1) {
+      const [px, py] = out[out.length - 1];
+      const [cx, cy] = pts[i];
+      const [nx, ny] = pts[i + 1];
+      const cross = (cx - px) * (ny - py) - (cy - py) * (nx - px);
+      const scale2 = Math.hypot(nx - px, ny - py);
+      if (scale2 > 0 && Math.abs(cross) / scale2 > 0.4) out.push(pts[i]);
+    }
+    out.push(pts[pts.length - 1]);
+    return out;
+  }).filter((pts) => {
+    let len = 0;
+    for (let i = 1; i < pts.length; i += 1) len += Math.hypot(pts[i][0] - pts[i - 1][0], pts[i][1] - pts[i - 1][1]);
+    return len >= minLenPx;
+  });
+
+  const d = simplified.map((pts) =>
+    'M' + pts.map(([x, y]) => `${x.toFixed(1)} ${y.toFixed(1)}`).join('L')).join('');
+
+  renderer.dispose();
+  return { d, count: simplified.length, W, H };
+};
+</script>

@@ -30,3 +30,8 @@ __pycache__/
 
 # Agent working notes
 plans/
+
+# Raw 3D source for the dilution refrigerator (~41 MB each). The derived,
+# Draco-compressed model and the extracted SVGs live in assets/model/.
+Quantum_Computer/
+Quantum_Computer_glb/
