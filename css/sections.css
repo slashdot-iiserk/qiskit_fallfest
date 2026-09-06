@@ -64,7 +64,12 @@
 }
 .hero__art-tick--tl { bottom: calc(100% + 0.6rem); left: 0; }
 .hero__art-tick--br { top: calc(100% + 0.6rem); right: 0; }
-@media (max-width: 940px) { .hero__art { height: min(46vh, 380px); } }
+@media (max-width: 940px) {
+  .hero__art { height: min(46vh, 380px); }
+  /* The scroll cue collides with the plate caption once the hero stacks, and
+     nobody needs to be told to scroll on a touch screen. */
+  .hero__scroll { display: none; }
+}
 
 .hero__scroll {
   position: absolute; bottom: 1.75rem; left: 50%; translate: -50% 0;
@@ -154,16 +159,17 @@
   background: var(--gold);
   transition: scale var(--dur-2) var(--ease-out);
 }
-/* --lead is written every frame by machine.js: it is the distance from the
-   anchor on the model out to the text gutter, so the leader stretches. */
-.hotspot { --lead: 88px; }
+/* machine.js writes both custom properties every frame: --lead is the distance
+   from the anchor on the model out to the text gutter (so the leader
+   stretches), and --gut is the gutter width the label has to live inside. */
+.hotspot { --lead: 88px; --gut: 210px; --bx: 100px; }
 .hotspot__line { position: absolute; left: 0; top: 0; height: 1px; width: var(--lead); background: var(--line-strong); }
 .hotspot__body {
-  position: absolute; left: calc(var(--lead) + 14px); top: -0.72em;
-  width: min(210px, 20vw);
+  position: absolute; left: var(--bx); top: -0.72em;
+  width: calc(var(--gut) - 26px);
 }
 .hotspot--left .hotspot__line { left: calc(var(--lead) * -1); }
-.hotspot--left .hotspot__body { left: auto; right: calc(var(--lead) + 14px); text-align: right; }
+.hotspot--left .hotspot__body { left: auto; right: var(--bx); text-align: right; }
 .hotspot__k {
   display: block;
   font-family: var(--font-mono); font-size: var(--step--2);
@@ -202,8 +208,11 @@
   color: var(--paper-3); max-width: 22ch; text-align: right;
 }
 
-@media (max-width: 720px) {
-  .hotspot__body { width: min(38vw, 150px); }
+@media (max-width: 760px) {
+  /* No room for a full sentence beside the model — the key stays anchored and
+     the chapter copy below carries the explanation. */
+  .hotspot__v { display: none; }
+  .hotspot__k { font-size: 0.62rem; letter-spacing: 0.12em; }
   /* The fallback note carries real information, so it stays on small screens —
      only the drag hint, which is meaningless on touch, goes away. */
   .machine__hint { display: none; }

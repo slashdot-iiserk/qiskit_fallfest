@@ -188,3 +188,36 @@ test.describe('scroll reveals', () => {
     await expect(page.locator('.figure-row')).toContainText('Announced before the fest');
   });
 });
+
+test.describe('the machine on a narrow screen', () => {
+  test.describe.configure({ timeout: 120_000 });
+
+  test('keeps every anchored label inside the viewport', async ({ page, isMobile }) => {
+    test.skip(!isMobile, 'covered by the mobile project');
+    test.slow();
+
+    await page.goto('/');
+    await expect(page.locator('[data-preloader]')).toHaveCount(0, { timeout: 15000 });
+    await page.evaluate(() => {
+      const m = document.querySelector('[data-machine]');
+      const r = m.getBoundingClientRect();
+      window.scrollTo({ top: r.top + window.scrollY + (r.height - window.innerHeight) * 0.5, behavior: 'instant' });
+    });
+    await page.waitForFunction(
+      () => document.querySelector('[data-machine]').dataset.machineReady === 'true',
+      null, { timeout: 60000 });
+    await page.waitForTimeout(1200);
+
+    const overflow = await page.evaluate(() => {
+      const w = window.innerWidth;
+      return [...document.querySelectorAll('.hotspot')]
+        .filter((el) => Number(el.style.opacity) > 0.15)
+        .map((el) => {
+          const body = el.querySelector('.hotspot__body').getBoundingClientRect();
+          return { text: el.querySelector('.hotspot__k').textContent, left: body.left, right: body.right, w };
+        })
+        .filter((b) => b.left < -1 || b.right > b.w + 1);
+    });
+    expect(overflow, 'labels must not run off the edge').toEqual([]);
+  });
+});

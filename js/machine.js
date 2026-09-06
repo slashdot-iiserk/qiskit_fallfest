@@ -265,7 +265,9 @@ export function initMachine() {
       // Project each anchor, park the dot on the model, and stretch the leader
       // out to a fixed gutter so the text never lies across the machine.
       const show = ready && smoothed > 0.14;
-      const gutter = Math.min(240, W * 0.24);
+      // Narrow screens get a proportionally wider gutter; the label body is
+      // sized from it in CSS so text can never run off the edge.
+      const gutter = W < 760 ? Math.max(96, W * 0.30) : Math.min(240, W * 0.24);
       for (const a of anchors) {
         if (!show) { a.el.style.opacity = '0'; continue; }
         projected.copy(a.vec);
@@ -276,13 +278,18 @@ export function initMachine() {
         const y = (1 - (projected.y * 0.5 + 0.5)) * H;
         const behind = projected.z > 1;
 
-        const lead = a.spec.side === 'right'
-          ? Math.max(28, (W - gutter) - x)
-          : Math.max(28, x - gutter);
+        // The label body is parked at the gutter edge no matter where its
+        // anchor is, and the leader spans whatever gap is left. Deriving the
+        // leader from the body (rather than the reverse) is what keeps the
+        // text on screen when the anchor rotates out past the gutter.
+        const offset = a.spec.side === 'right' ? (W - gutter) - x : x - gutter;
+        const lead = Math.max(0, offset - 12);
 
         // Fade a label out as its anchor rotates around the back.
         const facing = clamp(1 - (depth - (dist - 1.1)) / 2.2, 0, 1);
+        a.el.style.setProperty('--bx', `${offset.toFixed(0)}px`);
         a.el.style.setProperty('--lead', `${lead.toFixed(0)}px`);
+        a.el.style.setProperty('--gut', `${gutter.toFixed(0)}px`);
         a.el.style.transform = `translate3d(${x.toFixed(1)}px, ${y.toFixed(1)}px, 0)`;
         a.el.style.opacity = behind ? '0' : (facing * 0.95).toFixed(2);
       }
