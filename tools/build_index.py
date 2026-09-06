@@ -115,15 +115,15 @@ HEAD = f"""<!DOCTYPE html>
 <body>
 <a class="skip-link" href="#main">Skip to content</a>
 <canvas class="ambient" aria-hidden="true"></canvas>
+<!-- The drawing lives here for the whole first act; js/saga.js drives it. -->
+<div class="qc-stage" data-qc-stage aria-hidden="true"></div>
 """
 
 PRELOADER = """
 <div class="preloader" data-preloader role="status" aria-live="polite" aria-label="Loading">
+  <canvas class="preloader__field" data-preloader-field aria-hidden="true"></canvas>
   <div class="preloader__inner">
     {art}
-    <svg class="preloader__spike" data-preloader-spike viewBox="0 0 400 46" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-      <path d="M0 23H150l8-6 6 18 7-34 8 44 7-28 6 12 5-4h198"/>
-    </svg>
     <div data-preloader-fade style="width:100%">
       <div class="preloader__bar" data-preloader-bar><i></i></div>
       <p class="preloader__meta">
@@ -193,45 +193,33 @@ def build() -> str:
 
   <!-- ============================ HERO ============================ -->
   <section class="hero" data-hero>
-    <div class="container container--wide">
-      <div class="hero__grid">
-        <div>
-          <div class="hero__badges" data-hero-in>
-            <span class="chip chip--gold chip--live"><i class="chip__dot"></i> Registrations open</span>
-            <span class="chip">6 – 13 October 2026</span>
-          </div>
-
-          <h1 class="hero__title" data-hero-in>Qiskit<br><em>Fall Fest</em><br>2026</h1>
-          <p class="hero__sub" data-hero-in>IISER Kolkata · Presented by SlashDot</p>
-
-          <p class="hero__lede" data-hero-in>
-            Five days that take you from <em>what even is a qubit</em> to writing, running and
-            debugging real quantum circuits — closing with an invited speaker from the
-            IBM&nbsp;Quantum world.
-          </p>
-
-          <div class="hero__cta" data-hero-in>
-            <a class="btn btn--lg" href="register.html">Register {ARROW}</a>
-            <a class="btn btn--lg btn--ghost" href="#machine">See the machine</a>
-          </div>
-
-          <dl class="hero__meta" data-hero-in>
-            <div class="hero__meta-item"><dt>Venue</dt><dd>MN Saha, IISER&nbsp;Kolkata</dd></div>
-            <div class="hero__meta-item"><dt>Format</dt><dd>Talks &amp; hands-on labs</dd></div>
-            <div class="hero__meta-item"><dt>Open to</dt><dd>Students, any institute</dd></div>
-            <div class="hero__meta-item"><dt>Bring</dt><dd>A laptop</dd></div>
-          </dl>
-        </div>
-
-        <div class="hero__art" data-machine-slot="hero">
-          <span class="hero__art-tick hero__art-tick--tl">Fig. 01 — dilution refrigerator</span>
-          <span class="hero__art-frame" aria-hidden="true"></span>
-          <span class="hero__art-tick hero__art-tick--br">10 mK at the base</span>
-        </div>
+    <div class="hero__inner">
+      <div class="hero__badges" data-hero-in>
+        <span class="chip chip--gold chip--live"><i class="chip__dot"></i> Registrations open</span>
+        <span class="chip">6 – 13 October 2026</span>
       </div>
-    </div>
 
-    <p class="hero__scroll" aria-hidden="true">Scroll <i></i></p>
+      <h1 class="hero__title" data-hero-in>Qiskit<em>Fall Fest</em>2026</h1>
+      <p class="hero__sub" data-hero-in>IISER Kolkata · Presented by SlashDot</p>
+
+      <p class="hero__lede" data-hero-in>
+        Five days that take you from <em>what even is a qubit</em> to writing, running and
+        debugging real quantum circuits — closing with an invited speaker from the
+        IBM&nbsp;Quantum world.
+      </p>
+
+      <div class="hero__cta" data-hero-in>
+        <a class="btn btn--lg" href="register.html">Register {ARROW}</a>
+        <a class="btn btn--lg btn--ghost" href="#machine">Go inside the machine</a>
+      </div>
+
+      <dl class="hero__meta" data-hero-in>
+        <div class="hero__meta-item"><dt>Venue</dt><dd>MN Saha, IISER&nbsp;Kolkata</dd></div>
+        <div class="hero__meta-item"><dt>Format</dt><dd>Talks &amp; hands-on labs</dd></div>
+        <div class="hero__meta-item"><dt>Open to</dt><dd>Students, any institute</dd></div>
+        <div class="hero__meta-item"><dt>Bring</dt><dd>A laptop</dd></div>
+      </dl>
+    </div>
   </section>
 
   <!-- ============================ MARQUEE ============================ -->
@@ -281,57 +269,19 @@ def build() -> str:
         </div>
       </div>
 
-      <div class="grid grid--3" data-drop-group="90" style="margin-top:clamp(3rem,6vw,5rem)">
-        <article class="card" data-drop>
-          <span class="card__num">01</span>
-          <h3>Start from zero</h3>
-          <p>Day 0 covers the physics and Day 1 ends with an installation clinic. If you have never
-             touched quantum mechanics or Qiskit, you are exactly who this was designed for.</p>
-        </article>
-        <article class="card" data-drop>
-          <span class="card__num">02</span>
-          <h3>Talk, then lab, every hour</h3>
-          <p>Every session on the hands-on day is a talk immediately followed by a lab, so a concept is
-             never more than thirty minutes away from being code you have run yourself.</p>
-        </article>
-        <article class="card" data-drop>
-          <span class="card__num">03</span>
-          <h3>Everything published up front</h3>
-          <p>Slides, notebooks and the installation guide go into the public repository before each
-             session — and stay there. The 2025 archive on this site is what that looks like.</p>
-        </article>
-        <article class="card" data-drop>
-          <span class="card__num">04</span>
-          <h3>Three certificate tiers</h3>
-          <p>Participation, Intermediate and Advanced. First-timers who find the advanced day heavy can
-             still earn the Intermediate certificate by attending Day 2 in full.</p>
-        </article>
-        <article class="card" data-drop>
-          <span class="card__num">05</span>
-          <h3>Real hardware, real noise</h3>
-          <p>We do not stop at the simulator. One full session is about what actually happens on IBM
-             Quantum hardware: decoherence, readout error, and why your ideal circuit misbehaves.</p>
-        </article>
-        <article class="card" data-drop>
-          <span class="card__num">06</span>
-          <h3>An industry insider to close</h3>
-          <p>The fest ends with an invited expert talk from the IBM Quantum ecosystem. The speaker's
-             name stays in superposition until we announce it — registrants hear first.</p>
-        </article>
-      </div>
     </div>
   </section>
 
-  <!-- ============================ THE MACHINE ============================ -->
-  <section class="machine" id="machine" data-machine aria-label="The machine, explored">
-    <div class="machine__sticky">
-      <div class="machine__stage" data-machine-stage>
-        <canvas class="machine__canvas" data-machine-canvas aria-hidden="true"></canvas>
-        <div data-machine-slot="stage">{stage_art}</div>
-        <div class="machine__labels" data-machine-labels aria-hidden="true"></div>
-        <div class="machine__chapters" data-machine-chapters></div>
-        <p class="machine__hint" aria-hidden="true">Drag to turn</p>
-        <p class="machine__fallback" data-machine-fallback hidden></p>
+  <!-- ============================ THE SAGA ============================ -->
+  <section class="saga" id="machine" data-saga aria-label="Inside the machine">
+    <div class="saga__sticky">
+      <div class="saga__stage">
+        <canvas class="saga__canvas" data-saga-canvas aria-hidden="true"></canvas>
+        <div class="saga__labels" data-saga-labels aria-hidden="true"></div>
+        <div class="saga__values" data-saga-values aria-hidden="true"></div>
+        <div class="saga__chapters" data-saga-chapters></div>
+        <p class="saga__hint" data-saga-hint aria-hidden="true">Drag to turn</p>
+        <p class="saga__fallback" data-saga-fallback hidden></p>
       </div>
     </div>
   </section>

@@ -11,7 +11,7 @@ import { EVENT, SCHEDULE, PEOPLE, SPEAKERS, TIERS, FAQ } from './data/event.js';
 import { initAmbient } from './ambient.js';
 import { initBloch, GATES } from './bloch.js';
 import { initPreloader } from './preloader.js';
-import { initMachine } from './machine.js';
+import { initSaga } from './saga.js';
 
 const $  = (sel, ctx = document) => ctx.querySelector(sel);
 const $$ = (sel, ctx = document) => Array.from(ctx.querySelectorAll(sel));
@@ -437,7 +437,7 @@ function boot() {
   initDrops();
   initFigures();
   initAmbient($('.ambient'));
-  initMachine();
+  initSaga();
 
   const year = $('[data-year]');
   if (year) year.textContent = String(new Date().getFullYear());

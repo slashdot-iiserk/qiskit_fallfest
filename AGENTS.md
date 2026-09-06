@@ -66,6 +66,11 @@ Assets under `assets/` are produced by `tools/build_assets.py`. Its inputs are:
 | `2026_assets/` | **no** | The upstream Qiskit design kit. Clone it before running the asset build: `git clone git@github.com:Qiskit-Fall-Fest-2026/materials-resources.git 2026_assets` |
 | `Quantum_Computer_glb/` | **no** | The 42 MB source model for the dilution refrigerator. Everything in `assets/model/` is derived from it by `tools/build_model.sh`; the derived files are committed, the source is not. Point `QC_SOURCE` at it wherever you keep it. |
 
+The gallery manifest in `build_pages.py` walks `archive/2025/` on disk, so the
+whole archived edition — key art, sticker sheet, the team that ran it — appears
+in the gallery automatically. Drop 2026 photographs into `assets/gallery/2026/`
+as WebP and they are picked up the same way.
+
 Both scripts are idempotent — re-running them is always safe. `npm run build:pages` works without
 `2026_assets/`; only `build:assets` needs it.
 
@@ -77,26 +82,45 @@ nowhere else** — do not hardcode a session, a name or a date into HTML.
 
 The `README.md` schedule table is a human-readable duplicate; update it in the same commit.
 
-## The machine (3D)
+## The saga (js/saga.js)
 
-`js/machine.js` owns the sticky stage. Things worth knowing before touching it:
+One module owns the whole first act: the fixed drawing layer, the render, the
+labels and the chapter copy. Things worth knowing before touching it:
 
-- **Everything is lazy.** three.js, the Draco decoder and the 434 KB model are dynamic imports
-  behind an `IntersectionObserver` with a 150% root margin. Do not move those imports to the top
-  level — that would put ~1.1 MB on the critical path of a page most visitors never scroll.
-- **There are three ways out**: `prefers-reduced-motion`, no WebGL, and a load failure. All three
-  keep the line drawing and render the labels as a plain list. Test them; they are covered in
-  `tests/e2e/machine.spec.js`.
-- **Hotspot anchors are in the model's normalised space** (`y = +1` top, `-1` bottom) and live under
-  the same pivot as the model, so they rotate with it. Each frame the loop writes three custom
-  properties on the label: `--gut` (gutter width), `--bx` (where the body sits, measured from the
-  anchor) and `--lead` (what is left over for the leader line). Derive the body position from the
-  gutter and the leader from the body — never the other way round, or a label whose anchor rotates
-  past the gutter gets pushed off the edge. `tests/e2e/machine.spec.js` guards this on mobile.
-- **Labels carry a `short` form** used below 760px, where the descriptive line is hidden and the
-  chapter copy carries the detail. Keep both in `HOTSPOTS`.
-- **A composited WebGL buffer cannot be read back**, so the render loop publishes
-  `data-machine-frames` on the section. That attribute exists for the tests; keep it.
+- **`T` at the top of the file is the timeline.** Every constant is a fraction
+  of the saga's scroll runway, in order. Change the story by moving those, not
+  by scattering magic numbers through the frame loop.
+- **One rAF loop, one scroll read.** `measure()` runs once per frame and
+  everything derives from it. Do not add scroll listeners for new effects.
+- **The drawing is a single element.** It is created in the preloader and moved
+  — the same node — into `.qc-stage`, a fixed layer behind the page. There is no
+  second copy in the hero and there must never be: the point of the sequence is
+  that it is continuously the same object. `tests/e2e/saga.spec.js` asserts
+  `.hero .qc-draw` does not exist.
+- **Everything 3D is lazy.** three.js, the Draco decoder and the 434 KB model
+  are dynamic imports behind an `IntersectionObserver`. Do not hoist them.
+- **There are three ways out**: `prefers-reduced-motion`, no WebGL, and a load
+  failure. All three keep the drawing and render the copy as a plain list of
+  eleven items. Test them; they are covered.
+- **Eased progress is published** as `data-saga-p`, and the phase as
+  `data-saga-phase` (`draw` → `handoff` → `render` → `transform` → `qubit`).
+  Both exist so the tests can wait for the choreography to arrive rather than
+  guess at a timeout — the CI renderer manages about two frames a second. Keep
+  them.
+- **Smoothing must stay frame-rate independent.** It uses
+  `1 - Math.exp(-dt * rate)`. A fixed per-frame factor looks fine at 60 fps and
+  falls badly out of step on anything slower.
+- **Label placement**: each frame writes `--gut` (gutter width), `--bx` (where
+  the body sits, measured from the anchor) and `--lead` (what is left for the
+  leader line). Derive the body from the gutter and the leader from the body —
+  never the reverse, or a label whose anchor rotates past the gutter is pushed
+  off screen. Labels also carry a `short` form used below 760px.
+- **The transform** samples the model's own surface into a point cloud that
+  reassembles as a Bloch sphere. Point size is a *world radius* scaled by
+  `uProj` (pixels per unit at unit depth, updated on resize) — not a pixel
+  count, which produced 277px points and a white screen. Blending is normal,
+  not additive: eleven thousand points converging on one small sphere will
+  always overdraw.
 
 ## Scroll reveals
 
@@ -108,6 +132,14 @@ delays and adds `.is-in`.
 makes the target invisible to `IntersectionObserver`, so the observer that would remove the clip
 never fires and the content is lost forever. The section rules wipe via a `::after` pseudo-element
 for exactly this reason.
+
+## Where the copy lives
+
+The six things the fest is — start from zero, talk then lab, published up front,
+three tiers, real hardware, the invited talk — are **not cards in a grid**. They
+are `VALUES` in `js/saga.js`, and they orbit the model during the descent. The
+part descriptions are `PARTS` in the same file. Edit them there; there is no
+duplicate in the HTML.
 
 ## Code style
 
@@ -143,9 +175,10 @@ Add a test with the change, not after it. In particular:
   probably right.
 - Adding a page → add it to the `PAGES` array in `tests/e2e/site.spec.js`. That alone gives it
   console-error, SEO, and broken-image coverage.
-- Touching `js/machine.js` or `js/preloader.js` → `tests/e2e/machine.spec.js`. The 3D tests are
-  marked `test.slow()` because Draco decode and shader compilation run on a software GL backend
-  in CI; do not "fix" them by lowering the assertions.
+- Touching `js/saga.js` or `js/preloader.js` → `tests/e2e/saga.spec.js`. Those tests are marked
+  `test.slow()` because Draco decode and shader compilation run on a software GL backend in CI.
+  If one is flaky, make it wait on `data-saga-p` or `data-saga-phase` — do not lower the
+  assertion to something that would still pass with the feature broken.
 
 The e2e suite fails on **any** console error or failed request. Do not silence it; fix the cause.
 

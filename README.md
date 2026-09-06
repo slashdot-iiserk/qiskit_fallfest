@@ -76,8 +76,8 @@ first-timer who finds the advanced day heavy still leaves with the Intermediate 
 ├── js/
 │   ├── data/event.js       Single source of truth: schedule, people, tiers, FAQ
 │   ├── main.js             Nav, theme, scroll choreography, renderers
-│   ├── preloader.js        anime.js draw-on, then hands the drawing to the hero
-│   ├── machine.js          The sticky 3D stage, anchored labels, chapters
+│   ├── preloader.js        anime.js draw-on + qubits streaming out of the machine
+│   ├── saga.js             The whole scroll sequence: drawing → render → qubit
 │   ├── ambient.js          Canvas circuit rails and falling motes
 │   ├── bloch.js            Single-qubit simulator and Bloch-sphere renderer
 │   ├── registration.js     Google Forms field map, validation, submission
@@ -222,33 +222,68 @@ IBM.
 
 ## The machine
 
-The centrepiece is a dilution refrigerator — the gold chandelier that houses a superconducting
-quantum processor. It appears three times, and it is the *same object* each time:
+The centrepiece is a dilution refrigerator — the gold chandelier that houses a
+superconducting quantum processor. The whole first half of the page is one
+continuous sequence built around it, and it is the *same object* throughout.
 
-1. **The preloader** draws it on, stroke by stroke, with `anime.js`.
-2. **The hero** receives that very same DOM node — the preloader FLIPs it into place rather than
-   cross-fading two copies.
-3. **The machine section** is a sticky 400 vh stage where the drawing hands over to a real
-   three.js render. Scrolling turns it; labels anchored to points *on the geometry* are projected
-   to screen every frame and their leader lines stretch out to a text gutter, so the copy tracks
-   the model without ever lying across it.
+```
+preloader   the machine draws itself on, stroke by stroke, while qubits
+            stream out of its core toward you
+    ↓       the drawing is handed — the same DOM node — to a fixed stage
+hero        it sits behind the type, out of focus
+    ↓       it sharpens, grows and comes forward as you scroll
+figures     the numbers pass over it
+    ↓       it fills the frame, then pushes in on the top plate
+handoff     the line drawing becomes the real render, framed to match
+    ↓       the camera descends the machine, stage by stage
+labels      first what each part is; then those clear and the six things
+            the fest is orbit the model as you keep going down
+    ↓       down to the chip at the very bottom
+transform   the machine dissolves into its own surface points, and those
+            points reassemble into a single qubit on a Bloch sphere
+    ↓
+lab         which is the qubit you can then play with, by hand
+```
+
+The drawing is never duplicated and never cross-faded with a copy of itself: it
+lives on one fixed layer (`.qc-stage`) whose focus, scale and framing are a pure
+function of scroll, until the render takes over. `js/saga.js` owns all of it
+from a single rAF loop — one scroll read per frame, not one listener per effect.
+
+### The transform
+
+The dissolve is a real geometric morph, not a cross-fade. Every mesh in the
+model is sampled by area into ~11,000 points; each point knows both where it sat
+on the machine and where it belongs on the sphere, and a single uniform slides
+between the two along a bowed path with a per-point delay, so the change sweeps
+downward through the machine rather than snapping. The Bloch rings and state
+vector fade in once the cloud has essentially become a sphere.
 
 ### How the assets are derived
 
 Everything under `assets/model/` is generated from one 42 MB source GLB by
-[`tools/build_model.sh`](tools/build_model.sh). The source is **not committed** (see AGENTS.md).
+[`tools/build_model.sh`](tools/build_model.sh). The source is **not committed**
+(see AGENTS.md).
 
 | Output | From | Size |
 |--------|------|------|
 | `quantum-computer.glb` | `gltf-transform optimize` — weld, simplify, WebP textures, **Draco** | **434 KB** (from 42.4 MB) |
-| `qc-front.svg` | hidden-line extraction, front view | 25 KB |
-| `qc-three-quarter.svg` | hidden-line extraction, three-quarter view | 21 KB |
+| `qc-front.svg` | hidden-line extraction, front view | 63 KB |
+| `qc-three-quarter.svg` | hidden-line extraction, three-quarter view | 41 KB |
 
-The SVGs are **not traced from a screenshot.** `tools/glb2svg/` loads the model in headless
-Chromium, takes feature edges straight from the geometry with `EdgesGeometry` at a dihedral
-threshold, renders a packed-depth pre-pass, then walks each edge sampling against that depth buffer
-and keeps only the visible runs. What comes out is a true hidden-line drawing in vector form — which
-is what makes the `stroke-dashoffset` draw-on in the preloader possible. Re-run it with:
+The SVGs are **not traced from a screenshot.** `tools/glb2svg/` loads the model
+in headless Chromium and collects two kinds of edge:
+
+* **Feature edges** — creases and open boundaries, via `EdgesGeometry` at a
+  dihedral threshold.
+* **Silhouette edges** — for every edge shared by two faces, if those faces
+  disagree about whether they face the camera, that edge is on the outline. This
+  is what draws a *smooth* surface: the plates, the cylinders and the domed lid
+  have no crease anywhere, so without this pass their outlines are simply absent.
+
+Both sets are then tested against a packed-depth pre-pass and only the visible
+runs survive, giving a true hidden-line drawing in vector form — which is what
+makes the `stroke-dashoffset` draw-on in the preloader possible. Rebuild with:
 
 ```bash
 QC_SOURCE=/path/to/Quantum_Computer.glb ./tools/build_model.sh
@@ -257,6 +292,6 @@ QC_SOURCE=/path/to/Quantum_Computer.glb ./tools/build_model.sh
 ### Runtime cost
 
 three.js, its Draco decoder and the model are **lazily imported** — nothing is fetched until the
-machine section is within 1.5 viewports, and nothing at all under `prefers-reduced-motion` or where
-WebGL is unavailable (both fall back to the drawing plus a plain list of the labels). The initial
-page load never touches them.
+saga is within 60% of a viewport, and nothing at all under `prefers-reduced-motion` or where WebGL
+is unavailable. Both of those fall back to the still drawing behind the page, with the part
+descriptions and the six points laid out as plain text. The initial page load never touches them.

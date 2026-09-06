@@ -10,15 +10,19 @@
 }
 .preloader[data-done] { pointer-events: none; }
 .preloader__inner {
+  position: relative; z-index: 1;
   display: grid; justify-items: center; gap: var(--sp-6);
   width: min(90vw, 460px);
 }
 .preloader__art { width: min(46vw, 210px); color: var(--gold); }
 .preloader__art svg { width: 100%; height: auto; }
 
-/* The measurement spike: a flat oscilloscope trace that fires as the
-   drawing completes. */
-.preloader__spike { width: 100%; height: 46px; color: var(--magenta); overflow: visible; }
+/* Qubits streaming out of the machine, drawn behind the line work. */
+.preloader__field {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  pointer-events: none;
+}
 
 .preloader__meta {
   display: flex; align-items: baseline; justify-content: space-between;
@@ -319,21 +323,31 @@ html.is-loading { overflow: hidden; }
 @media (prefers-reduced-motion: reduce) { .split-line > span { transform: none; } }
 
 /* --- The drawing ---------------------------------------------------------
-   One element, carried from the preloader into the hero, then echoed on the
-   machine stage. Sized entirely by whichever context it currently sits in. */
+   A single element for the whole first act: it is born in the preloader, moves
+   into a fixed stage, and js/saga.js drives its focus, scale and framing from
+   scroll until the render takes over. Never duplicated, never cross-faded. */
 .qc-draw { display: block; will-change: transform; }
 .qc-draw svg { width: 100%; height: auto; color: var(--gold); overflow: visible; }
 
-.preloader .qc-draw { width: min(46vw, 190px); opacity: 0; }
-.hero__art .qc-draw { width: auto; height: 100%; }
-.hero__art .qc-draw svg { width: auto; height: 100%; }
-.machine__stage .qc-draw {
-  position: absolute; top: 50%; left: 50%;
-  translate: -50% -50%;
-  width: auto; height: min(70vh, 600px);
-  transition: opacity var(--dur-4) var(--ease-out);
+.preloader .qc-draw { width: min(44vw, 180px); opacity: 0; }
+
+.qc-stage {
+  position: fixed; inset: 0;
+  z-index: 0;
+  display: grid; place-items: center;
+  pointer-events: none;
+  opacity: 0;
+  will-change: filter, opacity;
+  contain: strict;
 }
-.machine__stage .qc-draw svg { width: auto; height: 100%; }
+.qc-stage .qc-draw {
+  width: auto; height: min(74vh, 660px);
+  will-change: transform;
+}
+.qc-stage .qc-draw svg { width: auto; height: 100%; stroke-width: var(--qc-stroke, 2.4); }
+
+/* Without JS or WebGL the drawing simply sits still behind the page. */
+.qc-stage[data-static] { opacity: 1; }
 
 /* --- Ambient canvas -------------------------------------------------------- */
 .ambient {
@@ -343,6 +357,9 @@ html.is-loading { overflow: hidden; }
   z-index: -1; pointer-events: none;
   opacity: 0.85;
 }
+
+/* Page content rides above the fixed drawing. */
+main, .nav, .footer { position: relative; z-index: 1; }
 
 /* --- Hero entrance ---------------------------------------------------------- */
 [data-hero-in] {

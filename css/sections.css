@@ -2,87 +2,58 @@
    Sections — hero, the machine, schedule, tiers, people, venue, footer
    ========================================================================== */
 
-/* --- Hero ------------------------------------------------------------------- */
+/* --- Hero -------------------------------------------------------------------
+   The drawing is not in here: it lives on the fixed .qc-stage behind the page.
+   The hero is only type, centred over it. */
 .hero {
   position: relative;
   min-height: 100svh;
-  display: grid; align-items: center;
+  display: grid; place-items: center;
   padding-top: calc(var(--nav-h) + 2rem);
   padding-bottom: var(--sp-8);
-  overflow: hidden;
+  text-align: center;
 }
-.hero__grid {
-  display: grid; gap: clamp(2rem, 5vw, 4.5rem);
-  grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
-  align-items: center;
+.hero__inner { width: min(100% - 2.5rem, 900px); }
+
+.hero__badges { display: flex; flex-wrap: wrap; gap: 0.5rem; justify-content: center; margin-bottom: var(--sp-6); }
+
+.hero__title {
+  font-size: clamp(2.7rem, 9vw, 6.2rem);
+  line-height: 0.95;
+  letter-spacing: -0.04em;
+  margin-bottom: var(--sp-4);
 }
-@media (max-width: 940px) { .hero__grid { grid-template-columns: 1fr; } }
+.hero__title em { font-style: normal; color: var(--gold); display: block; }
 
-.hero__badges { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: var(--sp-6); }
-
-.hero__title { font-size: clamp(2.9rem, 7.2vw, 5.1rem); margin-bottom: var(--sp-4); }
-.hero__title em { font-style: normal; color: var(--gold); }
 .hero__sub {
   font-family: var(--font-mono); font-weight: 400;
-  font-size: var(--step--2); letter-spacing: 0.3em; text-transform: uppercase;
-  color: var(--paper-3); margin-bottom: var(--sp-5);
+  font-size: var(--step--2); letter-spacing: 0.32em; text-transform: uppercase;
+  color: var(--paper-2); margin-bottom: var(--sp-5);
 }
 
-.hero__lede { max-width: 48ch; margin-bottom: var(--sp-5); color: var(--paper-2); font-size: var(--step-0); }
-.hero__cta { display: flex; flex-wrap: wrap; gap: var(--sp-3); margin-bottom: var(--sp-6); }
+.hero__lede {
+  max-width: 46ch; margin: 0 auto var(--sp-6);
+  color: var(--paper); font-size: var(--step-0);
+  text-shadow: 0 2px 24px var(--void);
+}
+.hero__lede em { font-style: italic; color: var(--gold); }
+
+.hero__cta { display: flex; flex-wrap: wrap; gap: var(--sp-3); justify-content: center; margin-bottom: var(--sp-6); }
 
 .hero__meta {
-  display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
   gap: var(--sp-5) var(--sp-4);
-  padding-top: var(--sp-5); border-top: 1px solid var(--line);
+  padding-top: var(--sp-4); border-top: 1px solid var(--line);
+  text-align: left;
 }
 .hero__meta-item dt {
   font-family: var(--font-mono); font-size: var(--step--2);
   letter-spacing: 0.18em; text-transform: uppercase; color: var(--paper-3);
   margin-bottom: 0.3rem;
 }
-.hero__meta-item dd { margin: 0; font-weight: 500; font-size: var(--step-0); }
+.hero__meta-item dd { margin: 0; font-weight: 500; font-size: var(--step--1); }
 
-/* The machine, drawn. */
-.hero__art {
-  position: relative;
-  display: grid; place-items: center;
-  height: min(62vh, 540px);
-  margin-block: 2.4rem;
-  padding-inline: clamp(1rem, 4vw, 3rem);
-}
-.hero__art-frame {
-  position: absolute; inset: 0;
-  border: 1px solid var(--line);
-  pointer-events: none;
-}
-.hero__art-tick {
-  position: absolute;
-  font-family: var(--font-mono); font-size: var(--step--2);
-  letter-spacing: 0.18em; text-transform: uppercase; color: var(--paper-3);
-  white-space: nowrap;
-}
-.hero__art-tick--tl { bottom: calc(100% + 0.6rem); left: 0; }
-.hero__art-tick--br { top: calc(100% + 0.6rem); right: 0; }
-@media (max-width: 940px) {
-  .hero__art { height: min(46vh, 380px); }
-  /* The scroll cue collides with the plate caption once the hero stacks, and
-     nobody needs to be told to scroll on a touch screen. */
-  .hero__scroll { display: none; }
-}
 
-.hero__scroll {
-  position: absolute; bottom: 1.75rem; left: 50%; translate: -50% 0;
-  display: flex; flex-direction: column; align-items: center; gap: 0.6rem;
-  font-family: var(--font-mono); font-size: var(--step--2);
-  letter-spacing: 0.28em; text-transform: uppercase; color: var(--paper-3);
-}
-.hero__scroll i { display: block; width: 1px; height: 40px; background: var(--gold-deep); overflow: hidden; position: relative; }
-.hero__scroll i::after {
-  content: ""; position: absolute; inset: 0; background: var(--gold);
-  animation: scroll-drop 2.4s var(--ease-in-out) infinite;
-}
-@keyframes scroll-drop { 0% { transform: translateY(-100%); } 60%, 100% { transform: translateY(100%); } }
 
 /* --- Section headings --------------------------------------------------------- */
 .section__head { max-width: 70ch; margin-bottom: clamp(2.5rem, 5vw, 4.5rem); }
@@ -112,37 +83,28 @@
 /* ==========================================================================
    The machine — a sticky 3D stage with text anchored to it
    ========================================================================== */
-.machine {
+.saga {
   position: relative;
-  /* Scroll runway for the sticky stage: the model turns across this height. */
-  height: 420svh;
+  /* The scroll runway the whole sequence plays across. */
+  height: 880svh;
+  touch-action: pan-y;
 }
-@media (max-width: 720px) { .machine { height: 340svh; } }
-.machine__sticky {
+@media (max-width: 720px) { .saga { height: 700svh; } }
+.saga__sticky {
   position: sticky; top: 0;
   height: 100svh;
   display: grid; place-items: center;
   overflow: hidden;
 }
-.machine__stage {
+.saga__stage {
   position: relative;
   width: min(100%, var(--container-wide));
   height: 100%;
   margin-inline: auto;
 }
-.machine__canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+.saga__canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
 
-/* The line drawing sits exactly where the render will appear, then hands over. */
-.machine__svg {
-  position: absolute; top: 50%; left: 50%;
-  translate: -50% -50%;
-  height: min(72vh, 620px); width: auto;
-  color: var(--gold);
-  overflow: visible;
-  transition: opacity var(--dur-4) var(--ease-out);
-}
-
-.machine__labels { position: absolute; inset: 0; pointer-events: none; }
+.saga__labels, .saga__values { position: absolute; inset: 0; pointer-events: none; }
 .hotspot {
   position: absolute; top: 0; left: 0;
   display: block; text-align: left;
@@ -178,17 +140,23 @@
 }
 .hotspot__k b { font-weight: inherit; }
 .hotspot__k .k-short { display: none; }
-.hotspot__v { display: block; font-size: var(--step--1); color: var(--paper-2); margin-top: 0.25rem; line-height: 1.4; }
+.hotspot__v { display: block; font-size: var(--step--1); color: var(--paper-2); margin-top: 0.3rem; line-height: 1.45; }
+
+/* Value cards carry a sentence rather than a measurement, so they get more
+   room and a rule to sit against. */
+.hotspot--value .hotspot__k { color: var(--paper); letter-spacing: 0.12em; }
+.hotspot--value .hotspot__body { padding-top: 0.55rem; border-top: 1px solid var(--line-strong); }
+.hotspot--value .hotspot__dot { opacity: 0.55; }
 .hotspot:hover .hotspot__dot::after { scale: 1.5; }
 
 /* Chaptered copy that changes as the machine turns. */
-.machine__chapters {
+.saga__chapters {
   position: absolute; inset: auto 0 0;
-  height: clamp(9rem, 18vh, 12rem);
+  height: clamp(9rem, 20vh, 13rem);
   padding-bottom: clamp(2rem, 5vw, 3.5rem);
   pointer-events: none;
 }
-.machine__chapter {
+.saga__chapter {
   position: absolute; inset: auto 0 0;
   width: min(100% - 3rem, 620px);
   margin-inline: auto;
@@ -196,16 +164,16 @@
   opacity: 0; transform: translateY(24px);
   transition: opacity var(--dur-3) var(--ease-out), transform var(--dur-3) var(--ease-out);
 }
-.machine__chapter.is-on { opacity: 1; transform: none; }
-.machine__chapter h3 { font-size: var(--step-2); margin-bottom: var(--sp-3); }
-.machine__chapter p { color: var(--paper-2); font-size: var(--step--1); }
+.saga__chapter.is-on { opacity: 1; transform: none; }
+.saga__chapter h3 { font-size: var(--step-2); margin-bottom: var(--sp-3); }
+.saga__chapter p { color: var(--paper-2); font-size: var(--step--1); }
 
-.machine__hint {
+.saga__hint {
   position: absolute; inset: auto auto 1.25rem 1.25rem;
   font-family: var(--font-mono); font-size: var(--step--2);
   letter-spacing: 0.18em; text-transform: uppercase; color: var(--paper-3);
 }
-.machine__fallback {
+.saga__fallback {
   position: absolute; inset: auto 1.25rem 1.25rem auto;
   font-family: var(--font-mono); font-size: var(--step--2);
   color: var(--paper-3); max-width: 22ch; text-align: right;
@@ -220,8 +188,8 @@
   .hotspot__k .k-short { display: inline; }
   /* The fallback note carries real information, so it stays on small screens —
      only the drag hint, which is meaningless on touch, goes away. */
-  .machine__hint { display: none; }
-  .machine__fallback {
+  .saga__hint { display: none; }
+  .saga__fallback {
     inset: auto 1rem auto 1rem; bottom: 0.9rem;
     max-width: none; text-align: center;
   }
@@ -454,7 +422,7 @@
 }
 
 /* --- Machine labels without 3D ---------------------------------------------- */
-.machine__labels--static {
+.saga__labels--static {
   position: absolute; inset: auto 0 0;
   display: grid; gap: var(--sp-4);
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));

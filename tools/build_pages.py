@@ -67,8 +67,12 @@ def gallery_items() -> list[dict]:
             "fit": "contain",
         })
 
-    # 2025 edition illustration crops, preserved in the archive
-    crops = ROOT / "archive" / "2025" / "graphics" / "Illustration Exports" / "Illustration Crops"
+    # --- The 2025 archive -------------------------------------------------
+    # Everything the 2025 site shipped with, so the archive is browsable as
+    # pictures and not only as a frozen page.
+    arch = ROOT / "archive" / "2025"
+
+    crops = arch / "graphics" / "Illustration Exports" / "Illustration Crops"
     for f in sorted(crops.glob("*.webp")):
         pretty = f.stem.replace("Crop_", "").replace("png", "").replace("_", " ").strip().title()
         items.append({
@@ -77,6 +81,47 @@ def gallery_items() -> list[dict]:
             "full": f"archive/2025/graphics/Illustration Exports/Illustration Crops/{f.name}",
             "alt": f"Qiskit Fall Fest 2025 illustration: {pretty}",
             "caption": f"2025 edition — {pretty}",
+            "fit": "cover",
+        })
+
+    # Badges and key art from the 2025 site.
+    for name, cap, fit in (
+        ("Badge.webp", "2025 badge", "contain"),
+        ("Badge_Dark.webp", "2025 badge, dark", "contain"),
+        ("Full_Illustration.webp", "2025 key illustration", "cover"),
+    ):
+        f = arch / "assets" / name
+        if f.exists():
+            items.append({
+                "category": "edition-2025",
+                "thumb": f"archive/2025/assets/{name}",
+                "full": f"archive/2025/assets/{name}",
+                "alt": f"Qiskit Fall Fest 2025: {cap}",
+                "caption": f"2025 edition — {cap}",
+                "fit": fit,
+            })
+
+    # The 2025 sticker/emoji sheet.
+    for f in sorted((arch / "assets" / "Emojis").glob("*.webp")):
+        pretty = f.stem.replace("Text_", "").replace("_", " ").strip().title()
+        items.append({
+            "category": "stickers-2025",
+            "thumb": f"archive/2025/assets/Emojis/{f.name}",
+            "full": f"archive/2025/assets/Emojis/{f.name}",
+            "alt": f"Qiskit Fall Fest 2025 sticker: {pretty}",
+            "caption": f"2025 sticker — {pretty}",
+            "fit": "contain",
+        })
+
+    # The 2025 organising team, as they were credited on that site.
+    for f in sorted((arch / "assets" / "profile_img").glob("*.webp")):
+        pretty = f.stem.replace("_", " ").title()
+        items.append({
+            "category": "team-2025",
+            "thumb": f"archive/2025/assets/profile_img/{f.name}",
+            "full": f"archive/2025/assets/profile_img/{f.name}",
+            "alt": f"Qiskit Fall Fest 2025 organiser: {pretty}",
+            "caption": f"2025 team — {pretty}",
             "fit": "cover",
         })
 
@@ -124,11 +169,14 @@ def build_gallery() -> None:
     labels = {
         "artwork-2026": "2026 key art",
         "stickers-2026": "2026 stickers",
-        "edition-2025": "2025 edition",
-        "photos-2025": "2025 photos",
         "photos-2026": "2026 photos",
+        "edition-2025": "2025 key art",
+        "stickers-2025": "2025 stickers",
+        "team-2025": "2025 team",
+        "photos-2025": "2025 photos",
     }
-    for key in ("artwork-2026", "stickers-2026", "edition-2025", "photos-2025", "photos-2026"):
+    for key in ("artwork-2026", "stickers-2026", "photos-2026",
+                "edition-2025", "stickers-2025", "team-2025", "photos-2025"):
         if counts.get(key):
             filters.append((key, labels[key]))
 
@@ -145,8 +193,9 @@ def build_gallery() -> None:
         <p class="eyebrow">Gallery</p>
         <h2>The look of the fest.</h2>
         <p class="lede">
-          The official 2026 illustration kit — birds, clouds and a Bloch sphere — alongside artwork
-          preserved from the 2025 edition. Photographs from the 2026 fest are added here as the days happen.
+          The official 2026 illustration kit — birds, clouds and a Bloch sphere — alongside everything
+          the 2025 edition shipped with: its key art, its sticker sheet and the team that ran it.
+          Photographs from the 2026 fest are added here as the days happen.
         </p>
       </div>
 
