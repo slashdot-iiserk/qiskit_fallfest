@@ -133,9 +133,9 @@ export function initSaga() {
     const push = ramp(progress, T.drawHold, T.drawPush);
     const gone = ramp(progress, T.drawPush, T.handoff);
 
-    const scale = lerp(lerp(1, 1.14, focus), 2.55, push);
+    const scale = lerp(lerp(1, 1.14, focus), 3.2, push);
     // Pushing in on the top means sliding the drawing down past the frame.
-    const shiftY = lerp(0, 30, push);
+    const shiftY = lerp(0, 36, push);
     const opacity = lerp(0.55, 1, focus) * (1 - gone);
 
     // Blur is expensive to re-rasterise, so it moves in whole pixels only.
@@ -356,7 +356,7 @@ export function initSaga() {
       // camera walks down the stages, then settling on the qubit it becomes.
       const stageY = lerp(0.95, -0.98, descent);
       const targetY = lerp(stageY, SPHERE_Y, morph);
-      const dist = lerp(lerp(2.35, 1.25, descent), 3.5, morph);
+      const dist = lerp(lerp(2.05, 1.25, descent), 3.5, morph);
 
       pivot.rotation.y = descent * 1.5 + dragYaw + morph * 0.7;
       pivot.rotation.x = dragPitch * 0.5 * (1 - morph);

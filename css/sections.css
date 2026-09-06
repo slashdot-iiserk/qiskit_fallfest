@@ -166,7 +166,12 @@
 }
 .saga__chapter.is-on { opacity: 1; transform: none; }
 .saga__chapter h3 { font-size: var(--step-2); margin-bottom: var(--sp-3); }
-.saga__chapter p { color: var(--paper-2); font-size: var(--step--1); }
+.saga__chapter p { color: var(--paper); font-size: var(--step--1); }
+/* The model reaches into this band, so the copy carries its own ground rather
+   than relying on a scrim — the palette has no gradients to fade one in with. */
+.saga__chapter h3, .saga__chapter p {
+  text-shadow: 0 2px 14px var(--void), 0 0 34px var(--void), 0 0 60px var(--void);
+}
 
 .saga__hint {
   position: absolute; inset: auto auto 1.25rem 1.25rem;
