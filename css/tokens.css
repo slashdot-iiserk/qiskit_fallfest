@@ -32,7 +32,7 @@
   /* --- Paper -------------------------------------------------------------- */
   --paper:     #f2efe8;
   --paper-2:   #a29e94;
-  --paper-3:   #6d6a63;
+  --paper-3:   #8a867c;
   --on-gold:   #14120c;
 
   /* --- Rules -------------------------------------------------------------- */
@@ -85,10 +85,10 @@
   --void:      #f6f4ef;
   --ink:       #ffffff;
   --ink-2:     #f1eee7;
-  --ink-3:     #e7e3d9;
+  --ink-3:     #ece8de;
   --ink-4:     #dbd6c9;
 
-  --gold:      #8a6c22;
+  --gold:      #7f621e;
   --gold-lit:  #6d5417;
   --gold-dim:  #a89460;
   --gold-deep: #cbbf9c;
@@ -97,7 +97,7 @@
 
   --paper:     #16150f;
   --paper-2:   #55524a;
-  --paper-3:   #7d7970;
+  --paper-3:   #64615a;
   --on-gold:   #fffdf6;
 
   --line:        rgba(22, 21, 15, 0.12);
