@@ -32,11 +32,14 @@ npx gltf-transform optimize "$SOURCE" "$WORK/qc-high.glb" \
 cp "$WORK/qc-high.glb" assets/model/quantum-computer.glb
 
 echo "==> line-extraction model (low poly, welded, uncompressed)"
-# Uncompressed so the extractor can load it without a Draco decoder, welded so
-# EdgesGeometry can actually find shared edges.
+# Uncompressed so the extractor can load it without a Draco decoder, and welded
+# so EdgesGeometry can find shared edges at all. The simplify error is a
+# quality dial for the *drawing*: the plates and cylinders are smooth surfaces
+# whose outline is a silhouette, and a silhouette of a coarse cylinder is a
+# visibly lumpy polygon. 0.003 keeps the rims round without much noise.
 npx gltf-transform optimize "$SOURCE" "$WORK/qc-lines.glb" \
   --texture-compress webp --texture-size 64 \
-  --simplify-error 0.006 --compress false --weld 0.0001
+  --simplify-error 0.003 --compress false --weld 0.0001
 
 echo "==> hidden-line SVGs"
 node tools/glb2svg/run.mjs
