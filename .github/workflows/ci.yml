@@ -50,7 +50,9 @@ jobs:
 
       - name: Regenerate the generated pages
         working-directory: tools
-        run: python3 build_pages.py
+        run: |
+          python3 build_index.py
+          python3 build_pages.py
 
       - name: Fail if the working tree changed
         run: |
