@@ -18,7 +18,7 @@
 /* The machine draws itself inside a ring that fills as the assets arrive. */
 .preloader__ring {
   position: relative;
-  width: min(64vw, 280px); aspect-ratio: 1;
+  width: min(58vw, 260px); aspect-ratio: 1;
   display: grid; place-items: center;
 }
 .preloader__ring svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
@@ -353,7 +353,11 @@ html.is-loading { overflow: hidden; }
 .qc-draw { display: block; will-change: transform; }
 .qc-draw svg { width: 100%; height: auto; color: var(--gold); overflow: visible; }
 
-.preloader .qc-draw { width: min(38vw, 158px); opacity: 0; }
+/* A definite box, and the SVG letterboxes itself inside it via its viewBox.
+   Sizing the wrapper from the SVG instead is circular — the SVG's width comes
+   from its height, which comes from the wrapper — and collapses to zero. */
+.preloader .qc-draw { width: 100%; height: 72%; opacity: 0; }
+.preloader .qc-draw svg { width: 100%; height: 100%; }
 
 .qc-stage {
   position: fixed; inset: 0;

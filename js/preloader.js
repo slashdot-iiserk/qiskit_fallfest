@@ -176,7 +176,7 @@ function startQubitField(canvas) {
   const FOCAL = 520;
   const NEAR = 0.35;
   const FAR = 6;
-  const COUNT = Math.round(Math.min(64, Math.max(26, window.innerWidth / 26)));
+  const COUNT = Math.round(Math.min(90, Math.max(34, window.innerWidth / 18)));
 
   let w = 0, h = 0, dpr = 1;
   let raf = 0;
@@ -233,7 +233,9 @@ function startQubitField(canvas) {
       const k = FOCAL / q.z;
       const sx = cx + q.x * k;
       const sy = cy + q.y * k;
-      const r = Math.max(0.6, 0.05 * k);
+      // A real radius in the scene, not a fraction of the projection: the old
+      // factor made a qubit fifty pixels across as it passed the camera.
+      const r = Math.min(9, Math.max(0.7, 0.011 * k));
       if (sx < -60 || sx > w + 60 || sy < -60 || sy > h + 60) continue;
 
       // Fade in from the back, out as it sweeps past the camera.
@@ -244,7 +246,7 @@ function startQubitField(canvas) {
 
       // The orbit ring: a circle seen at an angle, so it reads as a sphere.
       ctx.strokeStyle = `rgba(${colour},${(alpha * 0.55).toFixed(3)})`;
-      ctx.lineWidth = Math.max(0.5, r * 0.16);
+      ctx.lineWidth = Math.max(0.5, r * 0.2);
       ctx.beginPath();
       ctx.ellipse(sx, sy, r * 2.1, r * 2.1 * Math.abs(Math.cos(q.spin)), q.spin * 0.5, 0, Math.PI * 2);
       ctx.stroke();
