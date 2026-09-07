@@ -46,16 +46,42 @@ Regenerate with `npm run build:pages` (which runs `tools/build_pages.py`):
 - `404.html`
 - `sitemap.xml`, `robots.txt`, `site.webmanifest`
 
-Shared `<head>`, nav and footer markup lives in `tools/page_parts.py`. **`index.html` and
-`register.html` are hand-written** and carry their own copies of the nav and footer — if you change
-navigation, change it in `page_parts.py` *and* in those two files, or the pages will drift.
+### Two pages, on purpose
 
-`index.html` is generated too — by `tools/build_index.py`, which inlines the two line drawings from
-`assets/model/`. They are inlined rather than linked because the preloader must paint on the first
-frame and because `currentColor` (which lets the drawing follow the theme) only works inline. Run
-`npm run build:pages` after editing that file. **`register.html` is the only hand-written page**, so
-a navigation change has to be made in `tools/page_parts.py`, `tools/build_index.py` *and*
-`register.html`.
+The site is split in two, and the split is the point:
+
+| Page | Generator | What it is |
+| --- | --- | --- |
+| `index.html` | `tools/build_index.py` | The landing page. Informative, minimal, fast — event details, the schedule, the challenge, and Register as the loudest thing on it. **No three.js, no GLB, no importmap.** |
+| `machine.html` | `tools/build_machine.py` | The scroll-through of the machine: drawing → quantum computer → qubit → gates → the team inside the sphere → the register button. Opt-in, reached from the hero's "go inside the machine" aside and the footer. |
+
+The 3D experience is fabulous and it is also a lot to ask of someone who came to
+find out when the fest is. So the everyday visitor never pays for it: the
+landing page loads ~25 requests and no renderer at all, and anyone curious
+clicks through. `tests/e2e/site.spec.js` has a test that fails if three.js,
+Draco or a `.glb` is ever requested by `/`.
+
+The split is enforced at runtime by `document.body.dataset.page`
+(`landing` | `machine`):
+
+- `js/assets.js` preloads the model, the Draco decoder and the portraits **only**
+  when `page === 'machine'`, and skips outline tracing otherwise.
+- `js/main.js` imports `./saga.js` dynamically, also only on the machine page.
+- `js/preloader.js` guards the traced drawing, which the landing page's lighter
+  preloader (`.preloader--light`, a badge instead of a drawing) does not have.
+
+Shared `<head>`, nav and footer markup lives in `tools/page_parts.py`.
+**`register.html` is the only hand-written page**, and `build_index.py` and
+`build_machine.py` each carry their own nav — so a navigation change has to be
+made in `tools/page_parts.py`, `tools/build_index.py`, `tools/build_machine.py`
+*and* `register.html`, or the pages drift.
+
+Both generators inline the line drawings from `assets/model/` rather than
+linking them: the preloader must paint on the first frame, and `currentColor`
+(which lets the drawing follow the theme) only works inline. The saga markup
+lives in `SAGA` inside `tools/build_machine.py` — deliberately in the tracked
+file and not in `.work/`, which is gitignored, so a clean clone can rebuild.
+Run `npm run build:pages` after editing either generator.
 
 Assets under `assets/` are produced by `tools/build_assets.py`. Its inputs are:
 
@@ -65,6 +91,28 @@ Assets under `assets/` are produced by `tools/build_assets.py`. Its inputs are:
 | `source/organisers-2026.zip` | yes | Organiser portraits; the script extracts it into `.work/` on its own |
 | `2026_assets/` | **no** | The upstream Qiskit design kit. Clone it before running the asset build: `git clone git@github.com:Qiskit-Fall-Fest-2026/materials-resources.git 2026_assets` |
 | `Quantum_Computer_glb/` | **no** | The 42 MB source model for the dilution refrigerator. Everything in `assets/model/` is derived from it by `tools/build_model.sh`; the derived files are committed, the source is not. Point `QC_SOURCE` at it wherever you keep it. |
+
+### Logos on a dark ground
+
+The supplied marks are black artwork drawn for white paper, so they vanish on
+the ink palette. `build_assets.py` bakes light variants rather than leaning on a
+CSS `filter`, which would chew the antialiasing:
+
+- `light_svg()` sets an explicit `fill` on the root `<svg>`. The Qiskit paths
+  carry no fill of their own, so they inherit it → `assets/brand/qiskit-logo-light.svg`.
+- `light_raster()` inverts RGB while preserving alpha → `assets/brand/ibm-quantum-light.webp`.
+
+Partner marks are listed in `PARTNERS` in `tools/build_index.py`. A partner with
+`"src": None` renders as a dashed `.partner__placeholder` tile naming the
+partner and "logo to come" — missing artwork is made obviously *reserved*
+rather than silently absent. **Gluon and IISER Kolkata are still placeholders**;
+drop a file into `assets/brand/` and set `src` to fill one in.
+
+Sizing goes through `style="--partner-h:…px"`, not the `height` attribute:
+`css/base.css` sets `img { height: auto }`, which would otherwise win and render
+every mark at its intrinsic size. The heights are tuned *optically* (a roundel
+needs more pixels than a wordmark to carry the same weight), not to a common
+number.
 
 The gallery manifest in `build_pages.py` walks `archive/2025/` on disk, so the
 whole archived edition — key art, sticker sheet, the team that ran it — appears
@@ -229,7 +277,11 @@ Add a test with the change, not after it. In particular:
 - Touching `js/saga/qubit.js` → `tests/unit/bloch.test.js`. It asserts real quantum mechanics
   (`HZH = X`, `TT = S`, unitarity) *and* that each gate's declared rotation axis and angle agree
   with its matrix. If you change a gate and a test fails, the test is probably right.
-- **Check a phone.** The saga is the whole page; `.work` walkers aside, at minimum run the
+- Touching either generator's nav, or adding a section → the landing page's own
+  tests live in the `home page` describe of `tests/e2e/site.spec.js`: the hero's
+  format row, the five-card schedule rail, the challenge, the partner strip, and
+  the assertion that no 3D ever loads on `/`.
+- **Check a phone.** The saga is the machine page's whole reason to exist; `.work` walkers aside, at minimum run the
   `mobile-chromium` project. The qubit moves above the gate panel below 860px, labels drop their
   sentence below 760px, and the camera steps back on portrait.
 

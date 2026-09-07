@@ -63,11 +63,6 @@ HEAD = f"""<!DOCTYPE html>
 <link rel="stylesheet" href="css/components.css">
 <link rel="stylesheet" href="css/sections.css">
 
-<!-- three.js addons import bare "three"; this resolves it to the vendored copy. -->
-<script type="importmap">
-{{ "imports": {{ "three": "./vendor/three/three.module.min.js", "three/addons/": "./vendor/three/" }} }}
-</script>
-
 <script type="application/ld+json">
 {{
   "@context": "https://schema.org",
@@ -112,25 +107,21 @@ HEAD = f"""<!DOCTYPE html>
 }}
 </script>
 </head>
-<body>
+<body data-page="landing">
 <a class="skip-link" href="#main">Skip to content</a>
 <canvas class="ambient" aria-hidden="true"></canvas>
-<!-- The drawing lives here for the whole first act; js/saga.js drives it. -->
-<div class="qc-stage" data-qc-stage aria-hidden="true"></div>
 """
 
 PRELOADER = """
-<div class="preloader" data-preloader role="status" aria-live="polite" aria-label="Loading">
-  <canvas class="preloader__field" data-preloader-field aria-hidden="true"></canvas>
+<div class="preloader preloader--light" data-preloader role="status" aria-live="polite" aria-label="Loading">
   <div class="preloader__inner">
     <div class="preloader__ring" data-preloader-ring>
       <svg viewBox="0 0 120 120" aria-hidden="true">
         <circle class="ring__track" cx="60" cy="60" r="54" />
         <circle class="ring__arc" cx="60" cy="60" r="54" />
       </svg>
-      {art}
+      <img class="preloader__badge" src="assets/brand/badge-2026.svg" alt="" width="120" height="120">
     </div>
-
     <div data-preloader-fade class="preloader__meta">
       <p class="preloader__status" data-preloader-status>Starting up</p>
       <p class="preloader__count"><span class="preloader__pct" data-preloader-pct>000</span><small>%</small></p>
@@ -154,8 +145,8 @@ NAV = """
     <nav aria-label="Primary">
       <ul class="nav__menu" id="nav-menu">
         <li><a class="nav__link" href="#about">About</a></li>
-        <li><a class="nav__link" href="#machine">The machine</a></li>
         <li><a class="nav__link" href="#schedule">Schedule</a></li>
+        <li><a class="nav__link" href="#challenge">Challenge</a></li>
         <li><a class="nav__link" href="#certificates">Certificates</a></li>
         <li><a class="nav__link" href="resources.html">Resources</a></li>
         <li><a class="nav__link" href="gallery.html">Gallery</a></li>
@@ -176,10 +167,57 @@ NAV = """
 </header>
 """
 
+"""
+Partners.
+
+`src` is None where we do not have usable artwork yet — those render as a
+labelled placeholder tile rather than a broken image or a silent gap, so the
+slot is obviously reserved and can be filled by dropping a file in and adding
+the path here.
+"""
+PARTNERS = [
+    {"name": "IBM Quantum", "src": "assets/brand/ibm-quantum-light.webp", "href": "https://quantum.ibm.com", "h": 24},
+    {"name": "Qiskit", "src": "assets/brand/qiskit-logo-light.svg", "href": "https://qiskit.org", "h": 44},
+    {"name": "SlashDot", "src": "assets/brand/slashdot-light.webp", "href": "https://github.com/slashdot-iiserk", "h": 36},
+    {"name": "Gluon", "src": None, "href": None, "h": 26},
+    {"name": "IISER Kolkata", "src": None, "href": "https://www.iiserkol.ac.in", "h": 30},
+]
+
+
+def partners(size: str = "sm") -> str:
+    """size: 'sm' for the hero strip, 'lg' for the presented-with band."""
+    out = []
+    for partner in PARTNERS:
+        scale = 1 if size == "sm" else 1.5
+        if partner["src"]:
+            # Height comes from a custom property, not the attribute: the base
+            # reset sets `img { height: auto }`, which would otherwise win and
+            # render every mark at its intrinsic size.
+            inner = (f'<img src="{partner["src"]}" alt="{partner["name"]}" '
+                     f'style="--partner-h:{round(partner["h"] * scale)}px" '
+                     f'loading="lazy" decoding="async">')
+        else:
+            inner = (f'<span class="partner__placeholder">{partner["name"]}'
+                     f'<small>logo to come</small></span>')
+        if partner["href"]:
+            out.append(f'<a class="partner" href="{partner["href"]}" target="_blank" rel="noopener" '
+                       f'aria-label="{partner["name"]}">{inner}</a>')
+        else:
+            out.append(f'<span class="partner" aria-label="{partner["name"]}">{inner}</span>')
+    return "".join(out)
+
+
 ARROW = ('<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" '
          'stroke-linecap="round" stroke-linejoin="round" width="17" height="17" aria-hidden="true">'
          '<path d="M5 12h14M13 6l6 6-6 6"/></svg>')
 
+
+# The official Fall Fest sticker art, in the order it reads best as a strip.
+STICKER_STRIP = [
+    "text_fall-fest_02", "sticker-01", "text_quantum_02", "sticker-03", "qiskit_03",
+    "sticker-06", "text_computing_02", "sticker-04", "2026_2", "sticker-07",
+    "text_qiskit_01", "sticker-02",
+]
 
 MARQUEE_ITEMS = [
     ("|0&#10217;", "Superposition"), ("H", "Hadamard"), ("&otimes;", "Entanglement"),
@@ -191,6 +229,10 @@ MARQUEE_ITEMS = [
 def build() -> str:
     stage_art = drawing("qc-three-quarter")
     # Doubled so the track can loop seamlessly at -50%.
+    # Doubled for the same seamless -50% loop as the concept ticker.
+    stickers = "".join(
+        f'<img src="assets/stickers/{name}.webp" alt="" width="256" height="256" '
+        f'loading="lazy" decoding="async">' for name in STICKER_STRIP * 2)
     marquee = "".join(
         f'<span class="marquee__item"><b>{k}</b> {v}</span>' for k, v in MARQUEE_ITEMS * 2)
 
@@ -200,31 +242,39 @@ def build() -> str:
   <!-- ============================ HERO ============================ -->
   <section class="hero" data-hero>
     <div class="hero__inner">
+      <div class="hero__partners" data-hero-in aria-label="Presented with">
+        {{partners_hero}}
+      </div>
+
       <div class="hero__badges" data-hero-in>
         <span class="chip chip--gold chip--live"><i class="chip__dot"></i> Registrations open</span>
-        <span class="chip">6 – 13 October 2026</span>
+        <span class="chip">Open to students from any institute</span>
       </div>
 
       <h1 class="hero__title" data-hero-in>Qiskit<em>Fall Fest</em>2026</h1>
-      <p class="hero__sub" data-hero-in>IISER Kolkata · Presented by SlashDot</p>
 
-      <p class="hero__lede" data-hero-in>
-        Five days that take you from <em>what even is a qubit</em> to writing, running and
-        debugging real quantum circuits — closing with an invited speaker from the
-        IBM&nbsp;Quantum world.
+      <p class="hero__dates" data-hero-in>
+        <b>6 &ndash; 13 October 2026</b>
+        <span>MN Saha, IISER Kolkata</span>
       </p>
 
+      <ul class="hero__format" data-hero-in>
+        <li><b>Lectures</b><span>The physics, then the point of it</span></li>
+        <li><b>Hands-on labs</b><span>Qiskit on your own laptop</span></li>
+        <li><b>Challenge</b><span>With swag for the winners</span></li>
+        <li><b>Panel</b><span>An IBM Quantum industry insider</span></li>
+      </ul>
+
       <div class="hero__cta" data-hero-in>
-        <a class="btn btn--lg" href="register.html">Register {ARROW}</a>
-        <a class="btn btn--lg btn--ghost" href="#machine">Go inside the machine</a>
+        <a class="btn btn--lg" href="register.html">Register now {ARROW}</a>
+        <a class="btn btn--lg btn--ghost" href="#schedule">See the schedule</a>
       </div>
 
-      <dl class="hero__meta" data-hero-in>
-        <div class="hero__meta-item"><dt>Venue</dt><dd>MN Saha, IISER&nbsp;Kolkata</dd></div>
-        <div class="hero__meta-item"><dt>Format</dt><dd>Talks &amp; hands-on labs</dd></div>
-        <div class="hero__meta-item"><dt>Open to</dt><dd>Students, any institute</dd></div>
-        <div class="hero__meta-item"><dt>Bring</dt><dd>A laptop</dd></div>
-      </dl>
+      <p class="hero__aside" data-hero-in>
+        Curious how the hardware actually works?
+        <a href="machine.html">Go inside the machine &rarr;</a>
+        <small>A scroll-through of a real quantum computer. Optional, and a little indulgent.</small>
+      </p>
     </div>
   </section>
 
@@ -278,88 +328,55 @@ def build() -> str:
     </div>
   </section>
 
-  <!-- ============================ THE SAGA ============================ -->
-  <section class="saga" id="machine" data-saga aria-label="Inside the machine">
-    <div class="saga__sticky">
-      <div class="saga__stage">
-        <canvas class="saga__canvas" data-saga-canvas aria-hidden="true"></canvas>
-
-        <div class="saga__labels" data-saga-labels aria-hidden="true"></div>
-        <div class="saga__labels" data-saga-values aria-hidden="true"></div>
-        <div class="saga__labels" data-saga-stations aria-hidden="true"></div>
-
-        <!-- Gates, played by hand while the qubit sits to the left -->
-        <aside class="gate-panel" data-saga-gates hidden aria-label="Single-qubit gate playground">
-          <p class="gate-panel__eyebrow">Apply a gate</p>
-          <div class="gate-row">
-            <button class="gate-btn" type="button" data-gate="H">H<small>hadamard</small></button>
-            <button class="gate-btn" type="button" data-gate="X">X<small>not</small></button>
-            <button class="gate-btn" type="button" data-gate="Y">Y<small>pauli-y</small></button>
-            <button class="gate-btn" type="button" data-gate="Z">Z<small>phase</small></button>
-            <button class="gate-btn" type="button" data-gate="S">S<small>&radic;Z</small></button>
-            <button class="gate-btn" type="button" data-gate="T">T<small>&pi;/8</small></button>
-            <button class="gate-btn" type="button" data-gate-reset>&#8635;<small>reset</small></button>
-          </div>
-
-          <div class="circuit-strip" data-circuit aria-live="polite"></div>
-
-          <div class="amp-readout" aria-live="polite">
-            <div class="amp-row">
-              <span class="amp-row__ket">|0&#10217;</span>
-              <span class="amp-row__bar"><i data-p0-bar style="width:100%"></i></span>
-              <span class="amp-row__pct" data-p0-pct>100.0%</span>
-            </div>
-            <div class="amp-row">
-              <span class="amp-row__ket">|1&#10217;</span>
-              <span class="amp-row__bar"><i data-p1-bar style="width:0%"></i></span>
-              <span class="amp-row__pct" data-p1-pct>0.0%</span>
-            </div>
-          </div>
-          <p class="gate-panel__note">
-            Every gate is a rotation. The arc is the path the state actually takes —
-            and these are the numbers Qiskit would print.
-          </p>
-        </aside>
-
-        <!-- What everything finally becomes -->
-        <div class="saga__cta" data-saga-cta>
-          <p class="eyebrow">Registration is open</p>
-          <h2>Come and build one.</h2>
-          <a class="btn btn--lg" href="register.html">Register for Fall Fest 2026 {ARROW}</a>
-        </div>
-
-        <!-- On a phone there is no room for five plates beside the model, so
-             the nearest one is shown here instead, full size and readable. -->
-        <aside class="saga__card" data-saga-card hidden aria-live="polite">
-          <span class="saga__card-k"></span>
-          <span class="saga__card-v"></span>
-        </aside>
-
-        <div class="saga__chapters" data-saga-chapters></div>
-        <p class="saga__hint" data-saga-hint aria-hidden="true">Drag to turn</p>
-        <p class="saga__fallback" data-saga-fallback hidden></p>
-      </div>
-    </div>
-  </section>
-
   <!-- ============================ SCHEDULE ============================ -->
   <section class="section" id="schedule">
     <div class="container">
       <p class="section__index" data-drop="line"><b>02</b> <span>Schedule</span> <span>All times IST</span></p>
       <div class="section__head">
-        <h2 data-drop>Five days.</h2>
+        <h2 data-drop>Five days, start to finish.</h2>
         <p class="lede" data-drop>
           All sessions are at <strong>MN Saha</strong>, IISER Kolkata. Day 3 topics and the Day 4
           speaker are still being finalised — this page is the first place they will appear.
         </p>
       </div>
-      <div class="sched__tabs" role="tablist" aria-label="Choose a day" data-schedule-tabs></div>
+      <div class="sched__rail" role="tablist" aria-label="Choose a day" data-schedule-tabs></div>
       <div data-schedule-panels></div>
       <p class="muted" style="margin-top:2.5rem;font-size:var(--step--1)">
         The schedule on this page is generated from
         <a href="https://github.com/slashdot-iiserk/qiskit_fallfest/blob/main/js/data/event.js">a single data file in the repository</a>,
         so it is always the current version.
       </p>
+    </div>
+  </section>
+
+  <!-- ============================ CHALLENGE ============================ -->
+  <section class="section section--alt" id="challenge">
+    <div class="container">
+      <p class="section__index" data-drop="line"><b>03</b> <span>The challenge</span> <span>To be announced</span></p>
+      <div class="challenge" data-drop>
+        <div class="challenge__art" aria-hidden="true">
+          <img src="assets/stickers/sticker-05.webp" alt="" width="512" height="512" loading="lazy" decoding="async">
+          <img src="assets/stickers/sticker-07.webp" alt="" width="512" height="512" loading="lazy" decoding="async">
+          <img src="assets/stickers/sticker-01.webp" alt="" width="512" height="512" loading="lazy" decoding="async">
+        </div>
+        <div>
+          <p class="eyebrow">Announced closer to the date</p>
+          <h2 style="margin-block:1rem 1.25rem">There is a challenge.<br>There is swag.</h2>
+          <p class="lede">
+            A problem set to take away and actually solve, run across the fest. The brief is still
+            being written — but the prizes are not hypothetical: <strong>winners take home Qiskit
+            Fall Fest swag</strong>, and the leaderboard goes up on this page.
+          </p>
+          <ul class="challenge__list">
+            <li><span>Open to everyone who registers, whatever your level</span></li>
+            <li><span>Worked on across the hands-on days, submitted as a notebook</span></li>
+            <li><span>Swag for the winners, and a mention on the certificate</span></li>
+          </ul>
+          <p style="margin-top:1.75rem">
+            <a class="btn" href="register.html">Register to take part {ARROW}</a>
+          </p>
+        </div>
+      </div>
     </div>
   </section>
 
@@ -387,7 +404,7 @@ def build() -> str:
   <!-- ============================ CERTIFICATES ============================ -->
   <section class="section section--alt" id="certificates">
     <div class="container">
-      <p class="section__index" data-drop="line"><b>03</b> <span>Certification</span> <span>Three tiers</span></p>
+      <p class="section__index" data-drop="line"><b>04</b> <span>Certification</span> <span>Three tiers</span></p>
       <div class="section__head section__head--center">
         <h2 data-drop>Nobody walks away empty-handed.</h2>
         <p class="lede" style="margin-inline:auto" data-drop>
@@ -407,7 +424,7 @@ def build() -> str:
   <!-- ============================ RESOURCES ============================ -->
   <section class="section section--alt" id="resources">
     <div class="container">
-      <p class="section__index" data-drop="line"><b>04</b> <span>Before you arrive</span> <span>All public</span></p>
+      <p class="section__index" data-drop="line"><b>05</b> <span>Before you arrive</span> <span>All public</span></p>
       <div class="section__head">
         <h2 data-drop>Documentation, notebooks and prep</h2>
         <p class="lede" data-drop>
@@ -439,7 +456,7 @@ def build() -> str:
   <!-- ============================ VENUE ============================ -->
   <section class="section section--alt" id="venue">
     <div class="container">
-      <p class="section__index" data-drop="line"><b>05</b> <span>Getting there</span> <span>Mohanpur campus</span></p>
+      <p class="section__index" data-drop="line"><b>06</b> <span>Getting there</span> <span>Mohanpur campus</span></p>
       <div class="venue">
         <div class="venue__img" data-drop>
           <img src="assets/brand/iiserk.webp" width="1280" height="800" loading="lazy" decoding="async"
@@ -466,17 +483,19 @@ def build() -> str:
   </section>
 
   <!-- ============================ PARTNERS ============================ -->
-  <section class="section section--tight">
+  <section class="section section--tight" id="partners">
     <div class="container">
       <p class="eyebrow" style="display:flex;justify-content:center;margin-bottom:2.5rem">Presented with</p>
       <div class="partners" data-drop>
-        <img src="assets/brand/qiskit-logo.svg" alt="Qiskit" height="38" loading="lazy">
-        <img src="assets/brand/ibm-quantum.webp" alt="IBM Quantum" width="640" height="140" loading="lazy" decoding="async">
-        <img src="assets/brand/slashdot-light.webp" alt="SlashDot, IISER Kolkata" width="512" height="512" style="height:46px;width:auto" loading="lazy" decoding="async">
-        <img src="assets/brand/iiserk-slashdot.webp" alt="IISER Kolkata" width="1024" height="300" loading="lazy" decoding="async">
+        {{partners_band}}
       </div>
     </div>
   </section>
+
+  <!-- ============================ STICKERS ============================ -->
+  <div class="sticker-strip" aria-hidden="true">
+    <div class="sticker-strip__track">{stickers}</div>
+  </div>
 
   <!-- ============================ CTA ============================ -->
   <section class="section">
@@ -485,8 +504,9 @@ def build() -> str:
         <p class="eyebrow" style="display:inline-flex;margin-bottom:1.5rem">Registration is open</p>
         <h2>Bring a laptop.<br>We will handle the rest.</h2>
         <p>
-          Registration takes about ninety seconds and costs nothing. It is how you get the notebooks,
-          the announcements and — eventually — your certificate.
+          Registering takes about ninety seconds and is free in itself &mdash; the participation fee is
+          settled separately once it is announced. Registering is how you get the notebooks, the
+          announcements and &mdash; eventually &mdash; your certificate.
         </p>
         <a class="btn btn--lg" href="register.html">Register for Fall Fest 2026 {ARROW}</a>
       </div>
@@ -495,6 +515,9 @@ def build() -> str:
 
 </main>
 """
+
+    body = body.replace("{partners_hero}", partners("sm"))
+    body = body.replace("{partners_band}", partners("lg"))
 
     import page_parts as P
 

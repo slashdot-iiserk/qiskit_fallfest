@@ -49,7 +49,7 @@ const renderUp = (page) => page.waitForFunction(
 
 test.describe('preloader', () => {
   test('draws the machine, then hands it to the fixed stage', async ({ page }) => {
-    await page.goto('/');
+    await page.goto('/machine.html');
     expect(await page.evaluate(() => Boolean(document.querySelector('[data-preloader] .qc-draw')))).toBe(true);
     await gone(page);
     // The very same node now lives on the stage that carries it down the page.
@@ -58,7 +58,7 @@ test.describe('preloader', () => {
   });
 
   test('streams qubits from a canvas rather than a static graphic', async ({ page }) => {
-    await page.goto('/');
+    await page.goto('/machine.html');
     const painted = await page.evaluate(async () => {
       const c = document.querySelector('[data-preloader-field]');
       if (!c) return -1;
@@ -73,7 +73,7 @@ test.describe('preloader', () => {
   });
 
   test('reveals the hero copy once loading finishes', async ({ page }) => {
-    await page.goto('/');
+    await page.goto('/machine.html');
     await gone(page);
     const hidden = await page.locator('[data-hero-in]').evaluateAll(
       (els) => els.filter((el) => !el.classList.contains('is-in')).length);
@@ -84,7 +84,7 @@ test.describe('preloader', () => {
   test('is skipped entirely under reduced motion', async ({ browser }) => {
     const context = await browser.newContext({ reducedMotion: 'reduce' });
     const page = await context.newPage();
-    await page.goto('/');
+    await page.goto('/machine.html');
     await expect(page.locator('[data-preloader]')).toHaveCount(0, { timeout: 12000 });
     await expect(page.locator('[data-qc-stage] .qc-draw')).toBeAttached();
     await context.close();
@@ -92,7 +92,7 @@ test.describe('preloader', () => {
 });
 
 test.describe('the drawing', () => {
-  test.beforeEach(async ({ page }) => { await page.goto('/'); await gone(page); });
+  test.beforeEach(async ({ page }) => { await page.goto('/machine.html'); await gone(page); });
 
   test('sits behind the hero, out of focus', async ({ page }) => {
     const state = await page.evaluate(() => {
@@ -142,7 +142,7 @@ test.describe('the saga', () => {
   // Draco decode and shader compilation on a software GL backend are slow.
   test.describe.configure({ timeout: 150_000 });
 
-  test.beforeEach(async ({ page }) => { await page.goto('/'); await gone(page); });
+  test.beforeEach(async ({ page }) => { await page.goto('/machine.html'); await gone(page); });
 
   test('has a scroll runway several viewports tall', async ({ page }) => {
     const { section, viewport } = await page.evaluate(() => ({
@@ -314,7 +314,7 @@ test.describe('the saga', () => {
   test('falls back to the drawing under reduced motion', async ({ browser }) => {
     const context = await browser.newContext({ reducedMotion: 'reduce' });
     const page = await context.newPage();
-    await page.goto('/');
+    await page.goto('/machine.html');
     await page.evaluate(() => document.querySelector('[data-saga]').scrollIntoView());
     await page.waitForTimeout(1500);
     await expect(page.locator('[data-saga-fallback]')).toBeVisible();
@@ -336,7 +336,7 @@ test.describe('the saga on a narrow screen', () => {
   test('keeps every anchored label inside the viewport', async ({ page, isMobile }) => {
     test.skip(!isMobile, 'covered by the mobile project');
     test.slow();
-    await page.goto('/');
+    await page.goto('/machine.html');
     await gone(page);
     await scrollSaga(page, 0.32);
     await renderUp(page);
@@ -356,6 +356,7 @@ test.describe('the saga on a narrow screen', () => {
   });
 });
 
+/* The reveals live on the landing page, which is where the copy is. */
 test.describe('scroll reveals', () => {
   test('content drops in as it enters the viewport', async ({ page }) => {
     await page.goto('/');
@@ -388,7 +389,7 @@ test.describe('on a phone', () => {
   test('shows the nearest label as a readable card, not a chip', async ({ page, isMobile }) => {
     test.skip(!isMobile, 'covered by the mobile project');
     test.slow();
-    await page.goto('/');
+    await page.goto('/machine.html');
     await gone(page);
     await scrollSaga(page, 0.32);
     await renderUp(page);
@@ -409,7 +410,7 @@ test.describe('on a phone', () => {
   test('carries the faces inside the sphere too', async ({ page, isMobile }) => {
     test.skip(!isMobile, 'covered by the mobile project');
     test.slow();
-    await page.goto('/');
+    await page.goto('/machine.html');
     await gone(page);
     await scrollSaga(page, 0.90);
     await renderUp(page);

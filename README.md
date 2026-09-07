@@ -51,7 +51,8 @@ first-timer who finds the advanced day heavy still leaves with the Intermediate 
 
 ```
 .
-├── index.html              2026 landing page — hero, schedule, lab, tiers, team, FAQ
+├── index.html              2026 landing page — event details, schedule, challenge, register
+├── machine.html            The opt-in scroll-through of the quantum computer   (generated)
 ├── register.html           Multi-step registration wired to the official Google Form
 ├── resources.html          Install guide, notebooks, pre-reading, certificate criteria   (generated)
 ├── gallery.html            Filterable gallery with a lightbox                            (generated)
@@ -98,6 +99,7 @@ first-timer who finds the advanced day heavy still leaves with the Intermediate 
 ├── tools/
 │   ├── build_assets.py     Raster → WebP pipeline
 │   ├── build_index.py      Generates index.html, inlining the line drawings
+│   ├── build_machine.py    Generates machine.html — the 3D saga, on its own page
 │   ├── build_pages.py      Generates the other pages marked (generated) above
 │   ├── build_model.sh      Whole 3D pipeline: GLB → Draco GLB + SVGs
 │   ├── glb2svg/            Hidden-line vector extraction (three.js, headless)
@@ -127,7 +129,7 @@ modules do need a server, so `file://` will not work.
 ```bash
 npm run build          # assets + all pages
 npm run build:assets   # re-encode rasters to WebP into assets/
-npm run build:pages    # regenerate index / resources / gallery / archive / 404 / sitemap
+npm run build:pages    # regenerate index / machine / resources / gallery / archive / 404 / sitemap
 npm run build:model    # re-derive the Draco model and the line drawings
 ```
 
@@ -225,12 +227,27 @@ IBM.
 
 ---
 
+## Two pages
+
+`index.html` is the front door and it is deliberately plain: what the fest is,
+when it runs, the five-day schedule laid out so every day is legible without a
+click, the challenge and its swag, the certificate tiers, how to get there — and
+**Register**, which is the loudest thing on the page.
+
+It loads no renderer, no model and no importmap. Around 25 requests, and a test
+in `tests/e2e/site.spec.js` fails if three.js, Draco or a `.glb` is ever
+requested by `/`.
+
+`machine.html` is where the 3D lives. It is linked from the hero as an aside for
+anyone curious about the hardware, and it is worth the click — but nobody who
+came to find out when the fest is has to scroll through it first.
+
 ## The machine
 
 The centrepiece is a dilution refrigerator — the gold chandelier that houses a
-superconducting quantum processor. The first two thirds of the page are one
-continuous sequence built around it, and nothing in that sequence ever
-cross-fades with a copy of itself.
+superconducting quantum processor. `machine.html` is one continuous sequence
+built around it, and nothing in that sequence ever cross-fades with a copy of
+itself.
 
 ```
 preloader   the machine draws itself on while qubits stream out of its core;

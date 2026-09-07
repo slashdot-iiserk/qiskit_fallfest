@@ -10,7 +10,6 @@ import { animate } from '../vendor/anime/anime.esm.min.js';
 import { EVENT, SCHEDULE, PEOPLE, SPEAKERS, TIERS, FAQ } from './data/event.js';
 import { initAmbient } from './ambient.js';
 import { initPreloader } from './preloader.js';
-import { initSaga } from './saga.js';
 
 const $  = (sel, ctx = document) => ctx.querySelector(sel);
 const $$ = (sel, ctx = document) => Array.from(ctx.querySelectorAll(sel));
@@ -192,10 +191,13 @@ function renderSchedule() {
   if (!tabs || !panels) return;
 
   tabs.innerHTML = SCHEDULE.map((day, i) => `
-    <button class="sched__tab" role="tab" type="button"
+    <button class="sched__card" role="tab" type="button"
             id="tab-${esc(day.id)}" aria-controls="panel-${esc(day.id)}"
             aria-selected="${i === 0}" tabindex="${i === 0 ? 0 : -1}">
-      ${esc(day.label)}
+      <span class="sched__card-day">${esc(day.label)}</span>
+      <span class="sched__card-date">${esc(day.dateLabel)}</span>
+      <span class="sched__card-theme">${esc(day.theme)}</span>
+      <span class="sched__card-count">${day.sessions.length} session${day.sessions.length === 1 ? '' : 's'}</span>
     </button>`).join('');
 
   panels.innerHTML = SCHEDULE.map((day, i) => `
@@ -377,7 +379,13 @@ function boot() {
   initDrops();
   initFigures();
   initAmbient($('.ambient'));
-  initSaga();
+  // The saga is the machine page's whole reason to exist, and nothing else
+  // should pay to load it.
+  if (document.body.dataset.page === 'machine') {
+    import('./saga.js').then(({ initSaga }) => initSaga()).catch((err) => {
+      console.warn('[main] the machine could not start:', err.message);
+    });
+  }
 
   const year = $('[data-year]');
   if (year) year.textContent = String(new Date().getFullYear());

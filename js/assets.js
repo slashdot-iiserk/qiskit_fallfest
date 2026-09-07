@@ -34,7 +34,7 @@ const TASKS = [
  * than a slightly longer loading screen. They are collected from the event
  * data so this list can never drift from who is actually on the page.
  */
-const PORTRAITS = [...PEOPLE, ...SPEAKERS]
+const PORTRAITS = (document.body?.dataset.page === 'machine' ? [...PEOPLE, ...SPEAKERS] : [])
   .map((person) => person.photo)
   .filter(Boolean)
   .filter((slug, i, all) => all.indexOf(slug) === i)
@@ -50,6 +50,13 @@ const IMAGES = [
 
 /** Resolved once, then shared by every caller. */
 let bundle = null;
+
+/**
+ * Only the machine page needs the renderer, the model and the traced outline.
+ * The landing page is a poster: fonts and artwork, and it should never pay
+ * a megabyte for something it does not draw.
+ */
+const NEEDS_3D = document.body?.dataset.page === 'machine';
 
 export function wants3D() {
   if (REDUCED.matches || SAVE_DATA) return false;
@@ -76,7 +83,7 @@ export function preloadAll(onProgress = () => {}) {
     onProgress(sum / total, current.label);
   };
 
-  const use3D = wants3D();
+  const use3D = NEEDS_3D && wants3D();
 
   const fonts = (document.fonts?.ready ?? Promise.resolve())
     .then(() => report('fonts', 1))
@@ -103,8 +110,11 @@ export function preloadAll(onProgress = () => {}) {
   const model = use3D ? fetchWithProgress(MODEL_URL, (f) => report('model', f)) : Promise.resolve(null).then((v) => { report('model', 1); return v; });
 
   // Tracing the drawing is main-thread work, so it waits for the network to
-  // quieten down and then yields between chunks.
-  const outline = Promise.all([fonts, images]).then(() => traceOutline((f) => report('outline', f)));
+  // quieten down and then yields between chunks. There is no drawing to trace
+  // on the landing page.
+  const outline = use3D
+    ? Promise.all([fonts, images]).then(() => traceOutline((f) => report('outline', f)))
+    : Promise.resolve(null).then((v) => { report('outline', 1); return v; });
 
   bundle = Promise.all([fonts, images, three, model, outline])
     .then(([, , threeMods, modelBuffer, outlinePts]) => ({

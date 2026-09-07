@@ -583,6 +583,7 @@ def build_sitemap() -> None:
         ("resources.html", "0.8", "weekly"),
         ("gallery.html", "0.6", "monthly"),
         ("faq.html", "0.7", "monthly"),
+        ("machine.html", "0.5", "monthly"),
         ("archive/", "0.4", "yearly"),
         ("archive/2025/", "0.3", "yearly"),
     ]

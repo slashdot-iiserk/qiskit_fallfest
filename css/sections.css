@@ -3,57 +3,118 @@
    ========================================================================== */
 
 /* --- Hero -------------------------------------------------------------------
-   The drawing is not in here: it lives on the fixed .qc-stage behind the page.
-   The hero is only type, centred over it. */
+   The landing page carries no render. It is a poster: who is presenting it,
+   what it is, when, what shape it takes, and the one button that matters. */
 .hero {
   position: relative;
   min-height: 100svh;
   display: grid; place-items: center;
-  padding-top: calc(var(--nav-h) + 2rem);
-  padding-bottom: var(--sp-8);
+  padding-top: calc(var(--nav-h) + 2.5rem);
+  padding-bottom: var(--sp-7);
   text-align: center;
 }
-.hero__inner { width: min(100% - 2.5rem, 900px); }
+.hero__inner { display: flex; flex-direction: column; width: min(100% - 2.5rem, 980px); }
 
-.hero__badges { display: flex; flex-wrap: wrap; gap: 0.5rem; justify-content: center; margin-bottom: var(--sp-6); }
+/* Partner marks, small, above the title. */
+.hero__partners {
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: center;
+  gap: clamp(1.5rem, 4vw, 2.75rem);
+  padding-bottom: var(--sp-5);
+  margin-bottom: var(--sp-5);
+  border-bottom: 1px solid var(--line);
+}
+
+.hero__badges { display: flex; flex-wrap: wrap; gap: 0.5rem; justify-content: center; margin-bottom: var(--sp-4); }
 
 .hero__title {
-  font-size: clamp(2.7rem, 9vw, 6.2rem);
-  line-height: 0.95;
+  font-size: clamp(2.4rem, 7vw, 4.6rem);
+  line-height: 0.94;
   letter-spacing: -0.04em;
   margin-bottom: var(--sp-4);
 }
 .hero__title em { font-style: normal; color: var(--gold); display: block; }
 
-.hero__sub {
-  font-family: var(--font-mono); font-weight: 400;
-  font-size: var(--step--2); letter-spacing: 0.32em; text-transform: uppercase;
-  color: var(--paper-2); margin-bottom: var(--sp-5);
+.hero__dates {
+  display: flex; flex-wrap: wrap; align-items: baseline; justify-content: center;
+  gap: 0.5rem 1.1rem;
+  margin-bottom: var(--sp-5);
+}
+.hero__dates b { font-size: var(--step-1); font-weight: 600; letter-spacing: -0.01em; }
+.hero__dates span {
+  font-family: var(--font-mono); font-size: var(--step--2);
+  letter-spacing: 0.18em; text-transform: uppercase; color: var(--paper-2);
 }
 
-.hero__lede {
-  max-width: 46ch; margin: 0 auto var(--sp-6);
-  color: var(--paper); font-size: var(--step-0);
-  text-shadow: 0 2px 24px var(--void);
+/* The shape of the week, in four words. */
+.hero__format {
+  list-style: none; padding: 0;
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 0;
+  margin-bottom: var(--sp-5);
+  border-top: 1px solid var(--line);
+  text-align: left;
 }
-.hero__lede em { font-style: italic; color: var(--gold); }
+.hero__format li {
+  padding: var(--sp-3) var(--sp-4) var(--sp-3) 0;
+  border-bottom: 1px solid var(--line);
+}
+.hero__format b {
+  display: block; font-size: var(--step-0); font-weight: 600; color: var(--gold);
+  margin-bottom: 0.2rem;
+}
+.hero__format span { font-size: var(--step--2); color: var(--paper-2); line-height: 1.45; }
 
 .hero__cta { display: flex; flex-wrap: wrap; gap: var(--sp-3); justify-content: center; margin-bottom: var(--sp-6); }
 
-.hero__meta {
-  display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-  gap: var(--sp-5) var(--sp-4);
-  padding-top: var(--sp-4); border-top: 1px solid var(--line);
-  text-align: left;
+/* The way through to the machine: offered, not pushed. */
+.hero__aside {
+  display: grid; gap: 0.3rem;
+  padding-top: var(--sp-5);
+  border-top: 1px solid var(--line);
+  font-size: var(--step--1); color: var(--paper-2);
 }
-.hero__meta-item dt {
+.hero__aside a { font-weight: 500; }
+.hero__aside small {
   font-family: var(--font-mono); font-size: var(--step--2);
-  letter-spacing: 0.18em; text-transform: uppercase; color: var(--paper-3);
-  margin-bottom: 0.3rem;
+  letter-spacing: 0.08em; color: var(--paper-3);
 }
-.hero__meta-item dd { margin: 0; font-weight: 500; font-size: var(--step--1); }
 
+/* Register is the point of the page, so on anything short it comes before the
+   format breakdown rather than after it. */
+@media (max-width: 720px), (max-height: 820px) {
+  .hero__cta { order: 1; margin-bottom: var(--sp-5); }
+  .hero__format { order: 2; margin-bottom: var(--sp-5); }
+  .hero__aside { order: 3; }
+}
 
+@media (max-height: 820px) {
+  .hero { padding-top: calc(var(--nav-h) + 1.25rem); padding-bottom: var(--sp-6); }
+  .hero__partners { padding-bottom: var(--sp-4); margin-bottom: var(--sp-4); }
+  .hero__badges { margin-bottom: var(--sp-3); }
+  .hero__title { font-size: clamp(2.2rem, 5.6vw, 3.6rem); margin-bottom: var(--sp-3); }
+  .hero__dates { margin-bottom: var(--sp-4); }
+  .hero__format li { padding-block: 0.55rem; }
+}
+
+/* A 360x640 phone has no room for everything; the marks shrink before the
+   button moves. */
+@media (max-height: 700px) {
+  .hero { padding-top: calc(var(--nav-h) + 0.5rem); padding-bottom: var(--sp-5); }
+  .hero__title { font-size: clamp(1.9rem, 5vw, 3rem); }
+  .hero__partners { gap: 1.25rem; padding-bottom: var(--sp-3); margin-bottom: var(--sp-3); }
+  .hero__partners .partner img { height: calc(var(--partner-h, 28px) * 0.78); }
+  .hero__partners .partner__placeholder { padding: 0.4rem 0.6rem; }
+  .hero__badges { margin-bottom: var(--sp-2); }
+  .hero__title { margin-bottom: var(--sp-2); }
+  .hero__dates { margin-bottom: var(--sp-3); }
+}
+
+@media (max-width: 620px) {
+  .hero__format { grid-template-columns: 1fr 1fr; }
+  .hero__format li { padding-right: var(--sp-3); }
+  /* Two full-width buttons read better than two half-width ones. */
+  .hero__cta { flex-direction: column; align-items: stretch; }
+}
 
 /* --- Section headings --------------------------------------------------------- */
 .section__head { max-width: 70ch; margin-bottom: clamp(2.5rem, 5vw, 4.5rem); }
@@ -616,4 +677,170 @@
   font-family: var(--font-mono); font-size: var(--step-2); color: var(--gold-dim);
   background: var(--ink-3);
   filter: none;
+}
+
+/* --- Partners ---------------------------------------------------------------
+   The source marks are black artwork for white paper; light variants are baked
+   by tools/build_assets.py rather than faked with a filter here, which is why
+   these are shown at full strength instead of dimmed into invisibility. */
+.partners {
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: center;
+  gap: clamp(2rem, 6vw, 4.5rem);
+}
+.partner {
+  display: inline-flex; align-items: center;
+  text-decoration: none;
+  opacity: 0.75;
+  transition: opacity var(--dur-2) var(--ease-out);
+}
+.partner:hover { opacity: 1; }
+.partner img { height: var(--partner-h, 28px); width: auto; }
+
+/* A reserved slot, not a gap: obvious that artwork is coming. */
+.partner__placeholder {
+  display: grid; place-items: center; gap: 0.15rem;
+  min-width: 7.5rem; padding: 0.55rem 0.9rem;
+  border: 1px dashed var(--line-strong);
+  font-family: var(--font-mono); font-size: var(--step--2); font-weight: 500;
+  letter-spacing: 0.12em; text-transform: uppercase; color: var(--paper-2);
+  text-align: center;
+}
+.partner__placeholder small {
+  font-size: 0.56rem; letter-spacing: 0.1em; color: var(--paper-3); text-transform: none;
+}
+
+/* --- The challenge ------------------------------------------------------------ */
+.challenge {
+  display: grid; gap: clamp(2rem, 5vw, 3.5rem);
+  grid-template-columns: minmax(0, 300px) minmax(0, 1fr);
+  align-items: center;
+  padding: clamp(1.75rem, 4vw, 3rem);
+  border: 1px solid var(--line-strong);
+  background: var(--ink-2);
+}
+@media (max-width: 780px) { .challenge { grid-template-columns: minmax(0, 1fr); } }
+
+/* Actual swag artwork, loosely stacked the way stickers land on a laptop lid.
+   Each child owns --tx/--ty; the bob animates around them so the offsets
+   survive the keyframes. */
+.challenge__art { position: relative; display: grid; place-items: center; min-height: 300px; }
+.challenge__art img {
+  position: absolute; width: 44%; height: auto;
+  animation: challenge-bob 7s var(--ease-in-out) infinite alternate;
+}
+.challenge__art img:nth-child(1) { --tx: -62%; --ty: -26%; rotate: -9deg; width: 50%; }
+.challenge__art img:nth-child(2) { --tx: 66%; --ty: -46%; rotate: 12deg; animation-delay: -2.3s; }
+.challenge__art img:nth-child(3) { --tx: 8%; --ty: 58%; rotate: -5deg; width: 42%; animation-delay: -4.6s; }
+@keyframes challenge-bob {
+  from { translate: var(--tx, 0) calc(var(--ty, 0%) - 7px); }
+  to   { translate: var(--tx, 0) calc(var(--ty, 0%) + 7px); }
+}
+
+.challenge__list { list-style: none; padding: 0; margin-top: var(--sp-5); display: grid; gap: 0.7rem; }
+.challenge__list li { display: flex; gap: 0.7rem; font-size: var(--step--1); color: var(--paper-2); }
+.challenge__list li::before { content: "—"; color: var(--gold); flex: none; }
+
+/* --- The machine page's own opening ------------------------------------------- */
+.machine-intro {
+  position: relative;
+  min-height: 100svh;
+  display: grid; place-items: center;
+  text-align: center;
+  padding-top: calc(var(--nav-h) + 2rem);
+}
+.machine-intro__title {
+  font-size: clamp(2.6rem, 8vw, 5rem);
+  letter-spacing: -0.04em;
+  margin-block: var(--sp-4) var(--sp-5);
+}
+.machine-intro__meta {
+  margin-top: var(--sp-6);
+  font-family: var(--font-mono); font-size: var(--step--2);
+  letter-spacing: 0.12em; text-transform: uppercase; color: var(--paper-3);
+}
+.machine-intro__cue {
+  margin-top: var(--sp-7);
+  display: flex; flex-direction: column; align-items: center; gap: 0.6rem;
+  font-family: var(--font-mono); font-size: var(--step--2);
+  letter-spacing: 0.24em; text-transform: uppercase; color: var(--paper-3);
+}
+.machine-intro__cue i { display: block; width: 1px; height: 44px; background: var(--gold-deep); overflow: hidden; position: relative; }
+.machine-intro__cue i::after {
+  content: ""; position: absolute; inset: 0; background: var(--gold);
+  animation: scroll-drop 2.4s var(--ease-in-out) infinite;
+}
+@keyframes scroll-drop { 0% { transform: translateY(-100%); } 60%, 100% { transform: translateY(100%); } }
+
+/* The machine page's nav stays out of the way of the render. */
+.nav--machine .nav__actions { margin-left: auto; }
+
+/* --- Schedule rail: the whole fest visible before anyone clicks a tab ---- */
+.sched__rail {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 1px;
+  list-style: none;
+  margin: 0 0 var(--sp-6);
+  padding: 0;
+  background: var(--line);
+  border: 1px solid var(--line);
+}
+.sched__card {
+  display: grid;
+  align-content: start;
+  gap: 0.3rem;
+  padding: var(--sp-4);
+  text-align: left;
+  background: var(--ink);
+  border: 0;
+  border-top: 2px solid transparent;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+  transition: background var(--dur-2) var(--ease-out), border-color var(--dur-2) var(--ease-out);
+}
+.sched__card:hover { background: var(--ink-2); }
+.sched__card[aria-selected="true"] { background: var(--ink-2); border-top-color: var(--gold); }
+.sched__card-day {
+  font-family: var(--font-mono);
+  font-size: var(--step--1);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--gold);
+}
+.sched__card-date { font-size: var(--step--1); color: var(--muted); }
+.sched__card-theme { font-weight: 600; line-height: 1.25; }
+.sched__card-count {
+  font-family: var(--font-mono);
+  font-size: var(--step--2);
+  letter-spacing: 0.08em;
+  color: var(--muted);
+}
+
+/* --- Sticker strip: the actual Fall Fest sticker art, drifting past -------- */
+.sticker-strip {
+  --speed: 64s;
+  overflow: hidden;
+  padding: var(--sp-6) 0;
+  border-block: 1px solid var(--line);
+  mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent);
+}
+.sticker-strip__track {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-6);
+  width: max-content;
+  animation: marquee var(--speed) linear infinite;
+}
+.sticker-strip:hover .sticker-strip__track { animation-play-state: paused; }
+.sticker-strip img {
+  height: clamp(44px, 7vw, 76px);
+  width: auto;
+  opacity: 0.85;
+  transition: opacity var(--dur-2) var(--ease-out), transform var(--dur-2) var(--ease-out);
+}
+.sticker-strip img:hover { opacity: 1; transform: translateY(-4px) rotate(-3deg); }
+@media (prefers-reduced-motion: reduce) {
+  .sticker-strip__track { animation: none; }
+  .sticker-strip { mask-image: none; }
 }

@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 
-const PAGES = ['/', '/register.html', '/resources.html', '/gallery.html', '/faq.html', '/archive/', '/404.html'];
+const PAGES = ['/', '/register.html', '/resources.html', '/gallery.html', '/faq.html', '/machine.html', '/archive/', '/404.html'];
 
 /** Fail a test on any console error or failed request the page produced. */
 function watchForProblems(page) {
@@ -57,8 +57,13 @@ test.describe('home page', () => {
     // The h1 is set in three lines, so match on its normalised text.
     const h1 = await page.getByRole('heading', { level: 1 }).innerText();
     expect(h1.replace(/\s+/g, ' ')).toContain('Fall Fest 2026');
-    await expect(page.locator('.hero__badges')).toContainText('6 – 13 October 2026');
-    await expect(page.locator('.hero__meta')).toContainText('MN Saha');
+    await expect(page.locator('.hero__dates')).toContainText('6 – 13 October 2026');
+    await expect(page.locator('.hero__dates')).toContainText('MN Saha');
+    // The four things the fest actually consists of, stated in the hero.
+    await expect(page.locator('.hero__format')).toContainText('Lectures');
+    await expect(page.locator('.hero__format')).toContainText('Hands-on labs');
+    await expect(page.locator('.hero__format')).toContainText('Challenge');
+    await expect(page.locator('.hero__format')).toContainText('Panel');
   });
 
   test('says the participation fee is still to be announced', async ({ page }) => {
@@ -115,11 +120,63 @@ test.describe('home page', () => {
   });
 
   test('the team and the speakers are not duplicated as flat sections', async ({ page }) => {
-    // They are inside the sphere now, flown through along the state vector. A
-    // second copy on the page would be one more place to forget to update.
+    // They live inside the sphere on the machine page, flown through along the
+    // state vector. A second copy here would be one more place to forget.
     await expect(page.locator('[data-team]')).toHaveCount(0);
     await expect(page.locator('[data-speakers]')).toHaveCount(0);
-    await expect(page.locator('[data-saga-stations]')).toBeAttached();
+    await expect(page.locator('[data-saga]')).toHaveCount(0);
+  });
+
+  test('stays light: no renderer, no model, no importmap', async ({ page }) => {
+    // The whole point of the split. If three.js creeps back onto the landing
+    // page the first paint gets slower for everyone who never asked for it.
+    const heavy = [];
+    page.on('request', (r) => {
+      const u = r.url();
+      if (/three|draco|\.glb$/i.test(u)) heavy.push(u);
+    });
+    await page.goto('/');
+    await page.waitForLoadState('networkidle');
+    expect(heavy, 'landing page must not pull the 3D stack').toEqual([]);
+    await expect(page.locator('script[type="importmap"]')).toHaveCount(0);
+  });
+
+  test('links to the machine as an optional detour', async ({ page }) => {
+    const link = page.locator('.hero__aside a[href="machine.html"]');
+    await expect(link).toBeVisible();
+    await expect(page.locator('.hero__aside')).toContainText('Optional');
+  });
+
+  test('the schedule shows every day at a glance', async ({ page }) => {
+    // Five days legible without a click — the schedule is the thing most
+    // visitors came for.
+    const cards = page.locator('.sched__card');
+    await expect(cards).toHaveCount(5);
+    await expect(cards.first()).toHaveAttribute('aria-selected', 'true');
+    await cards.nth(2).click();
+    await expect(cards.nth(2)).toHaveAttribute('aria-selected', 'true');
+    await expect(page.locator('.sched__day.is-active')).toContainText('Programming Quantum Computers');
+  });
+
+  test('announces the challenge and its swag', async ({ page }) => {
+    const challenge = page.locator('#challenge');
+    await expect(challenge).toContainText('swag');
+    await expect(challenge).toContainText('announced');
+  });
+
+  test('credits every partner, with a visible mark or a reserved slot', async ({ page }) => {
+    const partners = page.locator('#partners .partner');
+    await expect(partners).toHaveCount(5);
+    // A supplied mark names itself in its alt text; a pending one names itself
+    // on the placeholder tile.
+    const named = await partners.evaluateAll((els) => els.map(
+      (el) => el.querySelector('img')?.alt || el.textContent.replace(/logo to come/, '').trim()));
+    expect(named).toEqual(['IBM Quantum', 'Qiskit', 'SlashDot', 'Gluon', 'IISER Kolkata']);
+    // Marks that are supplied must actually render at a sane size.
+    const heights = await page.locator('#partners .partner img').evaluateAll(
+      (els) => els.map((el) => Math.round(el.getBoundingClientRect().height)));
+    expect(heights.length).toBeGreaterThan(0);
+    expect(heights.every((h) => h > 12 && h < 90), `heights: ${heights}`).toBe(true);
   });
 
 })

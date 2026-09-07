@@ -64,6 +64,31 @@ def svg(src: Path, dest: Path) -> None:
     shutil.copyfile(src, dest)
 
 
+def light_svg(src: Path, dest: Path, colour: str) -> None:
+    """Repaint a black-on-white mark for a dark ground.
+
+    The source paths carry no fill at all, so they default to black. An explicit
+    fill on the root is inherited by every path that does not set its own.
+    """
+    dest.parent.mkdir(parents=True, exist_ok=True)
+    markup = src.read_text(encoding="utf-8")
+    markup = markup.replace("<svg ", f'<svg fill="{colour}" ', 1)
+    dest.write_text(markup, encoding="utf-8")
+
+
+def light_raster(src: Path, dest: Path, width: int) -> None:
+    """Invert a black-on-transparent raster so it reads on the dark palette."""
+    dest.parent.mkdir(parents=True, exist_ok=True)
+    with Image.open(src) as im:
+        im = im.convert("RGBA")
+        rgb = Image.merge("RGB", im.split()[:3])
+        inverted = ImageOps.invert(rgb)
+        out = Image.merge("RGBA", (*inverted.split(), im.split()[3]))
+        if out.width > width:
+            out = out.resize((width, round(out.height * width / out.width)), Image.LANCZOS)
+        out.save(dest, "WEBP", quality=90, method=6)
+
+
 def rasterise_svg(src: Path, dest_png: Path, width: int) -> bool:
     """Render an SVG with ImageMagick; returns False when unavailable."""
     dest_png.parent.mkdir(parents=True, exist_ok=True)
@@ -117,6 +142,12 @@ def build_2026() -> None:
          width=318, lossless=True)
     svg(LEGACY / "qiskit logo.svg", OUT / "brand" / "qiskit-logo.svg")
     webp(LEGACY / "IBM Quantum Logo.png", OUT / "brand" / "ibm-quantum.webp", width=640, quality=88)
+
+    # Both partner marks are black artwork meant for white paper, and the site
+    # is the other way round. Light variants are baked here rather than faked
+    # with a CSS filter, which would also chew the antialiasing.
+    light_svg(LEGACY / "qiskit logo.svg", OUT / "brand" / "qiskit-logo-light.svg", "#f2efe8")
+    light_raster(LEGACY / "IBM Quantum Logo.png", OUT / "brand" / "ibm-quantum-light.webp", width=640)
     webp(LEGACY / "SlashDot Main logo noBG W-01-02.png", OUT / "brand" / "slashdot-light.webp", width=512, quality=88)
     webp(LEGACY / "SlashDot Main logo noBG B-01.png", OUT / "brand" / "slashdot-dark.webp", width=512, quality=88)
     webp(LEGACY / "iiser_k.jpg", OUT / "brand" / "iiserk.webp", width=1280, quality=76)

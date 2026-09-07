@@ -38,9 +38,8 @@ def head(title, description, canonical, *, extra_css=(), prefix=""):
 def nav(current="", prefix=""):
     items = [
         ("About", f"{prefix}index.html#about", "about"),
-        ("The machine", f"{prefix}index.html#machine", "machine"),
-        ("Lab", f"{prefix}index.html#lab", "lab"),
         ("Schedule", f"{prefix}index.html#schedule", "schedule"),
+        ("Challenge", f"{prefix}index.html#challenge", "challenge"),
         ("Certificates", f"{prefix}index.html#certificates", "certificates"),
         ("Resources", f"{prefix}resources.html", "resources"),
         ("Gallery", f"{prefix}gallery.html", "gallery"),
@@ -92,6 +91,7 @@ def footer(prefix=""):
         <ul>
           <li><a href="{prefix}index.html#about">About</a></li>
           <li><a href="{prefix}index.html#schedule">Schedule</a></li>
+          <li><a href="{prefix}index.html#challenge">Challenge</a></li>
           <li><a href="{prefix}index.html#certificates">Certificates</a></li>
           <li><a href="{prefix}faq.html">FAQ</a></li>
         </ul>
@@ -103,6 +103,7 @@ def footer(prefix=""):
           <li><a href="{prefix}resources.html">Resources</a></li>
           <li><a href="{prefix}gallery.html">Gallery</a></li>
           <li><a href="{prefix}archive/">Archive</a></li>
+          <li><a href="{prefix}machine.html">Inside the machine</a></li>
         </ul>
       </div>
       <div>

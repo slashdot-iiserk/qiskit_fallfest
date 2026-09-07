@@ -138,7 +138,9 @@ export function initPreloader() {
         qubits?.stop();
         root.remove();
         curtain?.remove();
-        utils.set(art, { x: 0, y: 0, scale: 1 });
+        // There is no drawing on the landing page; only the machine page
+        // carries one through the hand-off.
+        if (art) utils.set(art, { x: 0, y: 0, scale: 1 });
         finish();
       },
     });

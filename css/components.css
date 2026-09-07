@@ -419,3 +419,8 @@ main, .nav, .footer { position: relative; z-index: 1; }
   color: var(--paper-2);
 }
 .codeblock code { color: inherit; }
+
+/* The landing page's loading screen has no drawing to trace — it is short,
+   because there is nothing heavy behind it. */
+.preloader--light .preloader__ring { width: min(44vw, 190px); }
+.preloader__badge { width: 58%; height: auto; opacity: 0.9; }
