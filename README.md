@@ -51,6 +51,8 @@ first-timer who finds the advanced day heavy still leaves with the Intermediate 
 
 ```
 .
+├── DESIGN.md               Why the site is shaped the way it is — read before changing the look
+├── AGENTS.md               Operating manual: what to run, what breaks what
 ├── index.html              2026 landing page — event details, schedule, challenge, register
 ├── machine.html            The opt-in scroll-through of the quantum computer   (generated)
 ├── register.html           Multi-step registration wired to the official Google Form

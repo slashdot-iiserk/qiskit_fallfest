@@ -119,15 +119,39 @@ export function buildCloud(THREE, wrap, outline) {
   const aButton = new Float32Array(COUNT * 3);
   const aSeed = new Float32Array(COUNT);
 
-  /* --- Where the machine is ------------------------------------------- */
+  /* --- Where the machine is -------------------------------------------
+     The area-weighted pick used to walk the triangle list from the start for
+     every one of the fourteen thousand particles — O(count x triangles), and
+     with a fresh `for...of` iterator each time. On this model that was two
+     seconds of blocked main thread, all of it while the loading screen was
+     trying to animate, and it was the single largest cost on the machine page.
+
+     Prefix sums once, then a binary search per particle: O(count x log
+     triangles), and exactly the same distribution — the first triangle whose
+     cumulative area reaches the target is the one the scan would have found. */
   const tris = collectTriangles(THREE, wrap);
-  const totalArea = tris.reduce((a, t) => a + t[3], 0) || 1;
+  const cumulative = new Float64Array(tris.length);
+  let running = 0;
+  for (let i = 0; i < tris.length; i += 1) {
+    running += tris[i][3];
+    cumulative[i] = running;
+  }
+  const totalArea = running || 1;
+
+  const pickTriangle = (target) => {
+    let lo = 0;
+    let hi = tris.length - 1;
+    while (lo < hi) {
+      const mid = (lo + hi) >> 1;
+      if (cumulative[mid] < target) lo = mid + 1;
+      else hi = mid;
+    }
+    return tris[lo];
+  };
 
   for (let i = 0; i < COUNT; i += 1) {
     // Area-weighted pick, then a uniform point inside that triangle.
-    let target = Math.random() * totalArea;
-    let t = tris[0];
-    for (const tri of tris) { target -= tri[3]; if (target <= 0) { t = tri; break; } }
+    const t = pickTriangle(Math.random() * totalArea);
     let u = Math.random();
     let v = Math.random();
     if (u + v > 1) { u = 1 - u; v = 1 - v; }

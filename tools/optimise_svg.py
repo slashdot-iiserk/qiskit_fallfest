@@ -11,6 +11,14 @@ coordinates. Two things are wasted in that:
    offset by hundreds of units, so every number carries three or four digits
    of position. The *deltas* between adjacent points are almost all under ten.
 
+Each run still *starts* with an absolute `M`, and that is load-bearing rather
+than an oversight. `traceOutline` in `js/assets.js` splits the `d` attribute on
+`"M"` to get one self-contained subpath per run, measures each once and samples
+it in proportion to its length — the alternative being `getPointAtLength`
+across the whole combined path, which is quadratic in the number of runs. A
+relative `m` would both defeat that split and make every run depend on where
+the previous one ended. `tests/unit/drawing.test.js` guards it.
+
 Chaining first, then writing relative deltas, is lossless to the emitted
 precision: the same points, described from where the pen already is.
 
@@ -101,18 +109,13 @@ def optimise(markup: str) -> str:
         return markup
 
     parts: list[str] = []
-    # Where the pen is once everything written so far has been parsed.
-    px = py = None
     for run in chain(segments):
+        # Absolute move: keeps each run independently parseable — see above.
         x, y = run[0]
-        if px is None:
-            sx, sy = num(x), num(y)
-            parts += ["M", sx, sy]
-        else:
-            sx, sy = num(x - px), num(y - py)
-            parts += ["m", sx, sy]
-        px = float(sx) if px is None else px + float(sx)
-        py = float(sy) if py is None else py + float(sy)
+        sx, sy = num(x), num(y)
+        parts += ["M", sx, sy]
+        # Where the pen is once everything written so far has been parsed.
+        px, py = float(sx), float(sy)
         parts.append("l")
         for x, y in run[1:]:
             dx, dy = num(x - px), num(y - py)

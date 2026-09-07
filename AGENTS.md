@@ -1,7 +1,26 @@
 # AGENTS.md
 
 Conventions for anyone — human or agent — working in this repository.
-Read this before editing. It is short on purpose.
+Read this before editing.
+
+**Companion document:** `DESIGN.md` explains *why* the site is shaped the way
+it is — the two-page split, the visual language, the story the machine page
+tells, what was deliberately not done. This file is the operating manual: what
+to run, what breaks what, and what will bite you. Read `DESIGN.md` first if you
+are about to change how something looks or behaves; read this one first if you
+are about to change code.
+
+### The first five minutes
+
+```bash
+npm install
+npm test                      # 44 unit + 187 e2e — everything should be green before you start
+python3 -m http.server 4173 --bind 127.0.0.1
+```
+
+Then: `js/data/event.js` is the event. `tools/build_index.py` is the landing
+page. `tools/build_machine.py` is the 3D page. `js/saga/timeline.js` is the
+choreography. Nothing else is likely to be where you need to start.
 
 ## What this repository is
 
@@ -221,7 +240,16 @@ Things worth knowing before touching it:
   full → half for the gates → a sixth for the journey → full to become the
   button. It has to thin for act V because the camera is *inside* the sphere
   there; at full opacity fourteen thousand points fill the frame with what
-  looks like static.
+  looks like static. It was written as a product of overlapping ramps once, and
+  one term silently undid another.
+- **`buildCloud` runs during the loading screen**, so anything you add to it is
+  paid for while the visitor is watching an animation. The area-weighted pick
+  is prefix sums plus a binary search for that reason — see the performance
+  section. Keep it O(count x log triangles).
+- **The saga's rAF loop does nothing while `is-loading` is on the root.**
+  `covered()` gates it. `boot()` still runs underneath, so the model, the cloud
+  and the outline are all ready when the shutter lifts — that is the whole
+  point of the preloader — but nothing paints behind it.
 - **The camera rides beside the vector, not down it.** A half-sine lateral
   swing (zero at both ends, so the entry lines up with the qubit and the exit
   meets the button head on) keeps the arrow from foreshortening into a dot.
@@ -365,11 +393,101 @@ Add a test with the change, not after it. In particular:
   tests live in the `home page` describe of `tests/e2e/site.spec.js`: the hero's
   format row, the five-card schedule rail, the challenge, the partner strip, and
   the assertion that no 3D ever loads on `/`.
+- Touching `tools/optimise_svg.py` or anything under `assets/model/` →
+  `tests/unit/drawing.test.js`. It guards the contract between the optimiser
+  and `traceOutline`: one `<path>` for anime.js, and every run starting with an
+  absolute `M` so the subpath split still works. That test exists because
+  emitting relative `m` saved 7% and silently collapsed 1500 subpaths into one,
+  making the sampling quadratic. Nothing failed and no pixel moved.
+- Touching the preloader, `js/main.js`'s boot order or `js/saga.js`'s loop →
+  the two guards in the `home page` describe of `tests/e2e/site.spec.js`: that
+  the ambient layer waits for the shutter, and that no oversized sticker is
+  ever requested. Both regressions were invisible without a test.
 - **Check a phone.** The saga is the machine page's whole reason to exist; `.work` walkers aside, at minimum run the
   `mobile-chromium` project. The qubit moves above the gate panel below 860px, labels drop their
   sentence below 760px, and the camera steps back on portrait.
 
 The e2e suite fails on **any** console error or failed request. Do not silence it; fix the cause.
+
+## Performance work
+
+The loading screen is the only place a visitor waits, and the only place where
+a wasted millisecond is visible. It has been through a measured pass; the
+findings are in the two tables below. **Read them before optimising anything**,
+because most of the obvious suspects were not the problem.
+
+### How to measure
+
+Neither harness is committed (they live under gitignored `.work/perf/`), so
+recreate them as needed. Both patch the *served* JS through `page.route`, which
+means nothing in the repo changes in order to ablate a suspect:
+
+```js
+await page.route('**/js/preloader.js', async (route) => {
+  const res = await route.fetch();
+  route.fulfill({ body: patch(await res.text()),
+    headers: { ...res.headers(), 'content-type': 'application/javascript' } });
+});
+```
+
+Four rules, each learned the hard way:
+
+1. **Throttle the CPU.** `Emulation.setCPUThrottlingRate` at 4x and 8x via CDP.
+   Everything is smooth on a development machine.
+2. **Average at least three runs.** At 8x throttle a single run ranks a no-op
+   change twenty points either side of baseline. One run is a guess.
+3. **Only count frames while the thing under test is on screen.** Sampling past
+   the shutter measures a different page and will tell you the loading screen
+   is fine when it is frozen.
+4. **Patch the module, not the call site.** Replacing `initAmbient(...)` in
+   `main.js` broke the whole boot and made the ablation look like a 90%
+   improvement. Neutralise the exported function instead.
+
+### Which metric
+
+| Metric | Use it for |
+| --- | --- |
+| **Jitter** — mean absolute change between consecutive frame times | "It feels janky." A steady 30fps looks fine; 20-to-60 does not. This is usually the complaint. |
+| **Frames drawn while loading** | "Did it animate at all?" A frozen main thread shows up as *few* frames, and percentiles over 14 samples are meaningless. |
+| **Total blocking time** (`longtask` entries) | Finding the one long task. Pair with `Profiler.start/stop` over CDP for self-time by function; `longtask` on its own only ever says `self`. |
+| % frames over 32ms | Rough throughput. Conflates slow with uneven — do not use it alone. |
+
+### What actually mattered
+
+| Change | Effect |
+| --- | --- |
+| **`buildCloud` area-weighted pick: linear scan → prefix sums + binary search** | The worst thing on either page. O(count x triangles) with a fresh `for...of` iterator per particle, for 14,000 particles: **one 12.8-second blocking task** at 4x throttle, loading screen frozen behind it, 24 frames drawn for the whole load. Now 73ms and 119 frames. Same distribution — the first triangle whose cumulative area reaches the target is the one the scan found. |
+| **Ambient layer deferred to `qff:loaded`** | `.preloader` is opaque and covers the viewport, so a full screen of motes and rails was painted behind it every frame, invisible. 42 points of jank, for nothing. |
+| **Saga pre-tick gated on `is-loading`** | Same bug, same page: `measure()` forces layout and `paintDrawing()` repaints, every frame, behind the same opaque preloader. `boot()` still runs underneath so the saga is ready on time. |
+| **Preloader field renders below 1:1** (0.85 desktop / 0.7 coarse, adaptive to a 0.4 floor) | Clear, blits and composite all scale with its square. The drawing transform uses the same factor, so geometry stays in CSS pixels and the animation is untouched — only the raster is coarser, invisible on soft dust. |
+| **Qubit glyph baked into a rotation atlas** | Was a stroked rotated ellipse plus a filled arc *plus an `rgba()` string built per qubit per frame* — ninety path ops and ninety CSS colour parses every frame. Now one axis-aligned `drawImage` and a `globalAlpha` number. Verified pixel-identical against the original draw code. |
+| **Field thins with quality** | A coarser buffer is not enough on the weakest hardware; the blits have to go too. Drops to 40% of the qubits at the floor. Sparser reads better than stuttering. |
+| **Artwork via `createImageBitmap`** | An `<img>` decodes lazily on the main thread the first time something draws it — mid-animation, as a hitch. An ImageBitmap is decoded off-thread before it is handed over. |
+| **Right-sized encodes** (`-160`, `-320`) | A 512px sticker is never drawn near 512px. 109 KB of field artwork became 28 KB, and the sticker strip reuses the same files so it costs no requests at all. |
+| **Preload list trimmed** | It had drifted: the 88 KB campus photograph (which carries `loading="lazy"` in the markup — preloading overrode it) and the two *dark* logo variants the partner strip stopped using. 100 KB ahead of first paint, two thirds never shown. It also listed the artwork, which fetched every sticker twice — once as an `<img>`, once as a fetch for `createImageBitmap`. |
+
+### What did not matter
+
+Recorded so nobody spends an afternoon here again:
+
+- **The traced SVG.** Removing the dash animation entirely changed nothing
+  measurable, on either page. It looks expensive and is not.
+- **The size of the sticker *sources*.** Pre-scaling them into offscreen
+  canvases made no measurable difference — the cost is the rotated blit, not
+  the resample. Smaller encodes shipped anyway, for bytes and decode time, but
+  they are not what fixed the stutter.
+- **The Draco model fetch and the portraits.** Both are network, not main
+  thread; ablating them moved nothing.
+
+### Current numbers
+
+Landing page, frame-to-frame jitter: **2.7ms at 4x** throttle, 9.8ms at 8x
+(from 11.7ms and 22.0ms). About 158 KB over the wire to the shutter.
+
+Machine page, main-thread blocking during load: **443ms at 1x and 1395ms at
+4x** (from 4173ms and 13327ms), with 165 and 119 frames drawn (from 71 and 24).
+What remains is browser-internal — module parse, WASM compile, GLB parse, GPU
+upload — with no hot spot left in our own code.
 
 ## Registration form
 
