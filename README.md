@@ -100,6 +100,7 @@ first-timer who finds the advanced day heavy still leaves with the Intermediate 
 │   ├── build_assets.py     Raster → WebP pipeline
 │   ├── build_index.py      Generates index.html, inlining the line drawings
 │   ├── build_machine.py    Generates machine.html — the 3D saga, on its own page
+│   ├── optimise_svg.py     Halves the extracted line drawings (chain + relative)
 │   ├── build_pages.py      Generates the other pages marked (generated) above
 │   ├── build_model.sh      Whole 3D pipeline: GLB → Draco GLB + SVGs
 │   ├── glb2svg/            Hidden-line vector extraction (three.js, headless)
@@ -263,8 +264,11 @@ act II      the camera descends the machine. Glass plates name each stage,
 act III     at the chip the machine dissolves again and reassembles as a qubit
 act IV      the qubit moves aside and you drive it by hand: every gate is a
             rotation, drawn as the arc the state actually sweeps
-act V       the camera rides up the state vector, inside the sphere, past what
-            the fest offers
+act V       the camera rides up the state vector — beside it, not down it —
+            inside the sphere, past the team, the venue, the three certificate
+            tiers, the challenge and the speakers. The longest act: better than
+            a quarter of the runway, because it carries the whole back half of
+            the landing page as places you fly through
 act VI      everything converges into the register button
 ```
 

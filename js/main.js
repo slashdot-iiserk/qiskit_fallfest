@@ -398,8 +398,39 @@ function boot() {
       hero.classList.add('is-in');
       $$('[data-hero-in]', hero).forEach((el, i) => el.style.setProperty('--drop-delay', `${i * 90}ms`));
       hero.querySelectorAll('[data-hero-in]').forEach((el) => el.classList.add('is-in'));
+      revealBackdrop();
     });
   }
+}
+
+/**
+ * The drawing the preloader traced stays behind the landing page.
+ *
+ * The hand-off has already moved the node into `.qc-backdrop`; all that is
+ * left is to fade the stage in and let it drift. The drift is a fraction of
+ * the scroll distance, so the drawing is never still and never keeps up —
+ * which is what makes it read as being a long way behind the page.
+ */
+function revealBackdrop() {
+  const stage = document.querySelector('.qc-backdrop');
+  if (!stage || !stage.querySelector('.qc-draw')) return;
+  stage.classList.add('is-in');
+
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+  let queued = false;
+  const onScroll = () => {
+    if (queued) return;
+    queued = true;
+    requestAnimationFrame(() => {
+      queued = false;
+      // Capped so it cannot drift out of its own box on a very long page.
+      const shift = Math.min(window.scrollY * 0.06, 220);
+      stage.style.setProperty('--qc-shift', `${-shift.toFixed(1)}px`);
+    });
+  };
+  addEventListener('scroll', onScroll, { passive: true });
+  onScroll();
 }
 
 if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);

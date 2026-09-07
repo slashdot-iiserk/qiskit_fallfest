@@ -57,9 +57,29 @@ The site is split in two, and the split is the point:
 
 The 3D experience is fabulous and it is also a lot to ask of someone who came to
 find out when the fest is. So the everyday visitor never pays for it: the
-landing page loads ~25 requests and no renderer at all, and anyone curious
-clicks through. `tests/e2e/site.spec.js` has a test that fails if three.js,
-Draco or a `.glb` is ever requested by `/`.
+landing page loads no renderer at all, and anyone curious clicks through.
+`tests/e2e/site.spec.js` has a test that fails if three.js, Draco or a `.glb`
+is ever requested by `/`.
+
+The landing page still keeps the two things people said they loved:
+
+- **The loading screen** traces the machine inside the progress ring while
+  qubits *and* the 2026 sticker artwork stream out of it through a pinhole
+  projection. Every sprite out there is an image the page needs further down,
+  so the show is the preload — see `ARTWORK` and `loadArtwork()` in
+  `js/assets.js`.
+- **The drawing then stays**, in `.qc-backdrop`: the same node the preloader
+  traced, handed over on the FLIP and left behind the page for good, blurred
+  and at 0.13 opacity with a radial scrim over the middle so the copy wins.
+  The parallax drift is set on the *container*, because the hand-off writes an
+  inline transform on the drawing itself.
+
+Register and "Go inside the machine" are both headline buttons in the hero and
+are asserted to be the same height — solid gold commits, outlined gold invites.
+
+`preloadAll` reports against `TASKS_FLAT` on the landing page and `TASKS_3D` on
+the machine page, so the status line never claims to be tracing an outline that
+does not exist.
 
 The split is enforced at runtime by `document.body.dataset.page`
 (`landing` | `machine`):
@@ -91,6 +111,23 @@ Assets under `assets/` are produced by `tools/build_assets.py`. Its inputs are:
 | `source/organisers-2026.zip` | yes | Organiser portraits; the script extracts it into `.work/` on its own |
 | `2026_assets/` | **no** | The upstream Qiskit design kit. Clone it before running the asset build: `git clone git@github.com:Qiskit-Fall-Fest-2026/materials-resources.git 2026_assets` |
 | `Quantum_Computer_glb/` | **no** | The 42 MB source model for the dilution refrigerator. Everything in `assets/model/` is derived from it by `tools/build_model.sh`; the derived files are committed, the source is not. Point `QC_SOURCE` at it wherever you keep it. |
+
+### The line drawings
+
+`tools/glb2svg/` emits one absolute `M x y L x y` per edge. `tools/optimise_svg.py`
+then chains segments that share an endpoint into polylines and rewrites them as
+relative deltas, which halves both files — worth a pass of its own, because both
+are inlined into the HTML of every page that shows one (`qc-front` 63 KB → 34 KB,
+`qc-three-quarter` 41 KB → 23 KB). It runs as the last step of
+`tools/build_model.sh`.
+
+The pen position is tracked as the *rounded* total the renderer will reach, not
+the exact source coordinate, so each delta corrects the previous one's rounding
+instead of compounding it. Verified by rasterising before and after: 219 of
+1.44 M pixels differ at all, on antialiased edges.
+
+The drawing stays a **single `<path>`** — `anime.js` draws it on through one
+`svg.createDrawable`, and splitting it would change the animation.
 
 ### Logos on a dark ground
 
@@ -144,6 +181,23 @@ One sequence owns the first two thirds of the page. It is split into four files:
 
 Things worth knowing before touching it:
 
+- **Act V is the longest act.** The journey along the state vector carries the
+  whole back half of the landing page — the team, the venue, the three
+  certificate tiers, the challenge and the speakers — as places you fly past
+  rather than sections you scroll. It runs `T.journeyIn` → `T.journeyOut`,
+  better than a quarter of the runway, and `.saga`'s height grew with it.
+- **`STATIONS` supports rings.** A `kind: 'ring'` stop names a `group` in
+  `RINGS` (`team`, `speakers`, `tiers`) and is expanded into one anchor per
+  item, arranged around the vector at that depth. Only people get a portrait;
+  tiers read as the three plates they are.
+- **The shell is a progression, not a product.** `shell` in `js/saga.js` goes
+  full → half for the gates → a sixth for the journey → full to become the
+  button. It has to thin for act V because the camera is *inside* the sphere
+  there; at full opacity fourteen thousand points fill the frame with what
+  looks like static.
+- **The camera rides beside the vector, not down it.** A half-sine lateral
+  swing (zero at both ends, so the entry lines up with the qubit and the exit
+  meets the button head on) keeps the arrow from foreshortening into a dot.
 - **`T` in `saga/timeline.js` is the whole story.** Change the pacing by moving
   those constants, never by scattering numbers through the frame loop.
 - **`cameraAt(p, aspect)` is a pure function and is used twice** — once for the
@@ -274,6 +328,9 @@ Add a test with the change, not after it. In particular:
   are marked `test.slow()` because Draco decode and shader compilation run on a software GL
   backend in CI. If one is flaky, make it wait on `data-saga-p` or `data-saga-phase` — do not
   lower the assertion to something that would still pass with the feature broken.
+  **The spec derives its scroll positions from `T`** (see `AT` at the top of the
+  file) rather than hardcoding fractions, so retiming an act does not fail a
+  dozen tests that were only ever asserting the order of the story.
 - Touching `js/saga/qubit.js` → `tests/unit/bloch.test.js`. It asserts real quantum mechanics
   (`HZH = X`, `TT = S`, unitarity) *and* that each gate's declared rotation axis and angle agree
   with its matrix. If you change a gate and a test fails, the test is probably right.

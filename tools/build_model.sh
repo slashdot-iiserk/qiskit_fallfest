@@ -44,5 +44,11 @@ npx gltf-transform optimize "$SOURCE" "$WORK/qc-lines.glb" \
 echo "==> hidden-line SVGs"
 node tools/glb2svg/run.mjs
 
+# The extractor emits one absolute "M x y L x y" per edge. Both drawings are
+# inlined into the HTML of every page that shows one, so halving them is worth
+# a pass of its own.
+echo "==> shrink the drawings"
+python3 tools/optimise_svg.py
+
 echo
 ls -lh assets/model/

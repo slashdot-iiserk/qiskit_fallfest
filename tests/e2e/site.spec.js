@@ -141,10 +141,29 @@ test.describe('home page', () => {
     await expect(page.locator('script[type="importmap"]')).toHaveCount(0);
   });
 
-  test('links to the machine as an optional detour', async ({ page }) => {
-    const link = page.locator('.hero__aside a[href="machine.html"]');
-    await expect(link).toBeVisible();
-    await expect(page.locator('.hero__aside')).toContainText('Optional');
+  test('gives Register and the machine equal billing', async ({ page }) => {
+    // Both were asked for as headline calls to action: Register is the point
+    // of the page, the machine is what people came back to say they loved.
+    const cta = page.locator('.hero__cta');
+    await expect(cta.locator('a[href="register.html"]')).toBeVisible();
+    const machine = cta.locator('a[href="machine.html"]');
+    await expect(machine).toBeVisible();
+    await expect(machine).toContainText('machine');
+
+    // Equal billing means the same size, not a button and a footnote.
+    const [reg, mach] = await cta.locator('a').evaluateAll(
+      (els) => els.map((el) => Math.round(el.getBoundingClientRect().height)));
+    expect(Math.abs(reg - mach), `heights ${reg} vs ${mach}`).toBeLessThanOrEqual(2);
+    await expect(page.locator('.hero__aside')).toContainText('For the curious');
+  });
+
+  test('keeps the machine drawing behind the page', async ({ page }) => {
+    // The preloader traces it, then hands it over; it stays there for good.
+    const stage = page.locator('.qc-backdrop');
+    await expect(stage.locator('.qc-draw svg')).toBeAttached();
+    await expect(stage).toHaveClass(/is-in/);
+    // Behind the content, and never in the way of a click.
+    expect(await stage.evaluate((el) => getComputedStyle(el).pointerEvents)).toBe('none');
   });
 
   test('the schedule shows every day at a glance', async ({ page }) => {

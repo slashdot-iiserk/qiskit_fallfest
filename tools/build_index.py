@@ -113,15 +113,17 @@ HEAD = f"""<!DOCTYPE html>
 """
 
 PRELOADER = """
-<div class="preloader preloader--light" data-preloader role="status" aria-live="polite" aria-label="Loading">
+<div class="preloader" data-preloader role="status" aria-live="polite" aria-label="Loading">
+  <canvas class="preloader__field" data-preloader-field aria-hidden="true"></canvas>
   <div class="preloader__inner">
     <div class="preloader__ring" data-preloader-ring>
       <svg viewBox="0 0 120 120" aria-hidden="true">
         <circle class="ring__track" cx="60" cy="60" r="54" />
         <circle class="ring__arc" cx="60" cy="60" r="54" />
       </svg>
-      <img class="preloader__badge" src="assets/brand/badge-2026.svg" alt="" width="120" height="120">
+      {art}
     </div>
+
     <div data-preloader-fade class="preloader__meta">
       <p class="preloader__status" data-preloader-status>Starting up</p>
       <p class="preloader__count"><span class="preloader__pct" data-preloader-pct>000</span><small>%</small></p>
@@ -240,6 +242,8 @@ def build() -> str:
 <main id="main">
 
   <!-- ============================ HERO ============================ -->
+  <div class="qc-backdrop" data-qc-stage aria-hidden="true"></div>
+
   <section class="hero" data-hero>
     <div class="hero__inner">
       <div class="hero__partners" data-hero-in aria-label="Presented with">
@@ -266,14 +270,18 @@ def build() -> str:
       </ul>
 
       <div class="hero__cta" data-hero-in>
-        <a class="btn btn--lg" href="register.html">Register now {ARROW}</a>
-        <a class="btn btn--lg btn--ghost" href="#schedule">See the schedule</a>
+        <a class="btn btn--lg btn--hero" href="register.html">Register now {ARROW}</a>
+        <a class="btn btn--lg btn--machine" href="machine.html">
+          <span class="btn__pulse" aria-hidden="true"></span>
+          Go inside the machine {ARROW}
+        </a>
       </div>
 
       <p class="hero__aside" data-hero-in>
-        Curious how the hardware actually works?
-        <a href="machine.html">Go inside the machine &rarr;</a>
-        <small>A scroll-through of a real quantum computer. Optional, and a little indulgent.</small>
+        <span class="hero__aside-tag">For the curious</span>
+        The machine above, taken apart by scrolling: the drawing becomes a real quantum
+        computer, the computer becomes one qubit, and the qubit is yours to drive.
+        <a href="#schedule">Or skip straight to the schedule &rarr;</a>
       </p>
     </div>
   </section>

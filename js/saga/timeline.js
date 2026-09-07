@@ -6,34 +6,36 @@
  * frame loop.
  */
 
-import { PEOPLE, SPEAKERS } from '../data/event.js';
+import { PEOPLE, SPEAKERS, TIERS } from '../data/event.js';
 
 export const T = {
   /* Act I — the drawing becomes the machine */
-  drawHold:   0.030,  // whole machine, sharp
-  push:       0.100,  // camera has pushed in on the top plate
-  shatter:    0.135,  // the drawing hands over to its own particles
-  assemble:   0.215,  // the particles have taken the machine's shape
-  solid:      0.255,  // the render has faded in under them
+  drawHold:   0.022,  // whole machine, sharp
+  push:       0.075,  // camera has pushed in on the top plate
+  shatter:    0.102,  // the drawing hands over to its own particles
+  assemble:   0.162,  // the particles have taken the machine's shape
+  solid:      0.195,  // the render has faded in under them
 
   /* Act II — the descent */
-  partsIn:    0.280,
-  partsOut:   0.430,
-  valuesIn:   0.460,
-  valuesOut:  0.600,
-  chip:       0.625,  // arrival at the processor
+  partsIn:    0.215,
+  partsOut:   0.330,
+  valuesIn:   0.355,
+  valuesOut:  0.455,
+  chip:       0.475,  // arrival at the processor
 
   /* Act III — the qubit */
-  qubitStart: 0.645,
-  qubitEnd:   0.730,
+  qubitStart: 0.492,
+  qubitEnd:   0.556,
 
   /* Act IV — gates, played by hand */
-  gatesIn:    0.745,
-  gatesOut:   0.830,
+  gatesIn:    0.570,
+  gatesOut:   0.650,
 
-  /* Act V — along the state vector */
-  journeyIn:  0.845,
-  journeyOut: 0.945,
+  /* Act V — along the state vector.
+     The longest act on purpose: everything the rest of the site says gets said
+     here, as places you fly past rather than sections you scroll. */
+  journeyIn:  0.668,
+  journeyOut: 0.942,
 
   /* Act VI — everything becomes the button */
   buttonIn:   0.955,
@@ -156,20 +158,38 @@ export const VALUES = [
  * What you pass on the way up the state vector, inside the sphere. `t` is how
  * far along the vector each stop sits, 0 at the centre and 1 at the tip.
  *
- * A `people` stop is expanded by the saga into one anchor per person, arranged
- * in a ring around the vector at that depth, so the camera flies through a
- * circle of faces rather than past a list.
+ * This is the whole back half of the landing page, re-staged: the team, the
+ * venue, the certificates, the challenge and the speakers are all *places*
+ * here rather than sections. A `ring` stop is expanded by the saga into one
+ * anchor per item, arranged around the vector at that depth, so the camera
+ * flies through a circle of faces or tiers rather than past a list.
  */
 export const STATIONS = [
-  { t: 0.08, side: 'right', k: 'Five days', short: 'Five days',
+  { t: 0.04, side: 'right', k: 'Five days', short: 'Five days',
     v: '6 – 13 October at MN Saha. A primer, a kick-off, a full hands-on day, an advanced track, and an invited talk to close.' },
-  { t: 0.26, kind: 'people', group: 'team', ring: 0.80,
+  { t: 0.11, side: 'left', k: 'Talk, then lab, every hour', short: 'Talk + lab',
+    v: 'Every session on the hands-on day is a talk followed immediately by a lab. A concept is never far from being code you have run.' },
+
+  { t: 0.22, kind: 'ring', group: 'team', ring: 0.80,
     k: 'The people running it', short: 'The team' },
-  { t: 0.50, side: 'left', k: 'Three certificates', short: 'Certificates',
-    v: 'Participation, Intermediate, Advanced — issued on attendance and submitted lab work. They stack.' },
-  { t: 0.68, kind: 'people', group: 'speakers', ring: 0.72,
+
+  { t: 0.37, side: 'right', k: 'MN Saha Auditorium', short: 'The venue',
+    v: 'Every session, all five days, in one room on the IISER Kolkata campus. Nothing is streamed — you are in it.' },
+  { t: 0.44, side: 'left', k: 'Mohanpur, Nadia', short: 'Getting there',
+    v: 'The campus is at Mohanpur, about an hour and a half north of Kolkata. Directions and the nearest station are on the venue section.' },
+
+  { t: 0.56, kind: 'ring', group: 'tiers', ring: 0.62,
+    k: 'Three certificates', short: 'Certificates' },
+
+  { t: 0.69, side: 'right', k: 'A challenge, with swag', short: 'The challenge',
+    v: 'A problem set to take away and actually solve, run across the fest. The brief is still being written; the prizes are not hypothetical.' },
+  { t: 0.76, side: 'left', k: 'Everything published up front', short: 'Published',
+    v: 'Slides, notebooks and the setup guide go public before each session — and stay there. The 2025 archive is what that looks like.' },
+
+  { t: 0.86, kind: 'ring', group: 'speakers', ring: 0.72,
     k: 'Who is talking', short: 'Speakers' },
-  { t: 0.88, side: 'right', k: 'One unnamed speaker', short: 'The speaker',
+
+  { t: 0.96, side: 'right', k: 'One unnamed speaker', short: 'The speaker',
     v: 'An industry insider from the IBM Quantum world closes the fest on 13 October. The name is still unmeasured.' },
 ];
 
@@ -177,46 +197,75 @@ export const STATIONS = [
 export const CHAPTERS = [
   { at: T.solid, title: 'This is not the computer.',
     body: 'Almost all of it is refrigeration. The processor is the small chip at the very bottom — everything above exists to keep it cold and quiet enough to work.' },
-  { at: 0.38, title: 'Each plate is colder than the last.',
+  { at: 0.285, title: 'Each plate is colder than the last.',
     body: 'Gold-plated copper, stage after stage, carrying heat upward and out. By the bottom the chip sits near 0.01 K.' },
-  { at: 0.50, title: 'Every wire is an instruction.',
+  { at: 0.375, title: 'Every wire is an instruction.',
     body: 'The coax bundles carry shaped microwave pulses. A pulse of the right frequency, amplitude and duration is itself a gate.' },
   { at: T.qubitStart, title: 'And at the bottom, one qubit.',
     body: 'Everything you have just scrolled past exists to hold this still.' },
   { at: T.gatesIn, title: 'Now move it.',
     body: 'Each gate is a rotation. Pick one and watch the state sweep along its arc — these are the same numbers Qiskit would print.' },
-  { at: T.journeyIn, title: 'Come inside.',
-    body: 'Five days, three certificates and one unnamed speaker, along the vector you just steered.' },
+  { at: T.journeyIn, title: 'Now ride it.',
+    body: 'The arrow you have been steering is a direction in space. Follow it outward and the rest of the fest is arranged along it.' },
+  { at: 0.740, title: 'The room, and how to reach it.',
+    body: 'One auditorium, five days, an hour and a half north of Kolkata. Everything else on this vector is what happens inside it.' },
+  { at: 0.800, title: 'Nobody walks away empty-handed.',
+    body: 'Three certificate tiers, a challenge with real swag, and every notebook still public long after the lights go out.' },
+  { at: 0.855, title: 'And the people you will meet.',
+    body: 'The team who built this, the speakers who will teach it, and one name still held in superposition until the last day.' },
 ];
 
 
 /**
  * Flattens the journey into one list of anchors.
  *
- * A `people` stop becomes one entry per person, carrying their portrait and
- * placed on a ring around the vector at that depth, so the camera flies through
- * a circle of faces rather than past a list. Shared by the render and by the
- * no-WebGL fallback, so the two can never show different people.
+ * A `ring` stop becomes one entry per item, placed on a ring around the vector
+ * at that depth, so the camera flies through a circle rather than past a list.
+ * People carry their portrait; certificate tiers carry their seal. Shared by
+ * the render and by the no-WebGL fallback, so the two can never show different
+ * content.
  */
+const RINGS = {
+  team: () => PEOPLE.map((person) => ({
+    k: person.name,
+    short: person.name.split(' ')[0],
+    v: person.org ? `${person.role} · ${person.org}` : person.role,
+    person: true,
+    photo: person.photo ? `assets/organisers/${person.photo}-256.webp` : null,
+  })),
+  speakers: () => SPEAKERS.map((person) => ({
+    k: person.name,
+    short: person.name.split(' ')[0],
+    v: person.org ? `${person.role} · ${person.org}` : person.role,
+    person: true,
+    photo: person.photo ? `assets/organisers/${person.photo}-256.webp` : null,
+  })),
+  // The tiers are not people, so they get no portrait and no initials —
+  // they read as the three plates they are.
+  tiers: () => TIERS.map((tier) => ({
+    k: `${tier.name} certificate`,
+    short: tier.rank,
+    v: tier.summary,
+    photo: null,
+  })),
+};
+
 export function expandStations() {
   const out = [];
   for (const stop of STATIONS) {
-    if (stop.kind !== 'people') {
+    const build = RINGS[stop.kind === 'ring' || stop.kind === 'people' ? stop.group : ''];
+    if (!build) {
       out.push({ ...stop, ring: 0, angle: 0 });
       continue;
     }
-    const roster = stop.group === 'team' ? PEOPLE : SPEAKERS;
-    roster.forEach((person, i) => {
-      const angle = (i / roster.length) * Math.PI * 2;
+    const items = build();
+    items.forEach((item, i) => {
+      const angle = (i / items.length) * Math.PI * 2;
       out.push({
-        k: person.name,
-        short: person.name.split(' ')[0],
-        v: person.org ? `${person.role} · ${person.org}` : person.role,
+        ...item,
         side: Math.cos(angle) >= 0 ? 'right' : 'left',
-        person: true,
-        photo: person.photo ? `assets/organisers/${person.photo}-256.webp` : null,
-        // Spread each ring a little in depth so faces do not stack up.
-        t: stop.t + (i / roster.length - 0.5) * 0.06,
+        // Spread each ring a little in depth so entries do not stack up.
+        t: stop.t + (i / items.length - 0.5) * 0.06,
         ring: stop.ring,
         angle,
       });

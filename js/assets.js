@@ -19,13 +19,24 @@ const SAVE_DATA = navigator.connection?.saveData === true;
 export const MODEL_URL = 'assets/model/quantum-computer.glb';
 const DRACO_PATH = 'vendor/three/draco/';
 
-/** Weights are rough byte shares, so the bar moves at a believable rate. */
-const TASKS = [
+/**
+ * Weights are rough byte shares, so the bar moves at a believable rate.
+ *
+ * Only the machine page fetches a renderer, a model or a traced outline. The
+ * landing page counts what it actually does — otherwise the status line sits
+ * on "Tracing the outline" for a page that has no outline, and the percentage
+ * is measuring work that resolved instantly.
+ */
+const TASKS_3D = [
   { id: 'fonts', label: 'Typesetting', weight: 6 },
-  { id: 'images', label: 'Portraits and artwork', weight: 14 },
+  { id: 'images', label: 'Artwork and portraits', weight: 20 },
   { id: 'three', label: 'Renderer', weight: 34 },
   { id: 'model', label: 'Geometry', weight: 40 },
   { id: 'outline', label: 'Tracing the outline', weight: 10 },
+];
+const TASKS_FLAT = [
+  { id: 'fonts', label: 'Typesetting', weight: 8 },
+  { id: 'images', label: 'Artwork and portraits', weight: 22 },
 ];
 
 /**
@@ -40,13 +51,51 @@ const PORTRAITS = (document.body?.dataset.page === 'machine' ? [...PEOPLE, ...SP
   .filter((slug, i, all) => all.indexOf(slug) === i)
   .map((slug) => `assets/organisers/${slug}-256.webp`);
 
+/**
+ * The 2026 sticker artwork. The preloader throws these out of the machine
+ * alongside the qubits, and the page reuses every one of them further down —
+ * so loading them here is not decoration, it is the strip and the challenge
+ * cluster arriving warm.
+ */
+export const ARTWORK = [
+  'assets/stickers/text_fall-fest_02.webp',
+  'assets/stickers/sticker-01.webp',
+  'assets/stickers/text_quantum_02.webp',
+  'assets/stickers/sticker-03.webp',
+  'assets/stickers/qiskit_03.webp',
+  'assets/stickers/sticker-06.webp',
+  'assets/stickers/text_computing_02.webp',
+  'assets/stickers/sticker-07.webp',
+  'assets/stickers/2026_2.webp',
+  'assets/stickers/sticker-04.webp',
+];
+
 const IMAGES = [
   'assets/brand/badge-2026.svg',
   'assets/brand/iiserk.webp',
   'assets/brand/qiskit-logo.svg',
   'assets/brand/ibm-quantum.webp',
+  ...ARTWORK,
   ...PORTRAITS,
 ];
+
+/**
+ * Decodes the artwork, handing each one back the moment it is ready.
+ *
+ * The preloader calls this directly rather than waiting on `preloadAll`, so
+ * the first stickers are flying out of the machine while the renderer and the
+ * model are still downloading. Failures resolve to null: a missing sticker
+ * costs one sprite, and must never hold up the shutter.
+ */
+export function loadArtwork(onEach = () => {}) {
+  return Promise.all(ARTWORK.map((src) => new Promise((resolve) => {
+    const img = new Image();
+    img.decoding = 'async';
+    img.onload = () => { onEach(img); resolve(img); };
+    img.onerror = () => resolve(null);
+    img.src = src;
+  }))).then((all) => all.filter(Boolean));
+}
 
 /** Resolved once, then shared by every caller. */
 let bundle = null;
@@ -73,17 +122,18 @@ export function wants3D() {
 export function preloadAll(onProgress = () => {}) {
   if (bundle) return bundle;
 
-  const total = TASKS.reduce((a, t) => a + t.weight, 0);
+  const use3D = NEEDS_3D && wants3D();
+  const tasks = use3D ? TASKS_3D : TASKS_FLAT;
+
+  const total = tasks.reduce((a, t) => a + t.weight, 0);
   const done = new Map();
   const report = (id, fraction) => {
     done.set(id, Math.max(done.get(id) ?? 0, Math.min(1, fraction)));
     let sum = 0;
-    for (const t of TASKS) sum += (done.get(t.id) ?? 0) * t.weight;
-    const current = TASKS.find((t) => (done.get(t.id) ?? 0) < 1) ?? TASKS[TASKS.length - 1];
+    for (const t of tasks) sum += (done.get(t.id) ?? 0) * t.weight;
+    const current = tasks.find((t) => (done.get(t.id) ?? 0) < 1) ?? tasks[tasks.length - 1];
     onProgress(sum / total, current.label);
   };
-
-  const use3D = NEEDS_3D && wants3D();
 
   const fonts = (document.fonts?.ready ?? Promise.resolve())
     .then(() => report('fonts', 1))

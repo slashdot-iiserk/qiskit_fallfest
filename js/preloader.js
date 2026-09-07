@@ -1,18 +1,20 @@
 /**
  * Preloader.
  *
- * The machine draws itself on, stroke by stroke, and qubits stream out of it
- * into the space in front of you — spawned at its core, pushed outward, and
- * projected through a pinhole camera so they grow as they pass. When loading
- * finishes they scatter, the shutter lifts, and the drawing itself is handed
- * to the fixed stage that carries it down the rest of the page.
+ * The machine draws itself on, stroke by stroke, and its contents stream out
+ * into the space in front of you — qubits and the fest's own sticker artwork,
+ * spawned at its core, pushed outward, and projected through a pinhole camera
+ * so they grow as they pass. Every sprite out there is an image the page needs
+ * further down, so the show *is* the preload. When loading finishes they
+ * scatter, the shutter lifts, and the drawing itself is handed to the stage
+ * that keeps it behind the page from then on.
  *
  * All motion is anime.js and one small canvas; three.js is not on this path.
  * Under prefers-reduced-motion the whole thing collapses to a single frame.
  */
 
 import { animate, createTimeline, svg, utils } from '../vendor/anime/anime.esm.min.js';
-import { preloadAll } from './assets.js';
+import { preloadAll, loadArtwork } from './assets.js';
 
 const REDUCED = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 const MIN_MS = 1700;
@@ -50,6 +52,9 @@ export function initPreloader() {
   }
 
   const qubits = field ? startQubitField(field) : null;
+  // Hand each sticker to the field the moment it decodes, rather than waiting
+  // for the whole set: the machine starts throwing things almost immediately.
+  void loadArtwork((img) => qubits?.addArt(img));
   const started = performance.now();
 
   /* --- Progress -----------------------------------------------------------
@@ -165,11 +170,13 @@ export function initPreloader() {
 }
 
 /* ==========================================================================
-   Qubits, streaming out of the machine
+   Qubits and artwork, streaming out of the machine
    ==========================================================================
-   A pinhole camera on a 2D canvas: each qubit carries a real (x, y, z) and is
-   divided through by its depth, so it grows as it comes at you. Each is drawn
-   as a Bloch sphere in miniature — a dot with a ring around it.
+   A pinhole camera on a 2D canvas: every sprite carries a real (x, y, z) and
+   is divided through by its depth, so it grows as it comes at you. A qubit is
+   drawn as a Bloch sphere in miniature — a dot with a ring around it. A
+   resource is drawn as the sticker itself, tumbling, and is only handed to the
+   field once its image has actually decoded.
    ========================================================================== */
 function startQubitField(canvas) {
   const ctx = canvas.getContext('2d');
@@ -186,6 +193,31 @@ function startQubitField(canvas) {
   let speedBoost = 0;
 
   const qubits = Array.from({ length: COUNT }, () => spawn(true));
+
+  /* Decoded sticker images, and the sprites flying them. Both grow as the
+     network delivers: one sprite per image, so the field fills up as the page
+     loads rather than all at once at the end. */
+  const art = [];
+  const sprites = [];
+
+  function spawnArt(img) {
+    const angle = Math.random() * Math.PI * 2;
+    return {
+      img,
+      // Sized against the narrow edge: a sticker that reads as a passing
+      // object on a desktop is most of the screen on a phone.
+      scale: Math.min(1, Math.max(0.42, Math.min(w, h) / 900)),
+      x: Math.cos(angle) * Math.random() * 0.3,
+      y: (Math.random() - 0.5) * 1.2,
+      z: NEAR + Math.random() * (FAR - NEAR),
+      vx: Math.cos(angle) * (0.10 + Math.random() * 0.16),
+      vy: (Math.random() - 0.5) * 0.08,
+      vz: -(0.42 + Math.random() * 0.5),
+      spin: Math.random() * Math.PI * 2,
+      rate: (Math.random() - 0.5) * 0.6,
+      size: 0.10 + Math.random() * 0.06,
+    };
+  }
 
   function spawn(scatter) {
     // Born inside the machine, then pushed outward and toward the viewer.
@@ -259,6 +291,33 @@ function startQubitField(canvas) {
       ctx.fill();
     }
 
+    /* The artwork, on the same projection. Drawn after the qubits so a sticker
+       passing the camera reads as being in front of the dust. */
+    for (const a of sprites) {
+      const step = dt * (1 + speedBoost);
+      a.z += a.vz * 0.0192 * step;
+      a.x += a.vx * 0.0192 * step;
+      a.y += a.vy * 0.0192 * step;
+      a.spin += a.rate * 0.02 * step;
+      if (a.z <= NEAR) Object.assign(a, spawnArt(a.img));
+
+      const k = FOCAL / a.z;
+      const sx = cx + a.x * k;
+      const sy = cy + a.y * k;
+      const size = a.size * a.scale * k;
+      if (size < 3 || sx < -size || sx > w + size || sy < -size || sy > h + size) continue;
+
+      const alpha = Math.min(1, (FAR - a.z) / 1.6) * Math.min(1, (a.z - NEAR) / 1.1) * 0.9;
+      if (alpha <= 0.01) continue;
+
+      ctx.save();
+      ctx.globalAlpha = alpha;
+      ctx.translate(sx, sy);
+      ctx.rotate(a.spin);
+      ctx.drawImage(a.img, -size / 2, -size / 2, size, size);
+      ctx.restore();
+    }
+
     raf = requestAnimationFrame(frame);
   }
 
@@ -268,6 +327,14 @@ function startQubitField(canvas) {
   raf = requestAnimationFrame(frame);
 
   return {
+    /** One more resource has decoded; throw it out of the machine too. */
+    addArt(img) {
+      if (!img?.width) return;
+      art.push(img);
+      sprites.push(spawnArt(img));
+      // A wide screen can carry a second copy of each, at its own depth.
+      if (w > 900) sprites.push(spawnArt(img));
+    },
     /** Everything accelerates outward as the shutter lifts. */
     burst() { speedBoost = 7; },
     stop() { running = false; cancelAnimationFrame(raf); ro.disconnect(); },

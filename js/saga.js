@@ -445,17 +445,28 @@ export function initSaga() {
       // under the real one so the shape reads as something that was assembled.
       const cloudAlpha = ramp(p, T.shatter - 0.015, T.shatter)
         * lerp(1, 0.55, ramp(p, T.buttonIn, T.buttonOut));
+      // How much of the shell is showing, as one progression rather than a
+      // product of overlapping terms:
+      //   full while the machine assembles
+      //   → half for the gates, or fourteen thousand points drown the vector
+      //     and the arc it sweeps
+      //   → a sixth for the journey, where the camera is *inside* the sphere
+      //     and the shell would otherwise fill the frame with points
+      //   → full again to become the button.
+      const shell = lerp(
+        lerp(lerp(1, 0.5, ramp(p, T.gatesIn - 0.03, T.gatesIn + 0.02)),
+             0.16, ramp(p, T.gatesOut, T.journeyIn + 0.04)),
+        1, ramp(p, T.journeyOut - 0.02, T.buttonIn));
+
       cloud.update({
         pivotMatrix: pivot.matrixWorld,
         sphereCentre,
         draw: drawMorph,
         sphere: ramp(p, T.qubitStart, T.qubitEnd),
         button: toButton,
-        // The shell thins out while gates are being played, or fourteen
-        // thousand points drown the vector and the arc it sweeps.
         opacity: cloudAlpha
           * (1 - ramp(p, T.solid, T.solid + 0.06) * (1 - toQubit))
-          * lerp(1, 0.5, ramp(p, T.gatesIn - 0.03, T.gatesIn + 0.02) * (1 - ramp(p, T.gatesOut, T.journeyIn))),
+          * shell,
         time: now / 1000,
         fog: scene.fog,
       });
@@ -463,7 +474,13 @@ export function initSaga() {
       dust.update({
         time: now / 1000,
         // Present through the machine and the journey, gone by the button.
-        opacity: ramp(p, T.shatter, T.assemble) * (1 - ramp(p, T.buttonIn, T.buttonOut)) * 0.85,
+        // The field was sized for the descent, where the camera looks at it
+        // from three units out. Riding the vector puts the camera inside it,
+        // where the same motes project large and read as static — so it thins
+        // right down for act V and the vector has the frame to itself.
+        opacity: ramp(p, T.shatter, T.assemble)
+          * (1 - ramp(p, T.buttonIn, T.buttonOut))
+          * lerp(0.85, 0.22, ramp(p, T.gatesOut, T.journeyIn + 0.03)),
         fog: scene.fog,
       });
 
@@ -518,9 +535,25 @@ export function initSaga() {
         // Stops short of the tip: riding all the way into it fills the frame
         // with the marker and there is nothing left to look at. The stand-off
         // widens on a portrait screen, or the ring of faces falls outside it.
-        const back = 1.25 * aspectWiden(camera.aspect);
+        // Far enough back that the vector reads as an object being followed
+        // rather than a prop filling the lens — act V is long now, and there
+        // is time to see where you are going.
+        const back = 1.9 * aspectWiden(camera.aspect);
         const along = centre.clone().addScaledVector(dir, reach * (journeyRide * 0.82 - 0.05));
-        camera.position.lerp(along.clone().addScaledVector(dir, -reach * back), journeyRide);
+
+        // Ride *beside* the vector, not straight down it. Dead astern
+        // foreshortens the arrow into a dot and the ring stops pass behind the
+        // lens instead of sweeping across it. The swing is a half-sine, so it
+        // is zero at both ends — the entry still lines up with the qubit and
+        // the exit still meets the button head on.
+        sideA.set(0, 1, 0);
+        if (Math.abs(sideA.dot(dir)) > 0.9) sideA.set(1, 0, 0);
+        sideA.crossVectors(dir, sideA).normalize();
+        const swing = reach * 0.6 * Math.sin(journeyRide * Math.PI);
+
+        camera.position.lerp(
+          along.clone().addScaledVector(dir, -reach * back).addScaledVector(sideA, swing),
+          journeyRide);
         const look = along.clone().addScaledVector(dir, reach * 1.6);
         camera.lookAt(
           lerp(0, look.x, journeyRide),
@@ -588,8 +621,11 @@ export function initSaga() {
         // Only what is near the camera's depth along the vector is shown, so
         // you read one stop at a time as you rise through them.
         const along = clamp((journeyRide - 0.06) / 0.88);
+        // The stops are denser than they used to be, so the window is tighter:
+        // you read one or two at a time and each gets its own moment rather
+        // than four crowding the gutters at once.
         placeLabels(ctx, stations, stationAlpha,
-          (st) => 1 - clamp(Math.abs(st.t - along) / 0.22));
+          (st) => 1 - clamp(Math.abs(st.t - along) / 0.15));
       } else {
         placeLabels(ctx, stations, 0, () => 0);
       }
