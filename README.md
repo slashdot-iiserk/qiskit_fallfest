@@ -230,18 +230,26 @@ IBM.
 
 ## Two pages
 
-`index.html` is the front door and it is deliberately plain: what the fest is,
-when it runs, the five-day schedule laid out so every day is legible without a
-click, the challenge and its swag, the certificate tiers, how to get there — and
-**Register**, which is the loudest thing on the page.
+`index.html` is the front door: what the fest is, when it runs, the five-day
+schedule laid out so every day is legible without a click, the challenge and its
+swag, the certificate tiers, how to get there — and two headline buttons,
+**Register now** and **Go inside the machine**.
 
-It loads no renderer, no model and no importmap. Around 25 requests, and a test
-in `tests/e2e/site.spec.js` fails if three.js, Draco or a `.glb` is ever
-requested by `/`.
+It keeps the loading screen: the machine traces itself inside the progress ring
+while qubits and the 2026 sticker artwork stream out of it, every sprite an
+image the page needs further down. It keeps the drawing afterwards too, blurred
+and faint behind the whole page. About 158 KB over the wire to the shutter, and
+it holds its frame rate on slow hardware — at 4× CPU throttle the frame-to-frame
+jitter is 2.7 ms, down from 11.7 ms before the optimisation pass. `AGENTS.md`
+records what actually mattered there, which was mostly not what it looked like.
 
-`machine.html` is where the 3D lives. It is linked from the hero as an aside for
-anyone curious about the hardware, and it is worth the click — but nobody who
-came to find out when the fest is has to scroll through it first.
+What it does not load is the renderer, the model or an importmap; a test in
+`tests/e2e/site.spec.js` fails if three.js, Draco or a `.glb` is ever requested
+by `/`.
+
+`machine.html` is where the 3D lives, and where that same drawing is taken
+apart. Nobody who came to find out when the fest is has to scroll through it
+first.
 
 ## The machine
 

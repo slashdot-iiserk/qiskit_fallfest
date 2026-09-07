@@ -233,7 +233,7 @@ def build() -> str:
     # Doubled so the track can loop seamlessly at -50%.
     # Doubled for the same seamless -50% loop as the concept ticker.
     stickers = "".join(
-        f'<img src="assets/stickers/{name}.webp" alt="" width="256" height="256" '
+        f'<img src="assets/stickers/{name}-160.webp" alt="" width="160" height="160" '
         f'loading="lazy" decoding="async">' for name in STICKER_STRIP * 2)
     marquee = "".join(
         f'<span class="marquee__item"><b>{k}</b> {v}</span>' for k, v in MARQUEE_ITEMS * 2)
@@ -363,9 +363,9 @@ def build() -> str:
       <p class="section__index" data-drop="line"><b>03</b> <span>The challenge</span> <span>To be announced</span></p>
       <div class="challenge" data-drop>
         <div class="challenge__art" aria-hidden="true">
-          <img src="assets/stickers/sticker-05.webp" alt="" width="512" height="512" loading="lazy" decoding="async">
-          <img src="assets/stickers/sticker-07.webp" alt="" width="512" height="512" loading="lazy" decoding="async">
-          <img src="assets/stickers/sticker-01.webp" alt="" width="512" height="512" loading="lazy" decoding="async">
+          <img src="assets/stickers/sticker-05-320.webp" alt="" width="320" height="320" loading="lazy" decoding="async" fetchpriority="low">
+          <img src="assets/stickers/sticker-07-320.webp" alt="" width="320" height="320" loading="lazy" decoding="async" fetchpriority="low">
+          <img src="assets/stickers/sticker-01-320.webp" alt="" width="320" height="320" loading="lazy" decoding="async" fetchpriority="low">
         </div>
         <div>
           <p class="eyebrow">Announced closer to the date</p>

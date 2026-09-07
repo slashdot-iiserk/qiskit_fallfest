@@ -179,7 +179,7 @@ export function initPreloader() {
    field once its image has actually decoded.
    ========================================================================== */
 function startQubitField(canvas) {
-  const ctx = canvas.getContext('2d');
+  const ctx = canvas.getContext('2d', { alpha: true });
   if (!ctx) return null;
 
   const FOCAL = 520;
@@ -187,17 +187,40 @@ function startQubitField(canvas) {
   const FAR = 6;
   const COUNT = Math.round(Math.min(90, Math.max(34, window.innerWidth / 18)));
 
-  let w = 0, h = 0, dpr = 1;
+  /* --- Buffer scale --------------------------------------------------------
+     The field is soft dust and tumbling stickers seen through a pinhole, so it
+     does not need one buffer pixel per screen pixel. Every per-frame cost —
+     the clear, the blits, the composite — falls with the square of this, and
+     at 0.7 the difference is not visible on content this soft.
+
+     The drawing transform is set to the same factor, so all the geometry below
+     stays in CSS pixels and the animation is unchanged: only the raster it
+     lands on is coarser. `?dpr=` pins it, as it does for the saga, so
+     reference captures do not drift as the adaptive path settles. */
+  const coarse = window.matchMedia('(pointer: coarse)').matches;
+  const pinned = Number(new URLSearchParams(location.search).get('dpr')) || 0;
+  const MAX_SCALE = pinned || (coarse ? 0.7 : 0.85);
+  const FLOOR_SCALE = 0.4;
+  let scale = MAX_SCALE;
+  /** 1 at full quality, 0 at the floor. Thins the field as well as the buffer. */
+  let quality = 1;
+
+  let w = 0, h = 0;
   let raf = 0;
   let running = true;
   let speedBoost = 0;
 
   const qubits = Array.from({ length: COUNT }, () => spawn(true));
+  /* How many of them are actually in play. A coarser buffer alone is not
+     enough on the weakest hardware — the blits themselves have to go. Motion
+     is unchanged for the ones that remain, so the field reads as sparser
+     rather than slower, which is the right trade: nobody can see a dust mote
+     that was never there, and everybody can see a stutter. */
+  let active = COUNT;
 
   /* Decoded sticker images, and the sprites flying them. Both grow as the
      network delivers: one sprite per image, so the field fills up as the page
      loads rather than all at once at the end. */
-  const art = [];
   const sprites = [];
 
   function spawnArt(img) {
@@ -236,31 +259,123 @@ function startQubitField(canvas) {
     };
   }
 
+  /* --- The qubit glyph, baked ----------------------------------------------
+     Drawing each qubit as a stroked, rotated ellipse plus a filled arc — with
+     an `rgba(...)` string built per qubit per frame — meant ninety path
+     operations and ninety CSS colour parses every frame. The glyph is instead
+     baked once into an atlas of rotation phases and blitted axis-aligned, so a
+     qubit costs one `drawImage` and a `globalAlpha` number.
+
+     The ring's apparent spin comes from the phase, and its opacity relative to
+     the dot is baked in, so multiplying the tile by the qubit's own alpha
+     reproduces the original exactly.
+
+     `|cos(spin)|` has period π and the `spin * 0.5` tilt has period 4π, so the
+     glyph repeats every 4π and the atlas is baked across that. */
+  const PHASES = 24;
+  const CYCLE = Math.PI * 4;
+  const GLYPH_R = 14;                       // reference qubit radius, CSS px
+  const TILE = Math.ceil(GLYPH_R * 2.1 * 2 + GLYPH_R * 0.2 + 4);
+  const HUES = { gold: '232,200,122', pink: '255,126,182' };
+  const ROWS = ['gold', 'pink'];
+  let atlas = null;
+
+  function bakeAtlas() {
+    const px = Math.max(1, Math.round(TILE * scale));
+    const sheet = document.createElement('canvas');
+    sheet.width = px * PHASES;
+    sheet.height = px * ROWS.length;
+    const g = sheet.getContext('2d');
+    if (!g) return;
+    g.setTransform(scale, 0, 0, scale, 0, 0);
+
+    ROWS.forEach((hue, row) => {
+      const colour = HUES[hue];
+      for (let i = 0; i < PHASES; i += 1) {
+        const spin = (i / PHASES) * CYCLE;
+        const cx = TILE * i + TILE / 2;
+        const cy = TILE * row + TILE / 2;
+        const r = GLYPH_R;
+
+        g.strokeStyle = `rgba(${colour},0.55)`;
+        g.lineWidth = Math.max(0.5, r * 0.2);
+        g.beginPath();
+        g.ellipse(cx, cy, r * 2.1, r * 2.1 * Math.abs(Math.cos(spin)), spin * 0.5, 0, Math.PI * 2);
+        g.stroke();
+
+        g.fillStyle = `rgb(${colour})`;
+        g.beginPath();
+        g.arc(cx, cy, r, 0, Math.PI * 2);
+        g.fill();
+      }
+    });
+    atlas = { sheet, px };
+  }
+
   function resize() {
-    dpr = Math.min(window.devicePixelRatio || 1, 2);
-    w = canvas.clientWidth; h = canvas.clientHeight;
+    w = canvas.clientWidth;
+    h = canvas.clientHeight;
     if (w < 2 || h < 2) return;
-    canvas.width = Math.round(w * dpr);
-    canvas.height = Math.round(h * dpr);
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    canvas.width = Math.max(1, Math.round(w * scale));
+    canvas.height = Math.max(1, Math.round(h * scale));
+    // Geometry below is in CSS pixels whatever the buffer scale is.
+    ctx.setTransform(scale, 0, 0, scale, 0, 0);
+    // Tumbling stickers do not repay a high-quality resample.
+    ctx.imageSmoothingQuality = 'low';
+    bakeAtlas();
+  }
+
+  /* --- Adaptive quality ----------------------------------------------------
+     A device that cannot hold the frame rate gets a coarser buffer rather than
+     a stuttering one. Measured over a window, so one slow frame — an image
+     decode, the first shader — never triggers it. */
+  let sampleAt = 0;
+  let sampleFrames = 0;
+  let sampleTime = 0;
+
+  function adapt(frameMs, now) {
+    if (pinned) return;
+    sampleFrames += 1;
+    sampleTime += frameMs;
+    if (!sampleAt) sampleAt = now;
+    if (now - sampleAt < 700) return;
+    const mean = sampleTime / Math.max(1, sampleFrames);
+    sampleAt = now; sampleFrames = 0; sampleTime = 0;
+
+    let next = scale;
+    if (mean > 28 && scale > FLOOR_SCALE) next = Math.max(FLOOR_SCALE, scale - 0.15);
+    else if (mean < 13 && scale < MAX_SCALE) next = Math.min(MAX_SCALE, scale + 0.1);
+    if (Math.abs(next - scale) > 0.001) {
+      scale = next;
+      quality = (scale - FLOOR_SCALE) / Math.max(0.001, MAX_SCALE - FLOOR_SCALE);
+      const wanted = Math.max(8, Math.round(COUNT * (0.4 + 0.6 * quality)));
+      // Anything coming back has been sitting still since it was dropped, so
+      // it re-enters the field where a new one would, not where it stopped.
+      for (let i = active; i < wanted; i += 1) qubits[i] = spawn(true);
+      active = wanted;
+      resize();
+    }
   }
 
   let prev = performance.now();
   function frame(now) {
     if (!running) return;
-    const dt = Math.min(3, (now - prev) / 16.67);
+    const elapsed = now - prev;
+    const dt = Math.min(3, elapsed / 16.67);
     prev = now;
+    adapt(elapsed, now);
     speedBoost += (0 - speedBoost) * 0.04;
 
     ctx.clearRect(0, 0, w, h);
     const cx = w / 2;
     const cy = h / 2;
 
-    for (const q of qubits) {
+    for (let i = 0; i < active; i += 1) {
+      const q = qubits[i];
       const step = dt * (1 + speedBoost);
-      q.z += q.vz * 0.016 * step * 60 * 0.02;
-      q.x += q.vx * 0.016 * step * 60 * 0.02;
-      q.y += q.vy * 0.016 * step * 60 * 0.02;
+      q.z += q.vz * 0.0192 * step;
+      q.x += q.vx * 0.0192 * step;
+      q.y += q.vy * 0.0192 * step;
       q.spin += q.rate * 0.02 * step;
       if (q.z <= NEAR) Object.assign(q, spawn(false));
 
@@ -274,26 +389,26 @@ function startQubitField(canvas) {
 
       // Fade in from the back, out as it sweeps past the camera.
       const alpha = Math.min(1, (FAR - q.z) / 1.4) * Math.min(1, (q.z - NEAR) / 0.9);
-      if (alpha <= 0.01) continue;
+      if (alpha <= 0.01 || !atlas) continue;
 
-      const colour = q.hue === 'pink' ? '255,126,182' : '232,200,122';
+      const phase = q.spin % CYCLE;
+      const col = ((phase < 0 ? phase + CYCLE : phase) / CYCLE * PHASES) | 0;
+      const row = q.hue === 'pink' ? 1 : 0;
+      const size = (r / GLYPH_R) * TILE;
 
-      // The orbit ring: a circle seen at an angle, so it reads as a sphere.
-      ctx.strokeStyle = `rgba(${colour},${(alpha * 0.55).toFixed(3)})`;
-      ctx.lineWidth = Math.max(0.5, r * 0.2);
-      ctx.beginPath();
-      ctx.ellipse(sx, sy, r * 2.1, r * 2.1 * Math.abs(Math.cos(q.spin)), q.spin * 0.5, 0, Math.PI * 2);
-      ctx.stroke();
-
-      ctx.fillStyle = `rgba(${colour},${alpha.toFixed(3)})`;
-      ctx.beginPath();
-      ctx.arc(sx, sy, r, 0, Math.PI * 2);
-      ctx.fill();
+      ctx.globalAlpha = alpha;
+      ctx.drawImage(
+        atlas.sheet,
+        col * atlas.px, row * atlas.px, atlas.px, atlas.px,
+        sx - size / 2, sy - size / 2, size, size,
+      );
     }
 
     /* The artwork, on the same projection. Drawn after the qubits so a sticker
        passing the camera reads as being in front of the dust. */
-    for (const a of sprites) {
+    const spriteCap = Math.max(3, Math.round(sprites.length * (0.5 + 0.5 * quality)));
+    for (let i = 0; i < Math.min(sprites.length, spriteCap); i += 1) {
+      const a = sprites[i];
       const step = dt * (1 + speedBoost);
       a.z += a.vz * 0.0192 * step;
       a.x += a.vx * 0.0192 * step;
@@ -310,13 +425,14 @@ function startQubitField(canvas) {
       const alpha = Math.min(1, (FAR - a.z) / 1.6) * Math.min(1, (a.z - NEAR) / 1.1) * 0.9;
       if (alpha <= 0.01) continue;
 
-      ctx.save();
       ctx.globalAlpha = alpha;
       ctx.translate(sx, sy);
       ctx.rotate(a.spin);
       ctx.drawImage(a.img, -size / 2, -size / 2, size, size);
-      ctx.restore();
+      // Cheaper than save()/restore() around every sprite.
+      ctx.setTransform(scale, 0, 0, scale, 0, 0);
     }
+    ctx.globalAlpha = 1;
 
     raf = requestAnimationFrame(frame);
   }
@@ -330,10 +446,7 @@ function startQubitField(canvas) {
     /** One more resource has decoded; throw it out of the machine too. */
     addArt(img) {
       if (!img?.width) return;
-      art.push(img);
       sprites.push(spawnArt(img));
-      // A wide screen can carry a second copy of each, at its own depth.
-      if (w > 900) sprites.push(spawnArt(img));
     },
     /** Everything accelerates outward as the shutter lifts. */
     burst() { speedBoost = 7; },

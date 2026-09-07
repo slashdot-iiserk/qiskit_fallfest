@@ -58,26 +58,39 @@ const PORTRAITS = (document.body?.dataset.page === 'machine' ? [...PEOPLE, ...SP
  * cluster arriving warm.
  */
 export const ARTWORK = [
-  'assets/stickers/text_fall-fest_02.webp',
-  'assets/stickers/sticker-01.webp',
-  'assets/stickers/text_quantum_02.webp',
-  'assets/stickers/sticker-03.webp',
-  'assets/stickers/qiskit_03.webp',
-  'assets/stickers/sticker-06.webp',
-  'assets/stickers/text_computing_02.webp',
-  'assets/stickers/sticker-07.webp',
-  'assets/stickers/2026_2.webp',
-  'assets/stickers/sticker-04.webp',
-];
+  'text_fall-fest_02', 'sticker-01', 'text_quantum_02', 'sticker-03', 'qiskit_03',
+  'sticker-06', 'text_computing_02', 'sticker-07', '2026_2', 'sticker-04',
+  // The 160px encode: the field tumbles these at about a hundred pixels
+  // across, so nothing oversized stands between a visitor and the site.
+  // 109 KB of artwork becomes 28 KB — and the sticker strip further down
+  // reuses the very same files, so it costs no requests at all.
+].map((slug) => `assets/stickers/${slug}-160.webp`);
 
+/* Only what is actually on screen when the shutter lifts.
+
+   This list is a promise that the first view will not pop in half-loaded, so
+   anything on it delays the shutter — and three things were on it that should
+   not have been. `iiserk.webp` is the campus photograph in the venue section,
+   88 KB and several screens down: it carries `loading="lazy"` in the markup,
+   and preloading it here overrode that. `qiskit-logo.svg` and
+   `ibm-quantum.webp` are the dark marks, which this page stopped using when
+   the partner strip moved to the `-light` variants — 100 KB between them,
+   fetched before anybody could see anything, two of them never shown at all.
+
+   The artwork is absent for a different reason: `loadArtwork` already fetches
+   it, and listing it here fetched every sticker twice — once as an <img>, once
+   as a fetch for `createImageBitmap`, which the two request paths do not
+   always share a cache entry for. `preloadAll` waits on that promise instead. */
 const IMAGES = [
   'assets/brand/badge-2026.svg',
-  'assets/brand/iiserk.webp',
-  'assets/brand/qiskit-logo.svg',
-  'assets/brand/ibm-quantum.webp',
-  ...ARTWORK,
+  'assets/brand/ibm-quantum-light.webp',
+  'assets/brand/qiskit-logo-light.svg',
+  'assets/brand/slashdot-light.webp',
   ...PORTRAITS,
 ];
+
+/** Roughly the widest a sticker is ever drawn in the field, in CSS pixels. */
+export const ARTWORK_DRAW_PX = 160;
 
 /**
  * Decodes the artwork, handing each one back the moment it is ready.
@@ -86,15 +99,43 @@ const IMAGES = [
  * the first stickers are flying out of the machine while the renderer and the
  * model are still downloading. Failures resolve to null: a missing sticker
  * costs one sprite, and must never hold up the shutter.
+ *
+ * `createImageBitmap` is worth the extra step here. An `<img>` is decoded
+ * lazily, on the main thread, at the moment something first draws it — which
+ * is a frame in the middle of the animation, and shows up as exactly the kind
+ * of hitch this loading screen cannot afford. An ImageBitmap is decoded off
+ * the main thread before it is ever handed over, so the first frame that draws
+ * a sticker costs no more than the hundredth.
  */
-export function loadArtwork(onEach = () => {}) {
-  return Promise.all(ARTWORK.map((src) => new Promise((resolve) => {
+let artworkPromise = null;
+
+export function loadArtwork(onEach) {
+  // Memoised: the preloader calls this for the field and `preloadAll` waits on
+  // it for the progress bar, and between them the artwork is fetched once.
+  if (artworkPromise) {
+    if (onEach) artworkPromise.then((all) => all.forEach(onEach));
+    return artworkPromise;
+  }
+  const viaBitmap = async (src) => {
+    const res = await fetch(src);
+    if (!res.ok) throw new Error(`${res.status} ${src}`);
+    return createImageBitmap(await res.blob());
+  };
+  const viaImage = (src) => new Promise((resolve, reject) => {
     const img = new Image();
     img.decoding = 'async';
-    img.onload = () => { onEach(img); resolve(img); };
-    img.onerror = () => resolve(null);
+    img.onload = () => resolve(img);
+    img.onerror = () => reject(new Error(`decode failed: ${src}`));
     img.src = src;
-  }))).then((all) => all.filter(Boolean));
+  });
+
+  artworkPromise = Promise.all(ARTWORK.map((src) => {
+    const load = typeof createImageBitmap === 'function'
+      ? viaBitmap(src).catch(() => viaImage(src))
+      : viaImage(src);
+    return load.then((bmp) => { onEach?.(bmp); return bmp; }).catch(() => null);
+  })).then((all) => all.filter(Boolean));
+  return artworkPromise;
 }
 
 /** Resolved once, then shared by every caller. */
@@ -139,11 +180,15 @@ export function preloadAll(onProgress = () => {}) {
     .then(() => report('fonts', 1))
     .catch(() => report('fonts', 1));
 
-  const images = Promise.all(IMAGES.map((src) => new Promise((resolve) => {
-    const img = new Image();
-    img.onload = img.onerror = resolve;
-    img.src = src;
-  }))).then(() => report('images', 1));
+  const images = Promise.all([
+    ...IMAGES.map((src) => new Promise((resolve) => {
+      const img = new Image();
+      img.onload = img.onerror = resolve;
+      img.src = src;
+    })),
+    // Same promise the field is already feeding from, not a second fetch.
+    loadArtwork(undefined),
+  ]).then(() => report('images', 1));
 
   const three = use3D
     ? Promise.all([

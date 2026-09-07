@@ -68,6 +68,33 @@ The landing page still keeps the two things people said they loved:
   projection. Every sprite out there is an image the page needs further down,
   so the show is the preload — see `ARTWORK` and `loadArtwork()` in
   `js/assets.js`.
+
+  It has been through a measured optimisation pass and the findings are worth
+  keeping, because most of them were not where they looked:
+
+  | Change | Effect |
+  | --- | --- |
+  | **Ambient layer deferred to `qff:loaded`** | The largest single win. `.preloader` is opaque and covers the viewport, so a full screen of motes and rails was being painted behind it every frame, invisible. 42 points of jank, for nothing. |
+  | **Field renders below 1:1** (`0.85` desktop / `0.7` coarse, adaptive to a `0.4` floor) | Every per-frame cost — clear, blits, composite — falls with the square of it. The drawing transform is set to the same factor, so the geometry stays in CSS pixels and the animation is untouched. |
+  | **Qubit glyph baked into a rotation atlas** | Was a stroked rotated ellipse plus a filled arc *plus an `rgba()` string built per qubit per frame* — ninety path ops and ninety CSS colour parses. Now one axis-aligned `drawImage` and a `globalAlpha` number. |
+  | **Field thins with quality** | A coarser buffer alone is not enough on the weakest hardware; the blits have to go too. Drops to 40% of the qubits at the floor. |
+  | **Artwork via `createImageBitmap`** | An `<img>` decodes lazily on the main thread the first time something draws it — mid-animation, as a hitch. An ImageBitmap is decoded off-thread before it is handed over. |
+  | **Right-sized encodes** (`-160`, `-320`) | A 512px sticker is never drawn near 512px. 109 KB of field artwork became 28 KB, and the sticker strip reuses the same files so it costs no requests at all. |
+  | **Preload list trimmed** | It had drifted: the 88 KB campus photograph (which carries `loading="lazy"` in the markup — preloading overrode it) and the two *dark* logo variants the partner strip stopped using. 100 KB, two of it never shown. |
+
+  Measured with `.work/perf/measure.cjs` (not committed — recreate it if needed;
+  it patches the served JS via `page.route` so nothing in the repo changes to
+  ablate a suspect). **Average several runs**: at 8× CPU throttle a single run
+  ranks a no-op change 20 points either side of baseline. Jitter — mean absolute
+  change between consecutive frames — is the metric that matches the complaint;
+  a steady 30fps looks fine, 20-to-60 does not.
+
+  Two things that were *not* the problem, both of which looked like obvious
+  suspects: the traced SVG (removing the dash animation entirely changed
+  nothing) and the size of the sticker sources (pre-scaling them into offscreen
+  canvases made no measurable difference — the cost is the rotated blit, not
+  the resample). Smaller encodes still shipped, for bytes and decode time, but
+  they are not what fixed the stutter.
 - **The drawing then stays**, in `.qc-backdrop`: the same node the preloader
   traced, handed over on the FLIP and left behind the page for good, blurred
   and at 0.13 opacity with a radial scrim over the middle so the copy wins.

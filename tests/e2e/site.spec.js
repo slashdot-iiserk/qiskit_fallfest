@@ -157,6 +157,60 @@ test.describe('home page', () => {
     await expect(page.locator('.hero__aside')).toContainText('For the curious');
   });
 
+  test('the loading screen keeps the frame budget to itself', async ({ page }) => {
+    // `.preloader` is opaque and covers the viewport, so anything else
+    // animating underneath is invisible work. The ambient layer used to run
+    // there and was the single largest cost of the loading screen on slow
+    // hardware; it must not creep back.
+    await page.goto('/', { waitUntil: 'commit' });
+    await page.waitForSelector('[data-preloader-field]', { timeout: 20000 });
+    const during = await page.evaluate(() => {
+      const a = document.querySelector('.ambient');
+      const f = document.querySelector('[data-preloader-field]');
+      return {
+        // initAmbient sizes the canvas; untouched it keeps the 300px default.
+        ambientStarted: Boolean(a) && a.width !== 300,
+        // The field renders below 1:1 — every per-frame cost scales with the
+        // square of this.
+        buffer: f && f.clientWidth ? f.width / f.clientWidth : null,
+      };
+    });
+    expect(during.ambientStarted, 'ambient must wait for the shutter').toBe(false);
+    expect(during.buffer).not.toBeNull();
+    expect(during.buffer).toBeLessThan(1);
+    expect(during.buffer).toBeGreaterThan(0.3);
+
+    // Once the shutter lifts it does start, or the page loses its texture.
+    await expect(page.locator('[data-preloader]')).toHaveCount(0, { timeout: 30000 });
+    await expect
+      .poll(() => page.evaluate(() => document.querySelector('.ambient')?.width ?? 300), { timeout: 8000 })
+      .not.toBe(300);
+  });
+
+  test('the loading screen downloads only right-sized artwork', async ({ page }) => {
+    // A 512px sticker is never drawn near 512px anywhere on this page. The
+    // field tumbles them at ~100px and the strip shows them at 76, so both use
+    // the 160px encode — which also means the strip costs no requests, the
+    // files being in cache already. The challenge cluster is the largest they
+    // are ever seen and sits right at Chromium's lazy threshold, so it gets a
+    // 320px encode rather than competing with the loading screen at full size.
+    const seen = [];
+    page.on('request', (r) => {
+      const m = /assets\/stickers\/([^?]+)\.webp/.exec(r.url());
+      if (m) seen.push(m[1]);
+    });
+    await page.goto('/', { waitUntil: 'commit' });
+    await page.waitForSelector('[data-preloader-field]', { timeout: 20000 });
+    await expect(page.locator('[data-preloader]')).toHaveCount(0, { timeout: 30000 });
+
+    expect(seen.length, 'the field needs artwork').toBeGreaterThan(0);
+    const oversized = [...new Set(seen.filter((n) => !/-(160|320)$/.test(n)))];
+    expect(oversized, 'every sticker must be a right-sized encode').toEqual([]);
+    // The field's own artwork is the smallest encode, and fetched once each.
+    const field = seen.filter((n) => n.endsWith('-160'));
+    expect(new Set(field).size, 'the field artwork is fetched once each').toBe(field.length);
+  });
+
   test('keeps the machine drawing behind the page', async ({ page }) => {
     // The preloader traces it, then hands it over; it stays there for good.
     const stage = page.locator('.qc-backdrop');

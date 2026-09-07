@@ -165,8 +165,20 @@ def build_2026() -> None:
     for f in sorted(stickers_svg.glob("*.svg")):
         svg(f, OUT / "stickers" / f.name.replace(" ", "-").lower())
     for f in sorted(stickers_png.glob("*.png")):
-        webp(f, OUT / "stickers" / (f.stem.replace(" ", "-").lower() + ".webp"),
-             width=512, quality=82)
+        slug = f.stem.replace(" ", "-").lower()
+        webp(f, OUT / "stickers" / f"{slug}.webp", width=512, quality=82)
+        # Two smaller encodes, sized to where they are actually used, because a
+        # 512px sticker is never drawn anywhere near 512px:
+        #   160 — the loading screen tumbles these through a pinhole at about a
+        #         hundred pixels across, and the sticker strip shows them at 76
+        #         at most. It is the first thing a visitor downloads, on
+        #         hardware that may be neither fast nor well connected.
+        #   320 — the challenge cluster, the largest they are ever seen (150px,
+        #         so 320 covers a 2x screen). These sit right at Chromium's
+        #         lazy-loading threshold and so get fetched while the loading
+        #         screen is still up; at full size they competed with it.
+        webp(f, OUT / "stickers" / f"{slug}-160.webp", width=160, quality=74)
+        webp(f, OUT / "stickers" / f"{slug}-320.webp", width=320, quality=78)
 
     # Organiser portraits — square, two densities.
     for filename, slug in ORGANISERS.items():
