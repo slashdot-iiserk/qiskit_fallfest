@@ -115,6 +115,15 @@ Order, and why:
 10. **The speakers** (`08`) — who is teaching what.
 11. Partners, sticker strip, final CTA.
 
+### The footer credits, and who leads them
+
+The footer carries the marks again on every page, and it is deliberately **not
+a row of equals**: SlashDot is set larger than the rest and labelled "Organised
+by", because they are the club actually running the fest. The heights are tuned
+per-mark rather than shared, since equal pixel heights are not equal optical
+weights — a wide short wordmark at 40px out-sizes a square roundel at 40px. The
+test compares rendered *area*, not height, for that reason.
+
 ### The portraits
 
 The organiser photographs are what people actually sent: square, casual, shot
@@ -159,6 +168,21 @@ Register would have buried the point.
 **The schedule is cards, not tabs.** Tabs hid four days out of five behind a
 click. The cards *are* the tablist — one control, not a rail plus a redundant
 row of labels.
+
+### One mark moves
+
+Four of the five partner marks are rasters that fade up with the hero. The
+IISER Kolkata emblem is traced paths, and it draws itself on: the book outlines
+first, then the helix, then the dot, each fill resolving under its own stroke
+before the line work steps back.
+
+It is the only one that moves, and that is the point rather than an
+inconsistency. It is the host institute; it is the only mark whose artwork is
+line work to begin with; and a strip where everything animated would be a
+strip nobody could read. The rest of the row arriving quietly is what makes the
+one that assembles worth watching.
+
+Under `prefers-reduced-motion` it is simply there, filled, on the first frame.
 
 ### Missing artwork is visible, not absent
 

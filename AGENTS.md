@@ -207,6 +207,42 @@ CSS `filter`, which would chew the antialiasing:
   carry no fill of their own, so they inherit it → `assets/brand/qiskit-logo-light.svg`.
 - `light_raster()` inverts RGB while preserving alpha → `assets/brand/ibm-quantum-light.webp`.
 
+### A logo that only exists as a raster
+
+IISER Kolkata publishes its emblem as an 82x90 PNG and nothing larger. The
+version in `source/brand/iiserk_logo.png` comes from Wikimedia Commons
+(CC BY-SA 4.0) at 571x600; `source/brand/CREDITS.md` records the provenance of
+every third-party mark in the tree, and what to do if the institute ever
+supplies an official vector.
+
+`tools/logo2svg.py` traces it into layered paths, which buys two things a
+raster cannot give:
+
+- **It can be drawn on.** `js/logomark.js` strokes each region in order — book,
+  helix, type — and resolves the fill under the stroke as each finishes, so the
+  emblem assembles from line work in the hero strip instead of appearing.
+- **Each region recolours independently.** The wordmark and the dot are black
+  in the original, which is a hole on the ink palette, and become paper. The
+  helix and the book keep their brand colours. Inverting a raster would have
+  taken the blue with it.
+
+Two variants come out, and the distinction matters: `iiserk-logo.svg` is the
+full lockup, `iiserk-emblem.svg` is the emblem alone. Anywhere under about
+50px the wordmark under the emblem is an illegible smudge, so both partner
+strips and the footer use the emblem — the full mark is there for when
+something needs it at size.
+
+**potracer has two silent traps**, both of which trace the bounding rectangle
+instead of the shape and neither of which errors: a non-bool array is
+thresholded at `255 * 0.5` (so an array of 0/1 comes out uniformly False), and
+the constructor then *inverts*, taking True to mean background. Masks go in as
+`~mask`, dtype bool.
+
+Only the hero copy of the emblem is inlined; the band links the same file. Two
+inline copies cost 17 KB of markup for one animation.
+
+### A mark supplied as colour on a solid black square
+
 A mark supplied as **colour on a solid black square** — Gluon's wordmark — gets
 `keyed_webp()` instead: alpha comes from the brightest channel, which is what
 the artwork already uses to describe its own edges, and the colour is

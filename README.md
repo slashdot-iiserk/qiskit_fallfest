@@ -104,6 +104,7 @@ first-timer who finds the advanced day heavy still leaves with the Intermediate 
 │   ├── build_index.py      Generates index.html, inlining the line drawings
 │   ├── build_machine.py    Generates machine.html — the 3D saga, on its own page
 │   ├── optimise_svg.py     Halves the extracted line drawings (chain + relative)
+│   ├── logo2svg.py         Traces a flat-colour logo raster into layered paths
 │   ├── build_pages.py      Generates the other pages marked (generated) above
 │   ├── build_model.sh      Whole 3D pipeline: GLB → Draco GLB + SVGs
 │   ├── glb2svg/            Hidden-line vector extraction (three.js, headless)
@@ -135,6 +136,7 @@ npm run build          # assets + all pages
 npm run build:assets   # re-encode rasters to WebP into assets/
 npm run build:pages    # regenerate index / machine / resources / gallery / archive / 404 / sitemap
 npm run build:model    # re-derive the Draco model and the line drawings
+python3 tools/logo2svg.py   # re-trace the IISER Kolkata emblem into paths
 ```
 
 `build_assets.py` needs `pip install -r tools/requirements.txt` (Pillow, plus

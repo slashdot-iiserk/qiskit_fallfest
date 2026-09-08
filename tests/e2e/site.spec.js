@@ -170,7 +170,7 @@ test.describe('home page', () => {
     // every logo happened to be monochrome. The first coloured mark, Gluon,
     // is the one that would show it.
     const marks = page.locator('#partners .partner img');
-    await expect(marks).toHaveCount(4);
+    await expect(marks).toHaveCount(5);
     const styles = await marks.evaluateAll((els) => els.map((el) => ({
       filter: getComputedStyle(el).filter,
       opacity: Number(getComputedStyle(el.parentElement).opacity),
@@ -273,6 +273,46 @@ test.describe('home page', () => {
     expect(new Set(field).size, 'the field artwork is fetched once each').toBe(field.length);
   });
 
+  test('draws the IISER Kolkata emblem on from its own paths', async ({ page }) => {
+    // Inlined rather than linked so it can be traced: the mark assembles from
+    // line work instead of appearing. Each region is a separate path so the
+    // black wordmark could be recoloured for the ink palette without touching
+    // the brand blue.
+    const mark = page.locator('.hero__partners [data-logomark]');
+    await expect(mark).toBeAttached();
+    const regions = await mark.locator('path').evaluateAll(
+      (els) => els.map((el) => el.dataset.region));
+    expect(regions).toEqual(['book', 'helix', 'type']);
+
+    // It finishes, and hands the fills back to CSS rather than leaving inline
+    // styles on a completed mark.
+    await expect(mark).toHaveClass(/is-drawn/, { timeout: 15000 });
+    const settled = await mark.locator('path').evaluateAll((els) => els.map((el) => ({
+      fill: Number(getComputedStyle(el).fillOpacity),
+      inline: el.getAttribute('style') || '',
+    })));
+    for (const s of settled) {
+      expect(s.fill).toBe(1);
+      expect(s.inline, 'no leftover inline style').toBe('');
+    }
+  });
+
+  test('credits the organising club loudest in the footer', async ({ page }) => {
+    // SlashDot runs the fest, so the site-wide footer row is not a row of
+    // equals. Compared on area, because equal heights are not equal weights.
+    const logos = page.locator('.footer__logos .footer__logo');
+    await expect(logos).toHaveCount(5);
+    const areas = await logos.evaluateAll((els) => els.map((el) => {
+      const r = el.querySelector('img').getBoundingClientRect();
+      return { name: el.getAttribute('aria-label').split(/[ —]/)[0], area: r.width * r.height };
+    }));
+    const lead = areas.find((a) => a.name === 'SlashDot');
+    for (const other of areas.filter((a) => a.name !== 'SlashDot')) {
+      expect(lead.area, `SlashDot must lead ${other.name}`).toBeGreaterThan(other.area * 1.2);
+    }
+    await expect(page.locator('.footer__logos')).toContainText('Organised by');
+  });
+
   test('keeps the machine drawing behind the page', async ({ page }) => {
     // The preloader traces it, then hands it over; it stays there for good.
     const stage = page.locator('.qc-backdrop');
@@ -302,11 +342,16 @@ test.describe('home page', () => {
   test('credits every partner, with a visible mark or a reserved slot', async ({ page }) => {
     const partners = page.locator('#partners .partner');
     await expect(partners).toHaveCount(5);
-    // A supplied mark names itself in its alt text; a pending one names itself
-    // on the placeholder tile.
-    const named = await partners.evaluateAll((els) => els.map(
-      (el) => el.querySelector('img')?.alt || el.textContent.replace(/logo to come/, '').trim()));
+    // Every partner names itself on its wrapper, whatever it is made of: a
+    // linked raster, an inlined SVG, or a placeholder tile awaiting artwork.
+    const named = await partners.evaluateAll(
+      (els) => els.map((el) => el.getAttribute('aria-label')));
     expect(named).toEqual(['IBM Quantum', 'Qiskit', 'SlashDot', 'Gluon', 'IISER Kolkata']);
+    // Nothing is a placeholder any more; if one comes back it must say so
+    // rather than leaving a gap.
+    const pending = await partners.evaluateAll(
+      (els) => els.filter((el) => el.querySelector('.partner__placeholder')).length);
+    expect(pending).toBe(0);
     // Marks that are supplied must actually render at a sane size.
     const heights = await page.locator('#partners .partner img').evaluateAll(
       (els) => els.map((el) => Math.round(el.getBoundingClientRect().height)));

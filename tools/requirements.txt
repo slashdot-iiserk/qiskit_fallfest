@@ -1,5 +1,7 @@
-# Python dependencies for the asset pipeline (tools/build_assets.py).
+# Python dependencies for the asset pipeline.
 # Not needed to serve or test the site — only to re-encode assets.
 #   pip install -r tools/requirements.txt
 Pillow
 pillow-heif   # speaker photographs arrive from phones as HEIC
+potracer      # tools/logo2svg.py — traces a flat-colour logo into paths
+numpy         # ditto (region masks)

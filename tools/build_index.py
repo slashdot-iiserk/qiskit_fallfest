@@ -182,8 +182,25 @@ PARTNERS = [
     {"name": "Qiskit", "src": "assets/brand/qiskit-logo-light.svg", "href": "https://qiskit.org", "h": 44},
     {"name": "SlashDot", "src": "assets/brand/slashdot-light.webp", "href": "https://github.com/slashdot-iiserk", "h": 36},
     {"name": "Gluon", "src": "assets/brand/gluon-light.webp", "href": None, "h": 34},
-    {"name": "IISER Kolkata", "src": None, "href": "https://www.iiserkol.ac.in", "h": 30},
+    # Inlined rather than linked: js/logomark.js traces its paths on before the
+    # fills resolve, and a path inside an <img> cannot be animated from the
+    # page. It is 8.7 KB, which is the price of the only mark that moves.
+    # The emblem, not the full mark: at the 38px a strip gives a partner, the
+    # IISER KOLKATA wordmark underneath is an illegible smudge. The footer,
+    # where there is room, carries the whole thing.
+    {"name": "IISER Kolkata", "src": "assets/brand/iiserk-emblem.svg", "inline": True,
+     "href": "https://www.iiserkol.ac.in", "h": 38},
 ]
+
+
+def inline_svg(path: str, height: int, label: str) -> str:
+    """Drop an SVG straight into the markup, sized and labelled."""
+    markup = (ROOT / path).read_text(encoding="utf-8").strip()
+    markup = markup.replace("<svg ", f'<svg class="partner__mark" data-logomark '
+                                     f'style="--partner-h:{height}px" ', 1)
+    markup = markup.replace(' role="img"', f' role="img" aria-label="{label}"', 1) \
+        if 'aria-label' not in markup else markup
+    return markup
 
 
 def partners(size: str = "sm") -> str:
@@ -191,12 +208,18 @@ def partners(size: str = "sm") -> str:
     out = []
     for partner in PARTNERS:
         scale = 1 if size == "sm" else 1.5
-        if partner["src"]:
+        height = round(partner["h"] * scale)
+        # Only the hero copy is inlined. The band further down does not
+        # animate, so it links the same file and costs one cached request
+        # instead of a second 8.7 KB of markup.
+        if partner.get("inline") and size == "sm":
+            inner = inline_svg(partner["src"], height, partner["name"])
+        elif partner["src"]:
             # Height comes from a custom property, not the attribute: the base
             # reset sets `img { height: auto }`, which would otherwise win and
             # render every mark at its intrinsic size.
             inner = (f'<img src="{partner["src"]}" alt="{partner["name"]}" '
-                     f'style="--partner-h:{round(partner["h"] * scale)}px" '
+                     f'style="--partner-h:{height}px" '
                      f'loading="lazy" decoding="async">')
         else:
             inner = (f'<span class="partner__placeholder">{partner["name"]}'

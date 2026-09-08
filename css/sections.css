@@ -879,3 +879,55 @@
   .sticker-strip__track { animation: none; }
   .sticker-strip { mask-image: none; }
 }
+
+/* --- An inlined logomark ---------------------------------------------------
+   Inlined rather than linked so js/logomark.js can trace its paths on before
+   the fills resolve. Sized the same way as every other partner mark, from a
+   custom property, because `img { height: auto }` in the reset would win over
+   an attribute and this has to match its neighbours. */
+.partner__mark {
+  height: var(--partner-h, 30px);
+  width: auto;
+  overflow: visible;          /* the draw-on stroke sits outside the fill */
+  vector-effect: non-scaling-stroke;
+}
+.partner__mark path { stroke: none; }
+/* Nothing to see until it is asked to draw, so it cannot flash complete
+   between parse and the hero reveal. */
+.partner__mark:not(.is-drawn) path { fill-opacity: 0; }
+@media (prefers-reduced-motion: reduce) {
+  .partner__mark path { fill-opacity: 1 !important; }
+}
+
+/* --- Footer logos ----------------------------------------------------------
+   Site-wide credit, on every page. SlashDot leads at half again the height of
+   the rest, with a label, because they are the club running the fest — a row
+   of equals would say the opposite. */
+.footer__logos {
+  display: flex; flex-wrap: wrap; align-items: center;
+  justify-content: center;
+  gap: var(--sp-5) clamp(1.75rem, 5vw, 3.5rem);
+  margin-top: var(--sp-7);
+  padding-top: var(--sp-6);
+  border-top: 1px solid var(--line);
+}
+.footer__logo {
+  display: grid; justify-items: center; gap: 0.5rem;
+  opacity: 0.72;
+  text-decoration: none;
+  transition: opacity var(--dur-2) var(--ease-out);
+}
+.footer__logo:hover, .footer__logo:focus-visible { opacity: 1; }
+/* Each mark carries its own height, because equal pixel heights are not equal
+   optical weights: a wide short wordmark at 40px out-sizes a square roundel at
+   40px. SlashDot is set to lead all of them. */
+.footer__logo img { height: var(--logo-h, 30px); width: auto; }
+.footer__logo span {
+  font-family: var(--font-mono); font-size: var(--step--2);
+  letter-spacing: 0.16em; text-transform: uppercase; color: var(--gold-dim);
+  order: -1;
+}
+@media (max-width: 560px) {
+  .footer__logos { gap: var(--sp-4) var(--sp-5); }
+  .footer__logo img { height: calc(var(--logo-h, 30px) * 0.78); }
+}

@@ -117,9 +117,32 @@ def footer(prefix=""):
         </ul>
       </div>
     </div>
-    <div class="footer__bottom">
-      <span>© <span data-year>2026</span> SlashDot · IISER Kolkata. Qiskit and IBM Quantum are trademarks of IBM.</span>
-      <span class="mono">|ψ⟩ = α|0⟩ + β|1⟩</span>
+    <!-- The marks again, site-wide this time. SlashDot leads at half again
+         the size of the rest: they are the club actually running the fest,
+         and a row of equals would not say so. -->
+    <div class="footer__logos">
+      <a class="footer__logo footer__logo--lead" href="https://github.com/slashdot-iiserk" rel="noopener"
+         aria-label="SlashDot — the Coding &amp; Design Club, IISER Kolkata">
+        <img src="{prefix}assets/brand/slashdot-light.webp" alt="" width="512" height="270"
+             style="--logo-h:62px" loading="lazy" decoding="async">
+        <span>Organised by</span>
+      </a>
+      <a class="footer__logo" href="https://www.iiserkol.ac.in" rel="noopener" aria-label="IISER Kolkata">
+        <img src="{prefix}assets/brand/iiserk-emblem.svg" alt="" width="515" height="451"
+             style="--logo-h:40px" loading="lazy" decoding="async">
+      </a>
+      <a class="footer__logo" href="https://qiskit.org" rel="noopener" aria-label="Qiskit">
+        <img src="{prefix}assets/brand/qiskit-logo-light.svg" alt="" width="120" height="120"
+             style="--logo-h:36px" loading="lazy" decoding="async">
+      </a>
+      <a class="footer__logo" href="https://quantum.ibm.com" rel="noopener" aria-label="IBM Quantum">
+        <img src="{prefix}assets/brand/ibm-quantum-light.webp" alt="" width="640" height="196"
+             style="--logo-h:24px" loading="lazy" decoding="async">
+      </a>
+      <span class="footer__logo" aria-label="Gluon">
+        <img src="{prefix}assets/brand/gluon-light.webp" alt="" width="512" height="376"
+             style="--logo-h:32px" loading="lazy" decoding="async">
+      </span>
     </div>
   </div>
 </footer>

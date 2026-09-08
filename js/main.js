@@ -9,6 +9,7 @@
 import { animate } from '../vendor/anime/anime.esm.min.js';
 import { EVENT, SCHEDULE, PEOPLE, SPEAKERS, TIERS, FAQ } from './data/event.js';
 import { initAmbient } from './ambient.js';
+import { initLogomarks } from './logomark.js';
 import { initPreloader } from './preloader.js';
 
 const $  = (sel, ctx = document) => ctx.querySelector(sel);
@@ -388,6 +389,7 @@ function boot() {
      nothing. Deferring it changes nothing you can see and gives the loading
      screen the frame budget back. */
   const startAmbient = () => initAmbient($('.ambient'));
+  const drawMarks = initLogomarks(document);
 
   // The saga is the machine page's whole reason to exist, and nothing else
   // should pay to load it.
@@ -410,6 +412,9 @@ function boot() {
       hero.querySelectorAll('[data-hero-in]').forEach((el) => el.classList.add('is-in'));
       revealBackdrop();
       startAmbient();
+      // The emblem draws itself on once the hero copy has landed, so it is the
+      // last thing to arrive rather than competing with the headline.
+      setTimeout(drawMarks, 420);
     });
   } else {
     // Pages without a preloader — register, faq, the archive — have nothing
