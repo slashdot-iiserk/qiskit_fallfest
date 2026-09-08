@@ -278,7 +278,7 @@ function personCard(p) {
   const src = p.photo
     ? `<img src="assets/organisers/${esc(p.photo)}-256.webp"
             srcset="assets/organisers/${esc(p.photo)}-256.webp 256w, assets/organisers/${esc(p.photo)}-512.webp 512w"
-            sizes="180px" width="256" height="256" loading="lazy" decoding="async"
+            sizes="(max-width: 640px) 42vw, 200px" width="256" height="256" loading="lazy" decoding="async"
             alt="Portrait of ${esc(p.name)}">`
     : `<span class="person__initials" aria-hidden="true">${esc(initials(p.name))}</span>`;
   return `

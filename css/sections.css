@@ -381,11 +381,31 @@
   color: var(--paper-3); letter-spacing: 0.06em;
 }
 
-/* --- People -------------------------------------------------------------------- */
-.person { }
+/* --- People --------------------------------------------------------------------
+   The portraits are what people actually sent: square, casual, shot in six
+   different rooms under six different lights. Two decisions make a set like
+   that read as one set rather than six snapshots —
+
+   1. A square frame. The sources are square, so `cover` crops nothing at all;
+      the 4/5 frame this used to have took the top off a head whenever the
+      subject sat high in the frame.
+   2. Greyscale until hover. It flattens the wildly different white balances
+      into one palette, and colour arriving on hover makes the grid feel like
+      it is being read rather than merely displayed. */
+.people {
+  display: grid;
+  /* The floor fits all seven across a 1180px container and two across a
+     360px phone. The max stays `1fr`: a fixed maximum plus a non-stretching
+     `justify-content` makes every track take its maximum, so auto-fit packs
+     *fewer* columns — that combination collapsed a phone to a single column of
+     full-width portraits. */
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: var(--sp-5) var(--sp-4);
+  align-items: start;
+}
 .person__frame {
   position: relative; width: 100%; margin: 0 0 var(--sp-4);
-  aspect-ratio: 4 / 5; overflow: hidden;
+  aspect-ratio: 1; overflow: hidden;
   border: 1px solid var(--line);
   background: var(--ink-2);
 }
@@ -394,12 +414,20 @@
   filter: grayscale(1) contrast(1.05);
   transition: filter var(--dur-4) var(--ease-out), scale var(--dur-4) var(--ease-out);
 }
-.person:hover .person__frame img { filter: none; scale: 1.04; }
+.person:hover .person__frame img,
+.person:focus-within .person__frame img { filter: none; scale: 1.04; }
 .person__initials {
   position: absolute; inset: 0; display: grid; place-items: center;
   font-family: var(--font-mono); font-size: var(--step-3); color: var(--gold-dim);
 }
-.person__name { font-size: var(--step-0); font-weight: 600; }
+.person__name {
+  font-size: var(--step-0); font-weight: 600; line-height: 1.25;
+  /* Two lines' worth whether the name needs them or not, so the role labels
+     sit on one line across the row instead of stepping down under the long
+     names. */
+  min-height: 2.5em;
+  text-wrap: balance;
+}
 .person__role {
   font-family: var(--font-mono); font-size: var(--step--2);
   letter-spacing: 0.14em; text-transform: uppercase; color: var(--paper-3);

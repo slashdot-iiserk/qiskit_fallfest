@@ -92,6 +92,7 @@ def footer(prefix=""):
           <li><a href="{prefix}index.html#about">About</a></li>
           <li><a href="{prefix}index.html#schedule">Schedule</a></li>
           <li><a href="{prefix}index.html#challenge">Challenge</a></li>
+          <li><a href="{prefix}index.html#team">The team</a></li>
           <li><a href="{prefix}index.html#certificates">Certificates</a></li>
           <li><a href="{prefix}faq.html">FAQ</a></li>
         </ul>

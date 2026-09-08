@@ -119,10 +119,28 @@ test.describe('home page', () => {
     await expect(page.locator('[data-countdown] .mystery__unit')).toHaveCount(4);
   });
 
-  test('the team and the speakers are not duplicated as flat sections', async ({ page }) => {
-    // They live inside the sphere on the machine page, flown through along the
-    // state vector. A second copy here would be one more place to forget.
-    await expect(page.locator('[data-team]')).toHaveCount(0);
+  test('credits every organiser, with a portrait or their initials', async ({ page }) => {
+    // Both pages render the team from PEOPLE in js/data/event.js — here as a
+    // grid, and inside the sphere on the machine page — so the two can differ
+    // in presentation but never in who is on them.
+    const cards = page.locator('#team .person');
+    await expect(cards).toHaveCount(7);
+    await expect(page.locator('#team')).toContainText('Manish Behera');
+    await expect(page.locator('#team')).toContainText('Lead Organiser');
+
+    // Every card carries a face or, failing that, initials — never a hole.
+    const filled = await cards.evaluateAll((els) => els.map((el) => Boolean(
+      el.querySelector('img') || el.querySelector('.person__initials')?.textContent?.trim())));
+    expect(filled.every(Boolean), 'every organiser needs a portrait or initials').toBe(true);
+
+    // The sources are square; a frame that is not would crop heads off.
+    const square = await cards.first().locator('.person__frame').evaluate((el) => {
+      const r = el.getBoundingClientRect();
+      return Math.abs(r.width - r.height) < 2;
+    });
+    expect(square, 'the portrait frame must be square').toBe(true);
+
+    // The speakers are billed on the schedule, not repeated as a second grid.
     await expect(page.locator('[data-speakers]')).toHaveCount(0);
     await expect(page.locator('[data-saga]')).toHaveCount(0);
   });
@@ -162,6 +180,10 @@ test.describe('home page', () => {
     // animating underneath is invisible work. The ambient layer used to run
     // there and was the single largest cost of the loading screen on slow
     // hardware; it must not creep back.
+    const portraits = [];
+    page.on('request', (r) => {
+      if (r.url().includes('/assets/organisers/')) portraits.push(r.url().split('/').pop());
+    });
     await page.goto('/', { waitUntil: 'commit' });
     await page.waitForSelector('[data-preloader-field]', { timeout: 20000 });
     const during = await page.evaluate(() => {
@@ -175,7 +197,11 @@ test.describe('home page', () => {
         buffer: f && f.clientWidth ? f.width / f.clientWidth : null,
       };
     });
+    during.portraits = portraits;
     expect(during.ambientStarted, 'ambient must wait for the shutter').toBe(false);
+    // The organiser portraits sit at the very bottom of the page. They are
+    // lazy and must stay out of the loading screen's way.
+    expect(during.portraits, 'no portrait before the shutter').toEqual([]);
     expect(during.buffer).not.toBeNull();
     expect(during.buffer).toBeLessThan(1);
     expect(during.buffer).toBeGreaterThan(0.3);

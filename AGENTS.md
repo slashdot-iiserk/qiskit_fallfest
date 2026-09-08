@@ -72,7 +72,7 @@ The site is split in two, and the split is the point:
 | Page | Generator | What it is |
 | --- | --- | --- |
 | `index.html` | `tools/build_index.py` | The landing page. Informative, minimal, fast — event details, the schedule, the challenge, and Register as the loudest thing on it. **No three.js, no GLB, no importmap.** |
-| `machine.html` | `tools/build_machine.py` | The scroll-through of the machine: drawing → quantum computer → qubit → gates → the team inside the sphere → the register button. Opt-in, reached from the hero's "go inside the machine" aside and the footer. |
+| `machine.html` | `tools/build_machine.py` | The scroll-through of the machine: drawing → quantum computer → qubit → gates → the team inside the sphere → the register button. Opt-in, reached from the hero's second headline button and the footer. |
 
 The 3D experience is fabulous and it is also a lot to ask of someone who came to
 find out when the fest is. So the everyday visitor never pays for it: the
@@ -337,10 +337,16 @@ Three sets of copy live in `js/saga/timeline.js`, not in the HTML:
 - `PARTS` — what each stage of the machine is, shown during the descent.
 - `VALUES` — the six things the fest is. **Not cards in a grid**: they orbit the
   model as you descend it.
-- `STATIONS` — what rides the state vector inside the sphere. A `people` stop is
-  expanded by `expandStations()` into one anchor per person, pulled from
-  `js/data/event.js`, so the team and the speakers can never drift out of sync
-  with the sphere. They are **not** also flat sections on the page.
+- `STATIONS` — what rides the state vector inside the sphere. A `ring` stop is
+  expanded by `expandStations()` into one anchor per item, pulled from
+  `js/data/event.js`, so nothing here can drift out of sync with the sphere.
+
+  The organisers appear **twice, deliberately**: as the `#team` grid at the
+  bottom of the landing page, and as faces on the vector inside the sphere.
+  That is two presentations of one list, not two lists — both render from
+  `PEOPLE`, so they cannot disagree about who is on the team. The *speakers*
+  are only billed against their sessions on the schedule; do not add a second
+  speaker grid.
 
 Plus `CHAPTERS`, the copy under the stage. The FAQ lives in
 `js/data/event.js` and is rendered onto its own page, `faq.html`.

@@ -110,7 +110,32 @@ Order, and why:
 5. **Challenge** (`03`) — announced as to-be-announced, with the swag shown.
 6. **Invited speaker** — unnamed, with a countdown.
 7. **Certificates** (`04`) — three tiers.
-8. **Resources** (`05`), **Venue** (`06`), partners, sticker strip, final CTA.
+8. **Resources** (`05`), **Venue** (`06`).
+9. **The team** (`07`) — the organisers, with their portraits.
+10. Partners, sticker strip, final CTA.
+
+### The portraits
+
+The organiser photographs are what people actually sent: square, casual, shot
+in seven different rooms under seven different lights. Two decisions make a set
+like that read as one set rather than seven snapshots.
+
+**A square frame.** The sources are square, so `object-fit: cover` crops
+nothing. The frame this section inherited was 4:5, which took the top off a
+head whenever the subject sat high in the shot.
+
+**Greyscale until hover.** It flattens seven white balances into one palette,
+and colour arriving under the cursor makes the grid feel read rather than
+merely displayed. It is also the reason a childhood snapshot and a conference
+photo can sit side by side without one looking like a mistake.
+
+Whoever has no photograph gets their initials in the same frame — never a hole.
+Currently that is one person.
+
+The team appears here *and* as faces on the vector inside the sphere. That is
+two presentations of one list, not two lists: both render from `PEOPLE`, so
+they cannot disagree. The portraits are lazy-loaded and asserted to stay out of
+the loading screen's way.
 
 ### Two decisions worth defending
 

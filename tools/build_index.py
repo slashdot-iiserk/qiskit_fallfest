@@ -491,6 +491,26 @@ def build() -> str:
   </section>
 
   <!-- ============================ PARTNERS ============================ -->
+  <!-- ============================ THE TEAM ============================ -->
+  <section class="section" id="team">
+    <div class="container">
+      <p class="section__index" data-drop="line"><b>07</b> <span>Who is running it</span> <span>SlashDot</span></p>
+      <div class="section__head">
+        <h2 data-drop>The people behind it.</h2>
+        <p class="lede" data-drop>
+          Students of IISER Kolkata, organising this alongside their own coursework. Most of them
+          were sitting in the audience at a fest like this one not long ago &mdash; which is exactly
+          why the first two days assume you have never seen a state vector.
+        </p>
+      </div>
+      <div class="people" data-team data-drop-group="80"></div>
+      <p class="muted" style="margin-top:2.5rem;font-size:var(--step--1)">
+        Session speakers are billed against each day on <a href="#schedule">the schedule</a>, and the
+        invited closing speaker is announced on 13 October.
+      </p>
+    </div>
+  </section>
+
   <section class="section section--tight" id="partners">
     <div class="container">
       <p class="eyebrow" style="display:flex;justify-content:center;margin-bottom:2.5rem">Presented with</p>
