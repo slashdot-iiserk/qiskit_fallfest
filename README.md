@@ -96,6 +96,7 @@ first-timer who finds the advanced day heavy still leaves with the Intermediate 
 │   ├── 2026/               2026 session material (published before each session)
 │   └── requirements.txt    Python environment for the labs
 ├── source/                 Uncompressed originals — inputs to the asset build, never served
+│   ├── speakers/           Speaker photographs, downscaled to ~1800px
 │   ├── brand/              Logos and the campus photograph
 │   └── organisers-2026.zip Organiser portraits
 ├── tools/
@@ -136,7 +137,9 @@ npm run build:pages    # regenerate index / machine / resources / gallery / arch
 npm run build:model    # re-derive the Draco model and the line drawings
 ```
 
-`build_assets.py` needs Pillow (`pip install Pillow`) and, for favicons, ImageMagick. It also reads
+`build_assets.py` needs `pip install -r tools/requirements.txt` (Pillow, plus
+pillow-heif for the HEIC photographs phones produce) and, for favicons,
+ImageMagick. It also reads
 the upstream Qiskit design kit, which is **not vendored** here — clone it first:
 
 ```bash

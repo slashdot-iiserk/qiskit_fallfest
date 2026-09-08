@@ -140,9 +140,45 @@ test.describe('home page', () => {
     });
     expect(square, 'the portrait frame must be square').toBe(true);
 
-    // The speakers are billed on the schedule, not repeated as a second grid.
-    await expect(page.locator('[data-speakers]')).toHaveCount(0);
     await expect(page.locator('[data-saga]')).toHaveCount(0);
+  });
+
+  test('bills every speaker with what they are teaching', async ({ page }) => {
+    // Running the fest and teaching a session are different jobs, so the page
+    // asks the two questions separately and some faces answer both. What this
+    // grid adds over the team grid is the topic.
+    const cards = page.locator('#speakers .person');
+    await expect(cards).toHaveCount(6);
+
+    const section = page.locator('#speakers');
+    for (const name of ['Devang Shroff', 'Rishabh Chaudhuri', 'Manish Behera',
+      'Shuvam Banerji Seal', 'Md Shayan Bari', 'Alok Jha']) {
+      await expect(section).toContainText(name);
+    }
+    // Day 0 is run with Gluon; everyone else is SlashDot.
+    await expect(section).toContainText('Gluon');
+    await expect(section).toContainText('Quantum Mechanics Primer');
+
+    // Same rule as the team: a face, or initials, never a hole.
+    const filled = await cards.evaluateAll((els) => els.map((el) => Boolean(
+      el.querySelector('img') || el.querySelector('.person__initials')?.textContent?.trim())));
+    expect(filled.every(Boolean), 'every speaker needs a portrait or initials').toBe(true);
+  });
+
+  test('shows every partner mark in its own colours', async ({ page }) => {
+    // A stale rule greyscaled and half-faded the whole band for as long as
+    // every logo happened to be monochrome. The first coloured mark, Gluon,
+    // is the one that would show it.
+    const marks = page.locator('#partners .partner img');
+    await expect(marks).toHaveCount(4);
+    const styles = await marks.evaluateAll((els) => els.map((el) => ({
+      filter: getComputedStyle(el).filter,
+      opacity: Number(getComputedStyle(el.parentElement).opacity),
+    })));
+    for (const s of styles) {
+      expect(s.filter, 'no mark may be filtered').toBe('none');
+      expect(s.opacity).toBeGreaterThan(0.6);
+    }
   });
 
   test('stays light: no renderer, no model, no importmap', async ({ page }) => {

@@ -154,6 +154,7 @@ Assets under `assets/` are produced by `tools/build_assets.py`. Its inputs are:
 | Input | Tracked? | Notes |
 |-------|----------|-------|
 | `source/brand/` | yes | Original logos and campus photo, kept uncompressed and unserved |
+| `source/speakers/` | yes | Speaker photographs, supplied one at a time. Store them **downscaled to ~1800px**, not at camera resolution: the crop box in `SPEAKER_PHOTOS` is a fraction, so a smaller source crops identically, and nothing here is emitted above 512px. One 4284x5712 HEIC was 4.5 MB, five times the largest file in the rest of `source/`. |
 | `source/organisers-2026.zip` | yes | Organiser portraits; the script extracts it into `.work/` on its own |
 | `2026_assets/` | **no** | The upstream Qiskit design kit. Clone it before running the asset build: `git clone git@github.com:Qiskit-Fall-Fest-2026/materials-resources.git 2026_assets` |
 | `Quantum_Computer_glb/` | **no** | The 42 MB source model for the dilution refrigerator. Everything in `assets/model/` is derived from it by `tools/build_model.sh`; the derived files are committed, the source is not. Point `QC_SOURCE` at it wherever you keep it. |
@@ -175,6 +176,27 @@ instead of compounding it. Verified by rasterising before and after: 219 of
 The drawing stays a **single `<path>`** — `anime.js` draws it on through one
 `svg.createDrawable`, and splitting it would change the animation.
 
+### Portraits
+
+Organiser portraits come out of the zip already framed as headshots, so
+`webp(square=True)` centre-crops them and that is enough.
+
+**Speaker photographs do not.** They arrive as holiday and restaurant
+snapshots, and a centre-crop lands on a torso or a dinner table. Each one
+carries its own `(cx, cy, side)` box in `SPEAKER_PHOTOS` — where the face is,
+and how much around it to keep — picked by eye to match the framing of the
+organiser portraits beside it. If a photograph is ever replaced, **re-check the
+box**: there is no face detection here, and a stale box crops through a chin.
+Phone photographs are HEIC; `pip install pillow-heif` (the import is guarded, so
+the rest of the pipeline still runs without it).
+
+`.person__frame` is **square**, because every source is. It used to be 4:5,
+which took the top off any head sitting high in the shot.
+
+Whoever has no photograph gets their initials in the same frame — never a hole.
+`PEOPLE` and `SPEAKERS` in `js/data/event.js` carry `photo: null` for them, and
+both the grids and the sphere labels handle it.
+
 ### Logos on a dark ground
 
 The supplied marks are black artwork drawn for white paper, so they vanish on
@@ -184,6 +206,19 @@ CSS `filter`, which would chew the antialiasing:
 - `light_svg()` sets an explicit `fill` on the root `<svg>`. The Qiskit paths
   carry no fill of their own, so they inherit it → `assets/brand/qiskit-logo-light.svg`.
 - `light_raster()` inverts RGB while preserving alpha → `assets/brand/ibm-quantum-light.webp`.
+
+A mark supplied as **colour on a solid black square** — Gluon's wordmark — gets
+`keyed_webp()` instead: alpha comes from the brightest channel, which is what
+the artwork already uses to describe its own edges, and the colour is
+unpremultiplied back out of it. That is the exact inverse of compositing over
+black, so the antialiasing survives where a flat threshold would leave it
+ragged. A low alpha floor is applied first, because JPEG puts its "black" at
+1-3 rather than 0 and that is enough to defeat the trim.
+
+**Do not add a `filter` or a blanket `opacity` to the partner band.** A stale
+rule did exactly that and greyscaled every mark for as long as they all
+happened to be monochrome; Gluon, the first coloured one, rendered almost
+black. `tests/e2e/site.spec.js` now fails if any mark is filtered.
 
 Partner marks are listed in `PARTNERS` in `tools/build_index.py`. A partner with
 `"src": None` renders as a dashed `.partner__placeholder` tile naming the

@@ -17,7 +17,17 @@ import sys
 import zipfile
 from pathlib import Path
 
-from PIL import Image, ImageOps
+from PIL import Image, ImageChops, ImageOps
+
+# Phone photographs arrive as HEIC. Optional so the rest of the pipeline still
+# runs without it: `pip install pillow-heif`.
+try:
+    import pillow_heif
+
+    pillow_heif.register_heif_opener()
+    HEIF = True
+except ImportError:  # pragma: no cover - depends on the local environment
+    HEIF = False
 
 ROOT = Path(__file__).resolve().parent.parent
 SRC_2026 = ROOT / "2026_assets" / "00_Deliverables"
@@ -25,6 +35,8 @@ ORGANISER_ZIP = ROOT / "source" / "organisers-2026.zip"
 SRC_ORGANISERS = ROOT / ".work" / "organisers" / "Organisers"
 # Original, uncompressed brand marks kept out of the served tree.
 LEGACY = ROOT / "source" / "brand"
+# Speaker photographs, supplied individually rather than in the organiser zip.
+SRC_SPEAKERS = ROOT / "source" / "speakers"
 OUT = ROOT / "assets"
 ARCHIVE_OUT = ROOT / "archive" / "2025" / "assets"
 
@@ -32,11 +44,29 @@ Image.MAX_IMAGE_PIXELS = None
 
 
 def webp(src: Path, dest: Path, width: int | None = None, quality: int = 80,
-         square: bool = False, lossless: bool = False) -> None:
-    """Encode `src` to WebP at `dest`, optionally resizing / centre-cropping."""
+         square: bool = False, lossless: bool = False,
+         crop: tuple[float, float, float] | None = None) -> None:
+    """Encode `src` to WebP at `dest`, optionally resizing / centre-cropping.
+
+    `crop` is `(cx, cy, side)` in fractions of the image: where the square
+    should be centred and how wide it should be as a fraction of the shorter
+    edge. `square=True` centre-crops instead, which is right for a photograph
+    already framed as a portrait and wrong for one that is not — see
+    SPEAKER_PHOTOS.
+    """
     dest.parent.mkdir(parents=True, exist_ok=True)
     with Image.open(src) as im:
         im = ImageOps.exif_transpose(im)
+        if crop:
+            cx, cy, frac = crop
+            side = round(min(im.size) * frac)
+            left = round(im.width * cx - side / 2)
+            top = round(im.height * cy - side / 2)
+            # Nudged back inside rather than clamped per-edge, so the box keeps
+            # its size and the subject stays where it was put.
+            left = max(0, min(left, im.width - side))
+            top = max(0, min(top, im.height - side))
+            im = im.crop((left, top, left + side, top + side))
         has_alpha = im.mode in ("RGBA", "LA", "P") and "transparency" in im.info or im.mode in ("RGBA", "LA")
         im = im.convert("RGBA" if has_alpha else "RGB")
         if square:
@@ -62,6 +92,50 @@ def png(src: Path, dest: Path, width: int, square: bool = False) -> None:
 def svg(src: Path, dest: Path) -> None:
     dest.parent.mkdir(parents=True, exist_ok=True)
     shutil.copyfile(src, dest)
+
+
+def keyed_webp(src: Path, dest: Path, width: int) -> None:
+    """Turn a bright-on-black mark into one with a transparent ground.
+
+    The Gluon wordmark is supplied as glowing colour on a solid black square.
+    Dropped straight onto the ink palette that square reads as a dark box,
+    because the ink is not quite black. Keying it out with a flat threshold
+    would leave the antialiasing ragged, so alpha comes from the brightest
+    channel — which is what the artwork already uses to describe its own edges
+    — and the colour is unpremultiplied back out of it. That is the exact
+    inverse of how the original was composited over black, so the edges survive.
+    """
+    dest.parent.mkdir(parents=True, exist_ok=True)
+    with Image.open(src) as im:
+        im = ImageOps.exif_transpose(im).convert("RGB")
+        r, g, b = im.split()
+        alpha = ImageChops.lighter(ImageChops.lighter(r, g), b)
+        # JPEG puts its "black" at 1-3 rather than 0, which is enough to make
+        # every pixel count as content and defeat the trim below. Real glow
+        # edges ramp well past this, so a low floor costs nothing.
+        alpha = alpha.point(lambda v: 0 if v < 12 else v)
+        px = im.load()
+        ax = alpha.load()
+        out = Image.new("RGBA", im.size)
+        op = out.load()
+        for y in range(im.height):
+            for x in range(im.width):
+                a = ax[x, y]
+                if a == 0:
+                    op[x, y] = (0, 0, 0, 0)
+                    continue
+                cr, cg, cb = px[x, y]
+                k = 255 / a
+                op[x, y] = (min(255, round(cr * k)), min(255, round(cg * k)),
+                            min(255, round(cb * k)), a)
+        # Trim the empty margin so the mark's optical size matches its
+        # neighbours rather than its canvas.
+        box = out.getbbox()
+        if box:
+            out = out.crop(box)
+        if out.width > width:
+            out = out.resize((width, round(out.height * width / out.width)), Image.LANCZOS)
+        out.save(dest, "WEBP", quality=92, method=6)
 
 
 def light_svg(src: Path, dest: Path, colour: str) -> None:
@@ -106,6 +180,26 @@ def rasterise_svg(src: Path, dest_png: Path, width: int) -> bool:
 # --------------------------------------------------------------------------
 # 2026 — the live site
 # --------------------------------------------------------------------------
+# Speaker photographs, supplied one at a time rather than in the organiser zip.
+#
+# These are holiday and restaurant snapshots, not headshots, so a plain
+# centre-crop lands on a torso or a dinner table. Each carries its own
+# `(cx, cy, side)` box — where the face is and how much around it to keep —
+# chosen to match the framing of the organiser portraits beside them. Re-check
+# by eye if a photograph is ever replaced; there is no face detection here and
+# guessing produces a crop through somebody's chin.
+#
+# Photographs arrive from phones as HEIC, which `pillow_heif` above handles.
+# Store them here downscaled to about 1800px rather than at camera resolution:
+# the crop box is a fraction, so a smaller source crops identically, and the
+# largest thing this pipeline emits is 512px. One 4284x5712 HEIC was 4.5 MB —
+# five times the largest file in the rest of `source/` — for a portrait shown
+# at 155.
+SPEAKER_PHOTOS = {
+    "devang-shroff.jpg": ("devang-shroff", (0.53, 0.42, 0.44)),
+    "rishabh-chaudhuri.jpg": ("rishabh-chaudhuri", (0.57, 0.25, 0.58)),
+}
+
 ORGANISERS = {
     "Manish B_Lead-Organiser.png": "manish-behera",
     "Shuvam Banerji Seal_Co-Organiser.png": "shuvam-banerji-seal",
@@ -152,6 +246,7 @@ def build_2026() -> None:
     webp(LEGACY / "SlashDot Main logo noBG B-01.png", OUT / "brand" / "slashdot-dark.webp", width=512, quality=88)
     webp(LEGACY / "iiser_k.jpg", OUT / "brand" / "iiserk.webp", width=1280, quality=76)
     webp(LEGACY / "iiserk_slashdot.png", OUT / "brand" / "iiserk-slashdot.webp", width=1024, quality=82)
+    keyed_webp(LEGACY / "gluon_logo.jpeg", OUT / "brand" / "gluon-light.webp", width=512)
 
     # Favicons, rendered from the Bloch-sphere badge.
     tmp = ROOT / ".work" / "badge.png"
@@ -188,6 +283,18 @@ def build_2026() -> None:
             continue
         webp(src, OUT / "organisers" / f"{slug}-512.webp", width=512, quality=82, square=True)
         webp(src, OUT / "organisers" / f"{slug}-256.webp", width=256, quality=80, square=True)
+
+    # Speakers who are not on the organising team, cropped to their own boxes.
+    for filename, (slug, box) in SPEAKER_PHOTOS.items():
+        src = SRC_SPEAKERS / filename
+        if not src.exists():
+            print(f"  ! missing speaker photograph: {filename}", file=sys.stderr)
+            continue
+        if src.suffix.lower() in (".heic", ".heif") and not HEIF:
+            print(f"  ! {filename} needs pillow-heif (pip install pillow-heif)", file=sys.stderr)
+            continue
+        webp(src, OUT / "organisers" / f"{slug}-512.webp", width=512, quality=82, crop=box)
+        webp(src, OUT / "organisers" / f"{slug}-256.webp", width=256, quality=80, crop=box)
 
 
 # --------------------------------------------------------------------------

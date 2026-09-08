@@ -165,11 +165,19 @@ export const PEOPLE = [
   { name: 'Md Shayan Bari',      role: 'Co-Organiser',   photo: null },
 ];
 
-/** Speakers billed on the public schedule. */
+/**
+ * Speakers billed on the public schedule, in the order the fest meets them.
+ *
+ * Several are also on PEOPLE — running the fest and teaching a session are
+ * different jobs, and the site asks the two questions separately. `role` is
+ * what they are speaking *on*, which is the thing this list adds over the
+ * team grid.
+ */
 export const SPEAKERS = [
-  { name: 'Devang Shroff',      role: 'Quantum Mechanics Primer', org: 'in collaboration with Gluon', photo: null },
-  { name: 'Rishabh Chaudhuri',  role: 'Quantum Mechanics Primer', org: 'in collaboration with Gluon', photo: null },
+  { name: 'Devang Shroff',      role: 'Quantum Mechanics Primer', org: 'Gluon', photo: 'devang-shroff' },
+  { name: 'Rishabh Chaudhuri',  role: 'Quantum Mechanics Primer', org: 'Gluon', photo: 'rishabh-chaudhuri' },
   { name: 'Manish Behera',      role: 'Qiskit 101 · Entanglement · Hardware', org: 'SlashDot, IISER Kolkata', photo: 'manish-behera' },
+  { name: 'Shuvam Banerji Seal', role: 'Kick Off',    org: 'SlashDot, IISER Kolkata', photo: 'shuvam-banerji-seal' },
   { name: 'Md Shayan Bari',     role: 'Labs 1 & 3',   org: 'SlashDot, IISER Kolkata', photo: null },
   { name: 'Alok Jha',           role: 'Lab 2',        org: 'SlashDot, IISER Kolkata', photo: 'alok-jha' },
 ];

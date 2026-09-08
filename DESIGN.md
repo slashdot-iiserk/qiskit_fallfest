@@ -112,7 +112,8 @@ Order, and why:
 7. **Certificates** (`04`) — three tiers.
 8. **Resources** (`05`), **Venue** (`06`).
 9. **The team** (`07`) — the organisers, with their portraits.
-10. Partners, sticker strip, final CTA.
+10. **The speakers** (`08`) — who is teaching what.
+11. Partners, sticker strip, final CTA.
 
 ### The portraits
 
@@ -136,6 +137,17 @@ The team appears here *and* as faces on the vector inside the sphere. That is
 two presentations of one list, not two lists: both render from `PEOPLE`, so
 they cannot disagree. The portraits are lazy-loaded and asserted to stay out of
 the loading screen's way.
+
+### Team and speakers are two questions
+
+Four people appear in both grids, and that is not a duplication to be fixed.
+*Who is running this* and *who is teaching me* are different questions an
+attendee actually asks, and the answers overlap. The speakers grid earns its
+place by carrying the topic — Quantum Mechanics Primer, Qiskit 101, Lab 2 —
+which is the thing the team grid does not say.
+
+The invited closing speaker stays out of both, in its own section with a
+countdown, because the whole point is that the name is not there yet.
 
 ### Two decisions worth defending
 

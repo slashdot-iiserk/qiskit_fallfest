@@ -510,14 +510,13 @@
 @media (max-width: 520px) { .venue__list li { grid-template-columns: 1fr; gap: 0.3rem; } }
 
 /* --- Partners ------------------------------------------------------------------------ */
-.partners { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: clamp(2rem, 6vw, 5rem); }
-.partners img {
-  height: clamp(26px, 4vw, 38px); width: auto;
-  opacity: 0.5; filter: grayscale(1);
-  transition: opacity var(--dur-3);
-}
-.partners img:hover { opacity: 1; }
+/* `.partners` is defined once, further down, alongside `.partner`. The block
+   that used to sit here was left over from before the partner strip was
+   generated, and it greyscaled and half-faded every mark in the band. That
+   went unnoticed for as long as every logo was monochrome anyway — the first
+   coloured one, Gluon, arrived and rendered almost black.
 
+*/
 /* --- CTA ------------------------------------------------------------------------------- */
 .cta-band {
   text-align: center;

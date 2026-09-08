@@ -181,7 +181,7 @@ PARTNERS = [
     {"name": "IBM Quantum", "src": "assets/brand/ibm-quantum-light.webp", "href": "https://quantum.ibm.com", "h": 24},
     {"name": "Qiskit", "src": "assets/brand/qiskit-logo-light.svg", "href": "https://qiskit.org", "h": 44},
     {"name": "SlashDot", "src": "assets/brand/slashdot-light.webp", "href": "https://github.com/slashdot-iiserk", "h": 36},
-    {"name": "Gluon", "src": None, "href": None, "h": 26},
+    {"name": "Gluon", "src": "assets/brand/gluon-light.webp", "href": None, "h": 34},
     {"name": "IISER Kolkata", "src": None, "href": "https://www.iiserkol.ac.in", "h": 30},
 ]
 
@@ -505,8 +505,28 @@ def build() -> str:
       </div>
       <div class="people" data-team data-drop-group="80"></div>
       <p class="muted" style="margin-top:2.5rem;font-size:var(--step--1)">
-        Session speakers are billed against each day on <a href="#schedule">the schedule</a>, and the
-        invited closing speaker is announced on 13 October.
+        Several of them are also teaching &mdash; who takes which session is
+        <a href="#speakers">just below</a>, and the invited closing speaker is announced on 13 October.
+      </p>
+    </div>
+  </section>
+
+  <!-- ============================ SPEAKERS ============================ -->
+  <section class="section section--alt" id="speakers">
+    <div class="container">
+      <p class="section__index" data-drop="line"><b>08</b> <span>Who is teaching</span> <span>Six sessions</span></p>
+      <div class="section__head">
+        <h2 data-drop>And who is teaching it.</h2>
+        <p class="lede" data-drop>
+          Every session is taught by someone who will still be in the room afterwards. Day 0 is run
+          jointly with <strong>Gluon</strong>, the physics society; the rest is SlashDot. The invited
+          talk that closes the fest is the one name still held back.
+        </p>
+      </div>
+      <div class="people" data-speakers data-drop-group="80"></div>
+      <p class="muted" style="margin-top:2.5rem;font-size:var(--step--1)">
+        Sessions and times are on <a href="#schedule">the schedule</a>. Day 3 topics and the Day 4
+        speaker are still being finalised.
       </p>
     </div>
   </section>
