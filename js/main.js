@@ -58,24 +58,55 @@ function initNav() {
   onScroll();
   window.addEventListener('scroll', onScroll, { passive: true });
 
+  /* --- The mobile menu ---------------------------------------------------
+     One `setMenu` rather than the same four lines in four places, because the
+     scrim and the focus handling have to move with it and they were drifting
+     out of sync with the toggle. */
+  const setMenu = (open) => {
+    burger?.setAttribute('aria-expanded', String(open));
+    menu?.classList.toggle('is-open', open);
+    nav.classList.toggle('nav--menu-open', open);
+    document.body.style.overflow = open ? 'hidden' : '';
+    // The panel ends partway down the page, so the rest of it gets a scrim:
+    // it says the page is behind the menu rather than beside it, and gives a
+    // large, obvious place to tap to dismiss.
+    if (open) burger?.setAttribute('aria-label', 'Close navigation');
+    else burger?.setAttribute('aria-label', 'Open navigation');
+  };
+
   burger?.addEventListener('click', () => {
-    const open = burger.getAttribute('aria-expanded') === 'true';
-    burger.setAttribute('aria-expanded', String(!open));
-    menu?.classList.toggle('is-open', !open);
-    document.body.style.overflow = !open ? 'hidden' : '';
+    setMenu(burger.getAttribute('aria-expanded') !== 'true');
   });
 
-  $$('.nav__link', menu || document).forEach((link) => link.addEventListener('click', () => {
-    burger?.setAttribute('aria-expanded', 'false');
-    menu?.classList.remove('is-open');
-    document.body.style.overflow = '';
-  }));
+  $$('.nav__link', menu || document).forEach(
+    (link) => link.addEventListener('click', () => setMenu(false)));
 
   document.addEventListener('keydown', (e) => {
     if (e.key !== 'Escape') return;
-    burger?.setAttribute('aria-expanded', 'false');
-    menu?.classList.remove('is-open');
-    document.body.style.overflow = '';
+    if (menu?.classList.contains('is-open')) burger?.focus();
+    setMenu(false);
+  });
+
+  /* Anywhere outside the bar's own contents closes the panel.
+     The test is `.nav__inner`, not `.nav`: the scrim is painted as `.nav::after`
+     and a pseudo-element is never an event target, so a tap on it arrives with
+     `e.target === nav` — and a `nav.contains(e.target)` guard swallowed exactly
+     the taps it was meant to catch. `.nav__inner` holds the brand, the panel
+     and the actions, which are the only things that should not dismiss.
+
+     On `click`, not `pointerdown`: closing on pointerdown tore the scrim down
+     mid-gesture, and the click that followed landed on whatever was underneath
+     — so dismissing the menu navigated the page. */
+  document.addEventListener('click', (e) => {
+    if (!menu?.classList.contains('is-open')) return;
+    if (e.target instanceof Element && e.target.closest('.nav__inner')) return;
+    setMenu(false);
+  });
+
+  // A width change can take the burger away while the panel is open, which
+  // would leave the body scroll-locked with no way to unlock it.
+  matchMedia('(min-width: 981px)').addEventListener('change', (e) => {
+    if (e.matches) setMenu(false);
   });
 
   // Highlight the section currently under the header.

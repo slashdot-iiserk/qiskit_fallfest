@@ -447,6 +447,78 @@ test.describe('chrome', () => {
   });
 });
 
+test.describe('the navbar', () => {
+  test('stays fixed to the top of the page', async ({ page }) => {
+    // It had stopped. `main, .nav, .footer { position: relative; z-index: 1 }`
+    // was added later in the same file at the same specificity and quietly
+    // overrode both the `fixed` and the `z-index: 110` — so the bar scrolled
+    // away on every page and every width, the blur-on-scroll styling was dead
+    // code, and on mobile the open menu painted *underneath* the hero. Nothing
+    // failed and nobody noticed.
+    await page.goto('/');
+    const nav = page.locator('.nav');
+    expect(await nav.evaluate((el) => getComputedStyle(el).position)).toBe('fixed');
+    expect(Number(await nav.evaluate((el) => getComputedStyle(el).zIndex))).toBeGreaterThan(10);
+
+    await page.evaluate(() => window.scrollTo({ top: 1200, behavior: 'instant' }));
+    await expect.poll(() => nav.evaluate((el) => Math.round(el.getBoundingClientRect().top)))
+      .toBe(0);
+    await expect(nav).toHaveClass(/is-stuck/);
+  });
+
+  test('the mobile menu opens, dismisses, and never navigates doing it',
+    async ({ page, isMobile }) => {
+      test.skip(!isMobile, 'covered by the mobile project');
+      await page.goto('/');
+      const burger = page.locator('.nav__burger');
+      const menu = page.locator('.nav__menu');
+      await expect(burger).toBeVisible();
+
+      await burger.tap();
+      await expect(menu).toHaveClass(/is-open/);
+      await expect(burger).toHaveAttribute('aria-expanded', 'true');
+      // The primary action has to stay reachable with the panel down.
+      const reachable = await page.evaluate(() => {
+        const b = document.querySelector('.nav__actions .btn');
+        const r = b.getBoundingClientRect();
+        return document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2)
+          ?.closest('.btn') === b;
+      });
+      expect(reachable, 'Register must stay tappable').toBe(true);
+
+      // Tapping the scrim dismisses without following a link underneath —
+      // closing on pointerdown removed the scrim mid-gesture and the click
+      // fell through to the hero.
+      const before = page.url();
+      await page.touchscreen.tap(Math.round(page.viewportSize().width / 2), 700);
+      await expect(menu).not.toHaveClass(/is-open/);
+      expect(page.url(), 'dismissing must not navigate').toBe(before);
+      expect(await page.evaluate(() => document.body.style.overflow)).toBe('');
+    });
+
+  test('mobile controls are big enough to hit', async ({ page, isMobile }) => {
+    test.skip(!isMobile, 'covered by the mobile project');
+    await page.goto('/');
+    await page.waitForTimeout(300);
+    const sizes = await page.locator('.nav__burger, .nav__actions .theme-toggle, .nav__actions .btn')
+      .evaluateAll((els) => els.map((el) => {
+        const r = el.getBoundingClientRect();
+        return { cls: el.className, w: Math.round(r.width), h: Math.round(r.height) };
+      }));
+    expect(sizes.length).toBeGreaterThan(2);
+    for (const s of sizes) {
+      expect(s.h, `${s.cls} is only ${s.h}px tall`).toBeGreaterThanOrEqual(44);
+      expect(s.w, `${s.cls} is only ${s.w}px wide`).toBeGreaterThanOrEqual(44);
+    }
+    // And the rows in the panel.
+    await page.locator('.nav__burger').tap();
+    await page.waitForTimeout(500);
+    const rows = await page.locator('.nav__link').evaluateAll(
+      (els) => els.map((el) => Math.round(el.getBoundingClientRect().height)));
+    for (const h of rows) expect(h).toBeGreaterThanOrEqual(44);
+  });
+});
+
 test.describe('gallery', () => {
   test('filters narrow the grid', async ({ page }) => {
     await page.goto('/gallery.html');

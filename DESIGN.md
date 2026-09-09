@@ -202,6 +202,19 @@ one that assembles worth watching.
 
 Under `prefers-reduced-motion` it is simply there, filled, on the first frame.
 
+### The mobile menu is a panel, not a drawer
+
+It drops from the bar and stops partway down the page, with the remainder
+scrimmed. That is a deliberate choice over a full-height sheet: the fest's
+dates and the Register button are what most people came for, and a panel that
+leaves the top of the hero visible behind a scrim keeps the visitor located.
+The scrim then doubles as a large, obvious place to tap to dismiss.
+
+Rows are full-width, 52px, divided, and carry a chevron — a row should read as
+somewhere to go, not as a label. The current section is marked with a gold edge
+on the left rather than the desktop underline, which is invisible on a stacked
+list. Every control in the bar is at least 44px.
+
 ### Missing artwork is visible, not absent
 
 A partner with `"src": None` in `PARTNERS` renders as a dashed

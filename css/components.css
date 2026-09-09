@@ -143,36 +143,113 @@ html.is-loading { overflow: hidden; }
 [data-theme="light"] .theme-toggle .icon-sun { display: block; }
 [data-theme="light"] .theme-toggle .icon-moon { display: none; }
 
+/* The bars are laid out by the grid rather than pinned to absolute offsets, so
+   the button can grow to a 44px touch target without the icon drifting off
+   centre — which is what happened the first time it was resized. */
 .nav__burger {
   display: none; width: 38px; height: 38px;
-  border: 1px solid var(--line); position: relative;
+  place-content: center; justify-items: center;
+  gap: 4px;
+  border: 1px solid var(--line);
 }
 .nav__burger span {
-  position: absolute; left: 10px; width: 17px; height: 1px;
+  display: block; width: 17px; height: 1px;
   background: var(--paper);
   transition: transform var(--dur-2) var(--ease-out), opacity var(--dur-1);
 }
-.nav__burger span:nth-child(1) { top: 13px; }
-.nav__burger span:nth-child(2) { top: 18px; }
-.nav__burger span:nth-child(3) { top: 23px; }
 .nav__burger[aria-expanded="true"] span:nth-child(1) { transform: translateY(5px) rotate(45deg); }
 .nav__burger[aria-expanded="true"] span:nth-child(2) { opacity: 0; }
 .nav__burger[aria-expanded="true"] span:nth-child(3) { transform: translateY(-5px) rotate(-45deg); }
 
 @media (max-width: 980px) {
-  .nav__burger { display: block; }
+  .nav__burger { display: grid; }
+
   .nav__menu {
     position: fixed; inset: var(--nav-h) 0 auto;
     flex-direction: column; align-items: stretch; gap: 0;
-    padding: var(--sp-4) var(--sp-5) var(--sp-6);
+    /* Room for a home-gesture bar or a rounded corner. */
+    padding: var(--sp-3) max(var(--sp-5), env(safe-area-inset-left))
+             calc(var(--sp-5) + env(safe-area-inset-bottom));
     background: var(--void);
-    border-bottom: 1px solid var(--line);
+    border-bottom: 1px solid var(--line-strong);
     clip-path: inset(0 0 100% 0);
     transition: clip-path var(--dur-3) var(--ease-out);
   }
   .nav__menu.is-open { clip-path: inset(0 0 0 0); }
-  .nav__link { padding: 0.9rem 0.2rem; font-size: var(--step-0); border-bottom: 1px solid var(--line); }
+
+  /* The panel stops partway down the page, so the remainder is scrimmed: it
+     reads as behind the menu rather than beside it, and it is a large, obvious
+     place to tap to dismiss. Painted by the bar, not the panel, so it can
+     cover the whole viewport without the panel having to be full height. */
+  .nav::after {
+    content: "";
+    position: fixed; inset: var(--nav-h) 0 0;
+    background: color-mix(in srgb, var(--void) 76%, transparent);
+    backdrop-filter: blur(2px);
+    -webkit-backdrop-filter: blur(2px);
+    opacity: 0; pointer-events: none;
+    transition: opacity var(--dur-3) var(--ease-out);
+    z-index: -1;
+  }
+  .nav--menu-open::after { opacity: 1; pointer-events: auto; }
+
+  .nav__link {
+    display: flex; align-items: center; justify-content: space-between;
+    min-height: 3.25rem;                    /* a comfortable thumb target */
+    padding: 0.55rem 0.2rem;
+    font-size: var(--step-0);
+    /* Full strength here: on a desktop bar these are secondary to the page,
+       but in the panel the list *is* the content. */
+    color: var(--paper);
+    border-bottom: 1px solid var(--line);
+  }
+  /* A chevron, so a row reads as somewhere to go rather than a label. */
+  .nav__link::before {
+    content: "";
+    order: 2;
+    width: 7px; height: 7px;
+    border-top: 1px solid var(--gold-dim);
+    border-right: 1px solid var(--gold-dim);
+    rotate: 45deg;
+    opacity: 0.7;
+  }
   .nav__link::after { display: none; }
+  .nav__menu li:last-child .nav__link { border-bottom: 0; }
+
+  /* The current section is named on the left edge rather than by an underline,
+     which is invisible on a stacked list. */
+  .nav__link[aria-current="page"], .nav__link.is-active {
+    box-shadow: inset 2px 0 0 var(--gold);
+    padding-left: 0.85rem;
+  }
+
+  /* Each item arrives just after the panel does, so the list reads as opening
+     rather than as already being there. */
+  .nav__menu li {
+    opacity: 0; transform: translateY(-8px);
+    transition: opacity var(--dur-2) var(--ease-out), transform var(--dur-2) var(--ease-out);
+  }
+  .nav__menu.is-open li { opacity: 1; transform: none; }
+  .nav__menu.is-open li:nth-child(1) { transition-delay: 60ms; }
+  .nav__menu.is-open li:nth-child(2) { transition-delay: 100ms; }
+  .nav__menu.is-open li:nth-child(3) { transition-delay: 140ms; }
+  .nav__menu.is-open li:nth-child(4) { transition-delay: 180ms; }
+  .nav__menu.is-open li:nth-child(5) { transition-delay: 220ms; }
+  .nav__menu.is-open li:nth-child(6) { transition-delay: 260ms; }
+  .nav__menu.is-open li:nth-child(7) { transition-delay: 300ms; }
+
+  /* Touch targets. 36 and 38px were both under the 44px minimum, and the
+     Register button was 34px tall — the smallest thing in the bar was also
+     the most important. */
+  .theme-toggle { width: 44px; height: 44px; }
+  .nav__burger { width: 44px; height: 44px; }
+  .nav__actions .btn--sm { min-height: 44px; padding-inline: 1rem; }
+}
+
+@media (max-width: 980px) and (prefers-reduced-motion: reduce) {
+  .nav__menu li { opacity: 1; transform: none; transition: none; }
+  .nav__menu { transition: none; }
+  .nav::after { transition: none; }
 }
 
 /* At the very narrow end the bar cannot hold the wordmark, the theme toggle,
@@ -395,8 +472,13 @@ html.is-loading { overflow: hidden; }
   opacity: 0.85;
 }
 
-/* Page content rides above the fixed drawing. */
-main, .nav, .footer { position: relative; z-index: 1; }
+/* Page content rides above the fixed drawing behind it.
+   `.nav` is deliberately *not* in this list. It needs `position: fixed` and a
+   z-index above the page, and this rule — same specificity, later in the file —
+   was quietly overriding both: the navbar had stopped being fixed at all, on
+   every page and every width, and on mobile the open menu painted underneath
+   the hero. `.nav` sets its own stacking above. */
+main, .footer { position: relative; z-index: 1; }
 
 /* --- Hero entrance ---------------------------------------------------------- */
 [data-hero-in] {

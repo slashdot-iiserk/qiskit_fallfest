@@ -418,6 +418,36 @@ side. Judge changes from those sheets rather than from one viewport.
   the reverse, or a label whose anchor rotates past the gutter is pushed off
   screen. The tilt is what makes the plates read as glass rather than overlay.
 
+## The navbar
+
+`.nav` is `position: fixed; z-index: 110` and **must not be caught by a blanket
+rule**. It was, for a long time: `main, .nav, .footer { position: relative;
+z-index: 1 }` sat later in `css/components.css` at the same specificity and
+overrode both declarations, so the bar scrolled away on every page and every
+width, `.is-stuck` and its backdrop blur were dead code, and on mobile the open
+menu painted *underneath* the hero. Nothing errored. `tests/e2e/site.spec.js`
+now asserts the bar is fixed and still at `top: 0` after scrolling.
+
+The mobile panel:
+
+- **One `setMenu(open)`** owns the class, `aria-expanded`, the label, the body
+  scroll lock and the scrim. The same four lines used to be repeated in four
+  handlers and had drifted apart.
+- **The scrim is `.nav::after`**, so it can cover the viewport without the
+  panel being full height. A pseudo-element is never an event target, which
+  means a tap on the scrim arrives with `e.target === nav` — dismiss-on-outside
+  therefore tests `.nav__inner` (brand, panel, actions), never `.nav`.
+- **Dismiss listens on `click`, not `pointerdown`.** Closing on pointerdown
+  removed the scrim mid-gesture and the click that followed landed on the hero,
+  so dismissing the menu navigated the page.
+- **A width change past the breakpoint closes it**, or the burger disappears
+  with the body still scroll-locked and no way to unlock it.
+- **Touch targets are 44px minimum.** The burger was 38, the theme toggle 36
+  and the Register button 34 — the smallest thing in the bar was the most
+  important one. The burger's bars are laid out by a grid rather than pinned to
+  absolute offsets, so the button can be resized without the icon drifting off
+  centre.
+
 ## Scroll reveals
 
 `[data-drop]` elements start above their resting position and settle with `--ease-drop`. The
