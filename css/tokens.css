@@ -38,6 +38,17 @@
   /* --- Rules -------------------------------------------------------------- */
   --line:        rgba(232, 200, 122, 0.14);
   --line-strong: rgba(232, 200, 122, 0.32);
+
+  /* The plate every partner mark sits on.
+     The supplied marks are light-on-dark artwork — IBM Quantum, Qiskit and
+     SlashDot are white — so on the light theme they vanished outright:
+     measured at 0.0%, 0.0% and 0.7% of their own box in contrasting ink. The
+     plate is deliberately the *same* dark in both themes, so the geometry
+     never shifts and each mark stays the one its owner designed. Shipping a
+     second set of marks and swapping them per theme would double the assets
+     and leave one to forget. */
+  --mark-plate:      #17171a;
+  --mark-plate-line: rgba(232, 200, 122, 0.18);
   --line-paper:  rgba(242, 239, 232, 0.10);
 
   /* --- Type ---------------------------------------------------------------- */

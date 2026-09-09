@@ -251,6 +251,34 @@ black, so the antialiasing survives where a flat threshold would leave it
 ragged. A low alpha floor is applied first, because JPEG puts its "black" at
 1-3 rather than 0 and that is enough to defeat the trim.
 
+### Marks on both themes
+
+Every partner mark is light-on-dark artwork — IBM Quantum, Qiskit and SlashDot
+are white — so on the light theme they were **not dim, they were gone**:
+measured at 0.0%, 0.0% and 0.7% of their own box in contrasting ink. Gluon and
+the IISER emblem survived only because they carry their own colours.
+
+They all sit on a plate now: `--mark-plate` in `css/tokens.css`, deliberately
+the *same* dark in both themes so the geometry never shifts and each mark stays
+the one its owner designed. The alternative — a second set of marks swapped per
+theme — doubles the assets and leaves one to forget.
+
+Plate heights are uniform per strip (`3.4rem` hero, `4.9rem` band, `3.3rem`
+footer with `4.7rem` for the lead) because five marks with five aspect ratios
+otherwise read as ragged tiles. Hierarchy is carried by the mark inside the
+plate, not by the plate.
+
+`tests/e2e/site.spec.js` asserts every mark has a plate and that the plate is
+dark, on both themes. To check by eye, or after touching any mark, measure it:
+a throwaway Playwright script that screenshots each mark's box and compares its
+ink to the ground behind it. **Two metrics that look reasonable and are wrong:**
+the share of pixels above a small threshold punishes thin wordmarks (mostly
+antialiased fringe) and calls visible marks invisible; and a median over
+"opaque" pixels measures the *background*, because `omitBackground` does
+nothing on a page whose body is opaque. A logo is a minority of its own box, so
+the statistic has to be the upper tail — what share of the box is ink separated
+from the ground, plus the p99.
+
 **Do not add a `filter` or a blanket `opacity` to the partner band.** A stale
 rule did exactly that and greyscaled every mark for as long as they all
 happened to be monochrome; Gluon, the first coloured one, rendered almost

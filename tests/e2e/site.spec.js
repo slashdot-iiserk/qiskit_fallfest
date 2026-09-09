@@ -297,6 +297,31 @@ test.describe('home page', () => {
     }
   });
 
+  test('every partner mark reads on both themes', async ({ page }) => {
+    // The supplied marks are light-on-dark artwork, so on the light theme
+    // IBM Quantum and Qiskit measured at literally 0% of their box in
+    // contrasting ink and SlashDot at 0.7%. They sit on a plate now, the same
+    // dark in both themes. This asserts the plate is actually behind every one
+    // of them and is actually dark, on whichever theme.
+    for (const theme of ['dark', 'light']) {
+      await page.evaluate((t) => { document.documentElement.dataset.theme = t; }, theme);
+      const grounds = await page.locator('.hero__partners .partner, #partners .partner, .footer__plate')
+        .evaluateAll((els) => els.map((el) => {
+          const bg = getComputedStyle(el).backgroundColor;
+          const m = /rgba?\((\d+), (\d+), (\d+)/.exec(bg);
+          if (!m) return { bg, lum: null };
+          const lum = (0.2126 * +m[1] + 0.7152 * +m[2] + 0.0722 * +m[3]) / 255;
+          return { bg, lum };
+        }));
+      expect(grounds.length, 'marks should be plated in three places').toBeGreaterThan(12);
+      for (const g of grounds) {
+        expect(g.lum, `a mark has no plate on the ${theme} theme (${g.bg})`).not.toBeNull();
+        expect(g.lum, `the ${theme} plate is not dark enough (${g.bg})`).toBeLessThan(0.2);
+      }
+    }
+    await page.evaluate(() => { delete document.documentElement.dataset.theme; });
+  });
+
   test('credits the organising club loudest in the footer', async ({ page }) => {
     // SlashDot runs the fest, so the site-wide footer row is not a row of
     // equals. Compared on area, because equal heights are not equal weights.

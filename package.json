@@ -19,6 +19,7 @@
     "@gltf-transform/cli": "^4.5.0",
     "@playwright/test": "^1.49.0",
     "animejs": "^4.5.0",
+    "pngjs": "^7.0.0",
     "three": "^0.185.1"
   },
   "engines": {

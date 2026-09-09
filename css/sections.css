@@ -723,12 +723,22 @@
   gap: clamp(2rem, 6vw, 4.5rem);
 }
 .partner {
-  display: inline-flex; align-items: center;
+  display: inline-flex; align-items: center; justify-content: center;
+  padding-inline: 0.95rem;
+  background: var(--mark-plate);
+  border: 1px solid var(--mark-plate-line);
   text-decoration: none;
-  opacity: 0.75;
-  transition: opacity var(--dur-2) var(--ease-out);
+  opacity: 0.82;
+  transition: opacity var(--dur-2) var(--ease-out), border-color var(--dur-2) var(--ease-out);
 }
-.partner:hover { opacity: 1; }
+/* One plate height per strip, so a row of marks with five different aspect
+   ratios still reads as a row rather than as ragged tiles. The marks keep
+   their own optically-tuned heights inside it. */
+.hero__partners .partner { height: 3.4rem; min-width: 5.6rem; }
+.partners .partner { height: 4.9rem; min-width: 7.5rem; }
+.partner:hover, .partner:focus-visible { opacity: 1; border-color: var(--line-strong); }
+/* The placeholder tile brings its own dashed frame; it must not get a second. */
+.partner:has(.partner__placeholder) { padding: 0; background: none; border: 0; }
 .partner img { height: var(--partner-h, 28px); width: auto; }
 
 /* A reserved slot, not a gap: obvious that artwork is coming. */
@@ -913,16 +923,30 @@
 }
 .footer__logo {
   display: grid; justify-items: center; gap: 0.5rem;
-  opacity: 0.72;
+  opacity: 0.78;
   text-decoration: none;
   transition: opacity var(--dur-2) var(--ease-out);
 }
 .footer__logo:hover, .footer__logo:focus-visible { opacity: 1; }
+/* Same plate as the partner strips — the marks are the same light-on-dark
+   artwork and need the same ground on either theme. The label sits outside it.
+   Two plate heights, not five: the hierarchy is carried by the mark inside,
+   so the row stays tidy while SlashDot still leads. */
+.footer__plate {
+  display: inline-flex; align-items: center; justify-content: center;
+  height: 3.3rem; min-width: 4.4rem;
+  padding-inline: 0.8rem;
+  background: var(--mark-plate);
+  border: 1px solid var(--mark-plate-line);
+}
+.footer__logo--lead .footer__plate { height: 4.7rem; min-width: 7rem; padding-inline: 1rem; }
 /* Each mark carries its own height, because equal pixel heights are not equal
    optical weights: a wide short wordmark at 40px out-sizes a square roundel at
    40px. SlashDot is set to lead all of them. */
 .footer__logo img { height: var(--logo-h, 30px); width: auto; }
-.footer__logo span {
+/* Not `.footer__logo span` — the plate is a span too, and matching both left
+   the ordering to document order, which dropped the label below the mark. */
+.footer__logo > span:not(.footer__plate) {
   font-family: var(--font-mono); font-size: var(--step--2);
   letter-spacing: 0.16em; text-transform: uppercase; color: var(--gold-dim);
   order: -1;

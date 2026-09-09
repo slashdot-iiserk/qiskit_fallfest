@@ -169,6 +169,24 @@ Register would have buried the point.
 click. The cards *are* the tablist — one control, not a rail plus a redundant
 row of labels.
 
+### Marks sit on a plate
+
+The site has a light theme, and every partner mark is light-on-dark artwork.
+On light, three of the five did not merely lose contrast — they disappeared
+entirely, at 0.0%, 0.0% and 0.7% of their box in contrasting ink.
+
+They sit on a dark plate now, and the plate is the *same* dark on both themes.
+That is the decision worth defending: the obvious alternative is a second set
+of marks swapped per theme, which doubles the assets, needs a switch that
+cannot use `prefers-color-scheme` (the theme is an attribute, not a media
+query), and quietly breaks the day someone adds a sixth partner and forgets the
+light variant. One plate, one set of marks, and each mark stays exactly the one
+its owner drew.
+
+On the dark theme the plate reads as a faint chip; on light it reads as a
+press-kit tile. Plate heights are uniform per strip, because five marks with
+five aspect ratios otherwise look like ragged tiles rather than a row.
+
 ### One mark moves
 
 Four of the five partner marks are rasters that fade up with the hero. The
