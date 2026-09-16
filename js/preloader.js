@@ -1,0 +1,455 @@
+/**
+ * Preloader.
+ *
+ * The machine draws itself on, stroke by stroke, and its contents stream out
+ * into the space in front of you — qubits and the fest's own sticker artwork,
+ * spawned at its core, pushed outward, and projected through a pinhole camera
+ * so they grow as they pass. Every sprite out there is an image the page needs
+ * further down, so the show *is* the preload. When loading finishes they
+ * scatter, the shutter lifts, and the drawing itself is handed to the stage
+ * that keeps it behind the page from then on.
+ *
+ * All motion is anime.js and one small canvas; three.js is not on this path.
+ * Under prefers-reduced-motion the whole thing collapses to a single frame.
+ */
+
+import { animate, createTimeline, svg, utils } from '../vendor/anime/anime.esm.min.js';
+import { preloadAll, loadArtwork } from './assets.js';
+
+const REDUCED = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const MIN_MS = 1700;
+const MAX_MS = 5400;
+
+export function initPreloader() {
+  const root = document.querySelector('[data-preloader]');
+  if (!root) return Promise.resolve();
+
+  const art = root.querySelector('[data-preloader-art]');
+  const field = root.querySelector('[data-preloader-field]');
+  const pct = root.querySelector('[data-preloader-pct]');
+  const bar = root.querySelector('[data-preloader-bar] i');
+  const ringArc = root.querySelector('[data-preloader-ring] .ring__arc');
+  const status = root.querySelector('[data-preloader-status]');
+  const curtain = document.querySelector('[data-curtain]');
+  const stageSlot = document.querySelector('[data-qc-stage]');
+
+  document.documentElement.classList.add('is-loading');
+
+  const finish = () => {
+    document.documentElement.classList.remove('is-loading');
+    root.dataset.done = 'true';
+    document.dispatchEvent(new CustomEvent('qff:loaded'));
+  };
+
+  if (REDUCED) {
+    if (stageSlot && art) stageSlot.appendChild(art);
+    root.remove();
+    curtain?.remove();
+    // Still warm the caches, just without the show.
+    void preloadAll();
+    finish();
+    return Promise.resolve();
+  }
+
+  const qubits = field ? startQubitField(field) : null;
+  // Hand each sticker to the field the moment it decodes, rather than waiting
+  // for the whole set: the machine starts throwing things almost immediately.
+  void loadArtwork((img) => qubits?.addArt(img));
+  const started = performance.now();
+
+  /* --- Progress -----------------------------------------------------------
+     Real work, not a timer: fonts, images, the renderer, the compressed model
+     and the traced outline all report through one weighted callback, so by the
+     time the shutter lifts the saga has nothing left to fetch. */
+  let shown = 0;
+  let realDone = false;
+  let realFraction = 0;
+
+  const RING = 2 * Math.PI * 54;
+  if (ringArc) ringArc.style.strokeDasharray = `${RING}`;
+
+  const assetsReady = Promise.all([
+    preloadAll((fraction, label) => {
+      realFraction = fraction;
+      if (status && label) status.textContent = label;
+    }),
+    new Promise((resolve) => {
+      if (document.readyState === 'complete') resolve();
+      else window.addEventListener('load', resolve, { once: true });
+    }),
+  ]).then(() => { realDone = true; realFraction = 1; });
+
+  const counter = { value: 0 };
+  const ticker = animate(counter, {
+    value: 100,
+    duration: MAX_MS,
+    ease: 'linear',
+    onUpdate: () => {
+      // Track real progress, but never run ahead of it and never go backwards.
+      const target = realDone ? 100 : Math.min(realFraction * 100, 97);
+      shown = Math.max(shown, Math.min(target, shown + (target - shown) * 0.12 + 0.15));
+      if (pct) pct.textContent = String(Math.round(shown)).padStart(3, '0');
+      if (bar) bar.style.width = `${shown}%`;
+      if (ringArc) ringArc.style.strokeDashoffset = `${RING * (1 - shown / 100)}`;
+      if (shown >= 99.6 && performance.now() - started >= MIN_MS) {
+        ticker.pause();
+        if (pct) pct.textContent = '100';
+        void handoff();
+      }
+    },
+  });
+
+  /* --- The drawing ------------------------------------------------------- */
+  const intro = createTimeline({ defaults: { ease: 'outQuart' } });
+  if (art) {
+    const drawables = svg.createDrawable(art.querySelectorAll('path'));
+    intro.add(drawables, { draw: ['0 0', '0 1'], duration: 2400, ease: 'inOutQuad' }, 0);
+    intro.add(art, { opacity: [0, 1], duration: 600 }, 0);
+  }
+  if (ringArc) intro.add(ringArc, { opacity: [0, 1], duration: 700 }, 200);
+
+  /* --- Handoff ------------------------------------------------------------ */
+  let handedOff = false;
+  async function handoff() {
+    if (handedOff) return;
+    handedOff = true;
+    await assetsReady;
+
+    if (pct) pct.textContent = '100';
+    if (bar) bar.style.width = '100%';
+    if (ringArc) ringArc.style.strokeDashoffset = '0';
+    if (status) status.textContent = 'Ready';
+    qubits?.burst();
+
+    // FLIP the drawing into the fixed stage so it reads as one object moving
+    // into place, not two elements swapping.
+    let flip = null;
+    if (art && stageSlot) {
+      const before = art.getBoundingClientRect();
+      stageSlot.appendChild(art);
+      const after = art.getBoundingClientRect();
+      if (after.width > 0 && before.width > 0) {
+        flip = {
+          x: before.left + before.width / 2 - (after.left + after.width / 2),
+          y: before.top + before.height / 2 - (after.top + after.height / 2),
+          scale: before.width / after.width,
+        };
+        utils.set(art, { x: flip.x, y: flip.y, scale: flip.scale });
+      }
+    }
+
+    const out = createTimeline({
+      onComplete: () => {
+        qubits?.stop();
+        root.remove();
+        curtain?.remove();
+        // There is no drawing on the landing page; only the machine page
+        // carries one through the hand-off.
+        if (art) utils.set(art, { x: 0, y: 0, scale: 1 });
+        finish();
+      },
+    });
+
+    out.add(root.querySelectorAll('[data-preloader-fade]'), { opacity: 0, y: -10, duration: 380, ease: 'outQuad' }, 0);
+    out.add(curtain?.querySelectorAll('span') ?? [], {
+      scaleY: [1, 0],
+      transformOrigin: ['50% 0%', '50% 0%'],
+      duration: 950,
+      ease: 'inOutQuart',
+      delay: (_, i) => i * 90,
+    }, 220);
+    out.add(root, { opacity: [1, 0], duration: 520, ease: 'outQuad' }, 300);
+    if (flip) out.add(art, { x: 0, y: 0, scale: 1, duration: 1250, ease: 'inOutQuart' }, 240);
+
+    return out;
+  }
+
+  setTimeout(() => { ticker.pause(); void handoff(); }, MAX_MS + 900);
+
+  return new Promise((resolve) => document.addEventListener('qff:loaded', resolve, { once: true }));
+}
+
+/* ==========================================================================
+   Qubits and artwork, streaming out of the machine
+   ==========================================================================
+   A pinhole camera on a 2D canvas: every sprite carries a real (x, y, z) and
+   is divided through by its depth, so it grows as it comes at you. A qubit is
+   drawn as a Bloch sphere in miniature — a dot with a ring around it. A
+   resource is drawn as the sticker itself, tumbling, and is only handed to the
+   field once its image has actually decoded.
+   ========================================================================== */
+function startQubitField(canvas) {
+  const ctx = canvas.getContext('2d', { alpha: true });
+  if (!ctx) return null;
+
+  const FOCAL = 520;
+  const NEAR = 0.35;
+  const FAR = 6;
+  const COUNT = Math.round(Math.min(90, Math.max(34, window.innerWidth / 18)));
+
+  /* --- Buffer scale --------------------------------------------------------
+     The field is soft dust and tumbling stickers seen through a pinhole, so it
+     does not need one buffer pixel per screen pixel. Every per-frame cost —
+     the clear, the blits, the composite — falls with the square of this, and
+     at 0.7 the difference is not visible on content this soft.
+
+     The drawing transform is set to the same factor, so all the geometry below
+     stays in CSS pixels and the animation is unchanged: only the raster it
+     lands on is coarser. `?dpr=` pins it, as it does for the saga, so
+     reference captures do not drift as the adaptive path settles. */
+  const coarse = window.matchMedia('(pointer: coarse)').matches;
+  const pinned = Number(new URLSearchParams(location.search).get('dpr')) || 0;
+  const MAX_SCALE = pinned || (coarse ? 0.7 : 0.85);
+  const FLOOR_SCALE = 0.4;
+  let scale = MAX_SCALE;
+  /** 1 at full quality, 0 at the floor. Thins the field as well as the buffer. */
+  let quality = 1;
+
+  let w = 0, h = 0;
+  let raf = 0;
+  let running = true;
+  let speedBoost = 0;
+
+  const qubits = Array.from({ length: COUNT }, () => spawn(true));
+  /* How many of them are actually in play. A coarser buffer alone is not
+     enough on the weakest hardware — the blits themselves have to go. Motion
+     is unchanged for the ones that remain, so the field reads as sparser
+     rather than slower, which is the right trade: nobody can see a dust mote
+     that was never there, and everybody can see a stutter. */
+  let active = COUNT;
+
+  /* Decoded sticker images, and the sprites flying them. Both grow as the
+     network delivers: one sprite per image, so the field fills up as the page
+     loads rather than all at once at the end. */
+  const sprites = [];
+
+  function spawnArt(img) {
+    const angle = Math.random() * Math.PI * 2;
+    return {
+      img,
+      // Sized against the narrow edge: a sticker that reads as a passing
+      // object on a desktop is most of the screen on a phone.
+      scale: Math.min(1, Math.max(0.42, Math.min(w, h) / 900)),
+      x: Math.cos(angle) * Math.random() * 0.3,
+      y: (Math.random() - 0.5) * 1.2,
+      z: NEAR + Math.random() * (FAR - NEAR),
+      vx: Math.cos(angle) * (0.10 + Math.random() * 0.16),
+      vy: (Math.random() - 0.5) * 0.08,
+      vz: -(0.42 + Math.random() * 0.5),
+      spin: Math.random() * Math.PI * 2,
+      rate: (Math.random() - 0.5) * 0.6,
+      size: 0.10 + Math.random() * 0.06,
+    };
+  }
+
+  function spawn(scatter) {
+    // Born inside the machine, then pushed outward and toward the viewer.
+    const angle = Math.random() * Math.PI * 2;
+    const radius = scatter ? Math.random() * 0.55 : Math.random() * 0.1;
+    return {
+      x: Math.cos(angle) * radius,
+      y: (Math.random() - 0.5) * 1.5,
+      z: scatter ? NEAR + Math.random() * (FAR - NEAR) : FAR,
+      vx: Math.cos(angle) * (0.05 + Math.random() * 0.12),
+      vy: (Math.random() - 0.5) * 0.06,
+      vz: -(0.55 + Math.random() * 0.7),
+      spin: Math.random() * Math.PI,
+      rate: 0.6 + Math.random() * 1.4,
+      hue: Math.random() < 0.22 ? 'pink' : 'gold',
+    };
+  }
+
+  /* --- The qubit glyph, baked ----------------------------------------------
+     Drawing each qubit as a stroked, rotated ellipse plus a filled arc — with
+     an `rgba(...)` string built per qubit per frame — meant ninety path
+     operations and ninety CSS colour parses every frame. The glyph is instead
+     baked once into an atlas of rotation phases and blitted axis-aligned, so a
+     qubit costs one `drawImage` and a `globalAlpha` number.
+
+     The ring's apparent spin comes from the phase, and its opacity relative to
+     the dot is baked in, so multiplying the tile by the qubit's own alpha
+     reproduces the original exactly.
+
+     `|cos(spin)|` has period π and the `spin * 0.5` tilt has period 4π, so the
+     glyph repeats every 4π and the atlas is baked across that. */
+  const PHASES = 24;
+  const CYCLE = Math.PI * 4;
+  const GLYPH_R = 14;                       // reference qubit radius, CSS px
+  const TILE = Math.ceil(GLYPH_R * 2.1 * 2 + GLYPH_R * 0.2 + 4);
+  const HUES = { gold: '232,200,122', pink: '255,126,182' };
+  const ROWS = ['gold', 'pink'];
+  let atlas = null;
+
+  function bakeAtlas() {
+    const px = Math.max(1, Math.round(TILE * scale));
+    const sheet = document.createElement('canvas');
+    sheet.width = px * PHASES;
+    sheet.height = px * ROWS.length;
+    const g = sheet.getContext('2d');
+    if (!g) return;
+    g.setTransform(scale, 0, 0, scale, 0, 0);
+
+    ROWS.forEach((hue, row) => {
+      const colour = HUES[hue];
+      for (let i = 0; i < PHASES; i += 1) {
+        const spin = (i / PHASES) * CYCLE;
+        const cx = TILE * i + TILE / 2;
+        const cy = TILE * row + TILE / 2;
+        const r = GLYPH_R;
+
+        g.strokeStyle = `rgba(${colour},0.55)`;
+        g.lineWidth = Math.max(0.5, r * 0.2);
+        g.beginPath();
+        g.ellipse(cx, cy, r * 2.1, r * 2.1 * Math.abs(Math.cos(spin)), spin * 0.5, 0, Math.PI * 2);
+        g.stroke();
+
+        g.fillStyle = `rgb(${colour})`;
+        g.beginPath();
+        g.arc(cx, cy, r, 0, Math.PI * 2);
+        g.fill();
+      }
+    });
+    atlas = { sheet, px };
+  }
+
+  function resize() {
+    w = canvas.clientWidth;
+    h = canvas.clientHeight;
+    if (w < 2 || h < 2) return;
+    canvas.width = Math.max(1, Math.round(w * scale));
+    canvas.height = Math.max(1, Math.round(h * scale));
+    // Geometry below is in CSS pixels whatever the buffer scale is.
+    ctx.setTransform(scale, 0, 0, scale, 0, 0);
+    // Tumbling stickers do not repay a high-quality resample.
+    ctx.imageSmoothingQuality = 'low';
+    bakeAtlas();
+  }
+
+  /* --- Adaptive quality ----------------------------------------------------
+     A device that cannot hold the frame rate gets a coarser buffer rather than
+     a stuttering one. Measured over a window, so one slow frame — an image
+     decode, the first shader — never triggers it. */
+  let sampleAt = 0;
+  let sampleFrames = 0;
+  let sampleTime = 0;
+
+  function adapt(frameMs, now) {
+    if (pinned) return;
+    sampleFrames += 1;
+    sampleTime += frameMs;
+    if (!sampleAt) sampleAt = now;
+    if (now - sampleAt < 700) return;
+    const mean = sampleTime / Math.max(1, sampleFrames);
+    sampleAt = now; sampleFrames = 0; sampleTime = 0;
+
+    let next = scale;
+    if (mean > 28 && scale > FLOOR_SCALE) next = Math.max(FLOOR_SCALE, scale - 0.15);
+    else if (mean < 13 && scale < MAX_SCALE) next = Math.min(MAX_SCALE, scale + 0.1);
+    if (Math.abs(next - scale) > 0.001) {
+      scale = next;
+      quality = (scale - FLOOR_SCALE) / Math.max(0.001, MAX_SCALE - FLOOR_SCALE);
+      const wanted = Math.max(8, Math.round(COUNT * (0.4 + 0.6 * quality)));
+      // Anything coming back has been sitting still since it was dropped, so
+      // it re-enters the field where a new one would, not where it stopped.
+      for (let i = active; i < wanted; i += 1) qubits[i] = spawn(true);
+      active = wanted;
+      resize();
+    }
+  }
+
+  let prev = performance.now();
+  function frame(now) {
+    if (!running) return;
+    const elapsed = now - prev;
+    const dt = Math.min(3, elapsed / 16.67);
+    prev = now;
+    adapt(elapsed, now);
+    speedBoost += (0 - speedBoost) * 0.04;
+
+    ctx.clearRect(0, 0, w, h);
+    const cx = w / 2;
+    const cy = h / 2;
+
+    for (let i = 0; i < active; i += 1) {
+      const q = qubits[i];
+      const step = dt * (1 + speedBoost);
+      q.z += q.vz * 0.0192 * step;
+      q.x += q.vx * 0.0192 * step;
+      q.y += q.vy * 0.0192 * step;
+      q.spin += q.rate * 0.02 * step;
+      if (q.z <= NEAR) Object.assign(q, spawn(false));
+
+      const k = FOCAL / q.z;
+      const sx = cx + q.x * k;
+      const sy = cy + q.y * k;
+      // A real radius in the scene, not a fraction of the projection: the old
+      // factor made a qubit fifty pixels across as it passed the camera.
+      const r = Math.min(9, Math.max(0.7, 0.011 * k));
+      if (sx < -60 || sx > w + 60 || sy < -60 || sy > h + 60) continue;
+
+      // Fade in from the back, out as it sweeps past the camera.
+      const alpha = Math.min(1, (FAR - q.z) / 1.4) * Math.min(1, (q.z - NEAR) / 0.9);
+      if (alpha <= 0.01 || !atlas) continue;
+
+      const phase = q.spin % CYCLE;
+      const col = ((phase < 0 ? phase + CYCLE : phase) / CYCLE * PHASES) | 0;
+      const row = q.hue === 'pink' ? 1 : 0;
+      const size = (r / GLYPH_R) * TILE;
+
+      ctx.globalAlpha = alpha;
+      ctx.drawImage(
+        atlas.sheet,
+        col * atlas.px, row * atlas.px, atlas.px, atlas.px,
+        sx - size / 2, sy - size / 2, size, size,
+      );
+    }
+
+    /* The artwork, on the same projection. Drawn after the qubits so a sticker
+       passing the camera reads as being in front of the dust. */
+    const spriteCap = Math.max(3, Math.round(sprites.length * (0.5 + 0.5 * quality)));
+    for (let i = 0; i < Math.min(sprites.length, spriteCap); i += 1) {
+      const a = sprites[i];
+      const step = dt * (1 + speedBoost);
+      a.z += a.vz * 0.0192 * step;
+      a.x += a.vx * 0.0192 * step;
+      a.y += a.vy * 0.0192 * step;
+      a.spin += a.rate * 0.02 * step;
+      if (a.z <= NEAR) Object.assign(a, spawnArt(a.img));
+
+      const k = FOCAL / a.z;
+      const sx = cx + a.x * k;
+      const sy = cy + a.y * k;
+      const size = a.size * a.scale * k;
+      if (size < 3 || sx < -size || sx > w + size || sy < -size || sy > h + size) continue;
+
+      const alpha = Math.min(1, (FAR - a.z) / 1.6) * Math.min(1, (a.z - NEAR) / 1.1) * 0.9;
+      if (alpha <= 0.01) continue;
+
+      ctx.globalAlpha = alpha;
+      ctx.translate(sx, sy);
+      ctx.rotate(a.spin);
+      ctx.drawImage(a.img, -size / 2, -size / 2, size, size);
+      // Cheaper than save()/restore() around every sprite.
+      ctx.setTransform(scale, 0, 0, scale, 0, 0);
+    }
+    ctx.globalAlpha = 1;
+
+    raf = requestAnimationFrame(frame);
+  }
+
+  const ro = new ResizeObserver(resize);
+  ro.observe(canvas);
+  resize();
+  raf = requestAnimationFrame(frame);
+
+  return {
+    /** One more resource has decoded; throw it out of the machine too. */
+    addArt(img) {
+      if (!img?.width) return;
+      sprites.push(spawnArt(img));
+    },
+    /** Everything accelerates outward as the shutter lifts. */
+    burst() { speedBoost = 7; },
+    stop() { running = false; cancelAnimationFrame(raf); ro.disconnect(); },
+  };
+}
