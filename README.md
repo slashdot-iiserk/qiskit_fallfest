@@ -1,380 +1,78 @@
-<div align="center">
+# Qiskit Fall Fest 2025 Website - Flask Deployment
 
-<img src="assets/brand/badge-2026.svg" alt="Qiskit Fall Fest 2026 badge" width="120">
+This repository contains the Qiskit Fall Fest 2025 website with Flask deployment for local intranet access.
 
-# Qiskit Fall Fest 2026 · IISER Kolkata
+## 🚀 Quick Start
 
-**10 – 13 October 2026 · MN Saha & G06, IISER Kolkata · Open to students from any institute**
+### Option 1: Using the Run Script (Recommended)
+```bash
+./run_server.sh
+```
 
-Website for the Qiskit Fall Fest at IISER Kolkata, hosted by
-**SlashDot**, the coding and design club.
+### Option 2: Manual Setup
+1. Install dependencies:
+```bash
+pip install -r requirements.txt
+```
 
-[**Live site**](https://slashdot-iiserk.github.io/qiskit_fallfest/) ·
-[Register](https://slashdot-iiserk.github.io/qiskit_fallfest/register.html) ·
-[Resources](https://slashdot-iiserk.github.io/qiskit_fallfest/resources.html) ·
-[Gallery](https://slashdot-iiserk.github.io/qiskit_fallfest/gallery.html) ·
-[2025 archive](https://slashdot-iiserk.github.io/qiskit_fallfest/archive/)
+2. Run the Flask server:
+```bash
+python flask_server.py
+```
 
-</div>
+## 🌐 Access the Website
+
+### Local Access (on your machine)
+- Open your browser and go to: `http://localhost:5000`
+
+### Network Access (from other devices)
+1. Find your computer's IP address:
+```bash
+ip addr show | grep "inet " | grep -v 127.0.0.1
+```
+
+2. Access from other devices using: `http://[YOUR_IP_ADDRESS]:5000`
+
+## 📁 Project Structure
+
+```
+qiskit_iiserk/
+├── index.html          # Main website file
+├── styles.css          # Website styles
+├── script.js           # JavaScript functionality
+├── flask_server.py    # Flask application
+├── requirements.txt    # Python dependencies
+├── run_server.sh      # Easy startup script
+├── assets/             # Images and media files
+│   ├── profile_img/    # Team member profile images
+│   └── Emojis/         # Website graphics
+└── Fall Fest Graphics/ # Additional graphics
+```
+
+## 🛠️ Features
+
+- ✅ Static file serving for all website assets
+- ✅ Accessible on local network (intranet)
+- ✅ Automatic dependency installation
+- ✅ Debug mode enabled for development
+- ✅ Easy startup with single command
+
+## 🛑 Stopping the Server
+
+Press `Ctrl+C` in the terminal where the server is running to stop it.
+
+## 📝 Requirements
+
+- Python 3.7+
+- Internet connection (for initial Flask installation)
+
+## 🎯 Use Cases
+
+- Local development and testing
+- Intranet deployment for team access
+- Demo presentations on local network
+- Offline website hosting
 
 ---
 
-## The event
-
-The Qiskit Fall Fest is a global, student-run celebration of quantum computing. The IISER Kolkata
-edition runs four days of talks and hands-on Qiskit labs, and closes with an invited IBM industry
-expert talk and a panel with the IBM guest and faculty.
-
-All times are IST (UTC+05:30). Days 0–2 are at MN Saha; Day 3 is in G06.
-
-| Day | Date | Time | Session | Speakers |
-|-----|------|------|---------|----------|
-| Day 0 | Sat 10 Oct 2026 | 9:00 PM – 9:30 PM | Kick-off | Devang Shroff, Rishabh Chaudhuri, Manish Behera, Anuprovo Debnath, Abhinav Dhingra, Shuvam Banerji Seal, Afreen Chowdhury, Alok Jha, Md Shayan Bari |
-| Day 0 | Sat 10 Oct 2026 | 9:30 PM – 10:00 PM | Why Quantum? What Problems Are We Solving? | Manish Behera |
-| Day 0 | Sat 10 Oct 2026 | After the talks | Installation clinic | Volunteers |
-| Day 1 | Sun 11 Oct 2026 | 10:00 AM – 12:00 PM (noon) | Quantum Mechanics for Quantum Computing (with Gluon) | Devang Shroff, Rishabh Chaudhuri |
-| Day 1 | Sun 11 Oct 2026 | 2:00 PM – 3:00 PM | Introduction to Quantum Computing — Qiskit 101 | Manish Behera |
-| Day 1 | Sun 11 Oct 2026 | 3:00 PM – 4:00 PM | Stern–Gerlach Experiment and Spins + Lab 1 (QSS26 parallel) | Manish Behera, Alok Jha |
-| Day 1 | Sun 11 Oct 2026 | 4:00 PM – 5:00 PM | Entanglement and Quantum Teleportation with Qiskit + Lab 2 | Manish Behera, Md Shayan Bari |
-| Day 2 | Mon 12 Oct 2026 | 9:00 PM – 10:00 PM | Quantum Key Distribution (QKD) | Manish Behera |
-| Day 2 | Mon 12 Oct 2026 | 10:00 PM – 11:00 PM | Quantum Fourier Transform (QFT) and Phase Estimation | Alok Jha, Manish Behera |
-| Day 2 | Mon 12 Oct 2026 | 11:00 PM – 12:00 AM (midnight) | Shor’s Algorithm | Anuprovo Debnath, Alok Jha |
-| Day 3 | Tue 13 Oct 2026 | 6:00 PM – 7:00 PM | Expert Talk — IBM Industry Insider | IBM industry expert (TBA) |
-| Day 3 | Tue 13 Oct 2026 | 7:00 PM – 8:00 PM | Panel Discussion — IBM Guest and Faculty | IBM guest (TBA), faculty (TBA) |
-
-The Day 2 Shor’s Algorithm session ends at midnight at the start of 13 October, not noon.
-
-Three certificate tiers are awarded — **Participation**, **Intermediate** and **Advanced** — so a
-first-timer who finds the advanced day heavy can still earn the Intermediate certificate.
-
-- **Participation:** attend the Day 0 kick-off and “Why Quantum?” session, and complete installation
-  with a working Qiskit environment.
-- **Intermediate:** everything in Participation, attendance at all Day 1 afternoon sessions
-  (Qiskit 101, Stern–Gerlach & Spins, Entanglement & Teleportation), and submission of Labs 1–2 notebooks.
-- **Advanced:** everything in Intermediate, attendance at the Day 2 advanced sessions, completion of
-  the advanced challenge notebook, and attendance at the Day 3 invited expert talk.
-
-The morning primer remains optional; the closing panel adds no certificate requirement.
-
-> **Fees.** Participation is **free for IISER Kolkata students**. External participants pay a
-> **₹200 registration fee**. Optional hostel accommodation for external participants is an
-> additional **₹200 per day**.
-
-> **Editing the schedule, team or FAQ?** They all render from one file:
-> [`js/data/event.js`](js/data/event.js). Nothing else needs touching.
-
----
-
-## Repository layout
-
-```
-.
-├── DESIGN.md               Why the site is shaped the way it is — read before changing the look
-├── AGENTS.md               Operating manual: what to run, what breaks what
-├── index.html              2026 landing page — event details, schedule, challenge, register
-├── machine.html            The opt-in scroll-through of the quantum computer   (generated)
-├── register.html           Multi-step registration wired to the official Google Form
-├── resources.html          Install guide, notebooks, pre-reading, certificate criteria   (generated)
-├── gallery.html            Filterable gallery with a lightbox                            (generated)
-├── faq.html                Every question, on its own page                               (generated)
-├── 404.html                                                                              (generated)
-├── archive/
-│   ├── index.html          Archive hub                                                   (generated)
-│   └── 2025/               The 2025 site, frozen as it shipped (images re-encoded to WebP)
-├── assets/
-│   ├── brand/              Badge, favicons, partner logos
-│   ├── graphics/           Hero art (3 widths) and the Open Graph card
-│   ├── model/              Draco GLB + the two hidden-line SVGs, all derived
-│   ├── organisers/         Organiser portraits (256 / 512 px WebP)
-│   ├── stickers/           2026 sticker sheet, SVG + WebP
-│   └── gallery/<year>/     Drop event photographs here as WebP
-├── css/
-│   ├── tokens.css          Design tokens — flat gold-on-ink palette, type scale, motion
-│   ├── base.css            Reset, layout primitives, utilities, a11y helpers
-│   ├── components.css      Preloader, nav, buttons, cards, marquee, accordion, drops
-│   ├── sections.css        Hero, the machine stage, schedule, lab, tiers, venue, footer
-│   ├── register.css        Registration wizard
-│   └── gallery.css         Gallery grid and lightbox
-├── js/
-│   ├── data/event.js       Single source of truth: schedule, people, tiers, FAQ
-│   ├── main.js             Nav, theme, scroll choreography, renderers
-│   ├── assets.js           Preloads everything during the loading screen
-│   ├── preloader.js        anime.js draw-on + qubits streaming out of the machine
-│   ├── saga.js             Orchestrates the whole scroll sequence
-│   ├── saga/timeline.js    The score: every beat, the camera path, the copy
-│   ├── saga/cloud.js       One particle system with four shapes to hold
-│   ├── saga/qubit.js       Single-qubit simulator, Bloch sphere, gate arcs
-│   ├── saga/labels.js      Glass plates anchored to points in the scene
-│   ├── ambient.js          Canvas circuit rails and falling motes
-│   ├── registration.js     Google Forms field map, validation, submission
-│   └── gallery.js          Filters and lightbox
-├── vendor/                 Self-hosted three.js, its Draco decoder, and anime.js
-├── materials/
-│   ├── 2025/               2025 notebooks and slides
-│   ├── 2026/               2026 session material (published before each session)
-│   └── requirements.txt    Python environment for the labs
-├── source/                 Uncompressed originals — inputs to the asset build, never served
-│   ├── speakers/           Speaker photographs, downscaled to ~1800px
-│   ├── brand/              Logos and the campus photograph
-│   └── organisers-2026.zip Organiser portraits
-├── tools/
-│   ├── build_assets.py     Raster → WebP pipeline
-│   ├── build_index.py      Generates index.html, inlining the line drawings
-│   ├── build_machine.py    Generates machine.html — the 3D saga, on its own page
-│   ├── optimise_svg.py     Halves the extracted line drawings (chain + relative)
-│   ├── logo2svg.py         Traces a flat-colour logo raster into layered paths
-│   ├── build_pages.py      Generates the other pages marked (generated) above
-│   ├── build_model.sh      Whole 3D pipeline: GLB → Draco GLB + SVGs
-│   ├── glb2svg/            Hidden-line vector extraction (three.js, headless)
-│   └── page_parts.py       Shared nav / footer / head fragments
-└── tests/
-    ├── unit/               Node test runner — payload mapping, validators, qubit maths
-    └── e2e/                Playwright — every page, the wizard, the lab, the gallery
-```
-
-There is **no build step for deployment**. GitHub Pages serves this repository's root directly, so
-every file above is the file the browser receives.
-
----
-
-## Running it locally
-
-```bash
-python3 -m http.server 4173 --bind 127.0.0.1
-# then open http://127.0.0.1:4173
-```
-
-A plain file server is enough — the site is vanilla HTML, CSS and ES modules with no bundler. ES
-modules do need a server, so `file://` will not work.
-
-## Regenerating assets and pages
-
-```bash
-npm run build          # assets + all pages
-npm run build:assets   # re-encode rasters to WebP into assets/
-npm run build:pages    # regenerate index / machine / resources / gallery / archive / 404 / sitemap
-npm run build:model    # re-derive the Draco model and the line drawings
-python3 tools/logo2svg.py   # re-trace the IISER Kolkata emblem into paths
-```
-
-`build_assets.py` needs `pip install -r tools/requirements.txt` (Pillow, plus
-pillow-heif for the HEIC photographs phones produce) and, for favicons,
-ImageMagick. It also reads
-the upstream Qiskit design kit, which is **not vendored** here — clone it first:
-
-```bash
-git clone git@github.com:Qiskit-Fall-Fest-2026/materials-resources.git 2026_assets
-```
-
-`build_pages.py` has no such dependency. Both scripts are idempotent — re-running them is safe.
-
-## Tests
-
-```bash
-npm install
-npx playwright install chromium
-npm test              # unit + e2e
-npm run test:unit     # node --test, no browser needed
-npm run test:e2e      # Playwright, desktop + mobile viewports
-```
-
-The suite covers: every page loading without a console error or failed request, SEO metadata and
-structured data, no broken images, schedule tabs and keyboard navigation, the FAQ accordion, the
-theme toggle and its persistence, scroll progress, internal link resolution, the gallery filters and
-lightbox, the archive banner, the Bloch-sphere physics, and the registration wizard end to end for
-**both** Google Form branches — including the exact POST body.
-
-> E2E tests intercept `docs.google.com`, so **no test data ever reaches the real response sheet.**
-
----
-
-## How registration works
-
-`register.html` is a designed, four-step form that posts directly into the official Google Form.
-
-* Google Forms accepts a plain form-encoded `POST` to `/formResponse`. The request is cross-origin
-  and opaque, so it is sent through a hidden iframe; the iframe's `load` event is the completion
-  signal. There is no backend and no Apps Script.
-* The form **branches** on "are you an IISER Kolkata student?". Each branch has its own entry ids and
-  its own `pageHistory` (`0,1` for IISER-K, `0,2` for everyone else). Sending the wrong
-  `pageHistory` makes Google reject the response for missing answers in a section that was never
-  visited. The mapping lives in `FIELDS` in [`js/registration.js`](js/registration.js) and is
-  covered by unit tests.
-* Every submission also carries `emailAddress` and `emailReceipt`. Both are ignored while email
-  collection is off; the moment the form owner turns on **Collect email addresses → Responder
-  input**, Google's own automatic response receipts start working — no sign-in required.
-* If the owner instead picks **Verified** email collection, Google requires a signed-in session that
-  a cross-origin POST cannot carry. The **Official Google Form** tab on the same page embeds the real
-  form for exactly that case; it loads lazily, only when opened.
-* A draft is kept in the visitor's own `localStorage` and cleared on submit. No analytics, no
-  trackers, no third-party scripts beyond Google Fonts.
-
-### Re-deriving the field map
-
-If the Google Form changes, the entry ids can be re-read from the live form:
-
-```bash
-curl -sL "https://forms.gle/VYnMRpgPCHiGEfNZ7" -o form.html
-python3 - <<'PY'
-import re, json
-h = open('form.html', encoding='utf-8').read()
-data = json.loads(re.search(r'FB_PUBLIC_LOAD_DATA_\s*=\s*(\[.*?\]);\s*</script>', h, re.S).group(1))
-for item in data[1][1]:
-    print(item[3], repr(item[1]), [e[0] for e in (item[4] or [])])
-PY
-```
-
-Then update `FIELDS` in `js/registration.js` and the fixtures in `tests/unit/registration.test.js`.
-
----
-
-## Accessibility & performance notes
-
-* Every interactive control is a real button with the right ARIA role; tabs, radio groups and the
-  accordion are keyboard-navigable, and the Bloch sphere responds to arrow keys.
-* All motion is behind `prefers-reduced-motion` — the background canvas does not even initialise.
-* A light theme is available from the header and remembered per browser.
-* Every raster on the site is WebP. The two 4K hero illustrations went from 1.1 MB and 1.2 MB of PNG
-  to 40 KB and 50 KB at 1920 px, with 960 px and 480 px variants alongside.
-* The background canvas caps device pixel ratio, scales particle count to the viewport, and pauses
-  entirely when the tab is hidden.
-
-## Contributing
-
-Pull requests are welcome — see [`AGENTS.md`](AGENTS.md) for the conventions this repository
-follows, including which files are generated and must not be hand-edited.
-
-## Licence
-
-Site code © SlashDot, IISER Kolkata. The Qiskit Fall Fest illustration kit is provided by IBM under
-the terms in [`2026_assets/LICENSE`](2026_assets/LICENSE). Qiskit and IBM Quantum are trademarks of
-IBM.
-
-
----
-
-## Two pages
-
-`index.html` is the front door: what the fest is, when it runs, the four-day
-schedule laid out so every day is legible without a click, the challenge and its
-swag, the certificate tiers, how to get there — with **Schedule** and **Machine**
-in the first button row, followed by a larger **Register now** button.
-
-It keeps the loading screen: the machine traces itself inside the progress ring
-while qubits and the 2026 sticker artwork stream out of it, every sprite an
-image the page needs further down. It keeps the drawing afterwards too, blurred
-and faint behind the whole page. About 158 KB over the wire to the shutter, and
-it holds its frame rate on slow hardware — at 4× CPU throttle the frame-to-frame
-jitter is 2.7 ms, down from 11.7 ms before the optimisation pass. `AGENTS.md`
-records what actually mattered there, which was mostly not what it looked like.
-
-What it does not load is the renderer, the model or an importmap; a test in
-`tests/e2e/site.spec.js` fails if three.js, Draco or a `.glb` is ever requested
-by `/`.
-
-`machine.html` is where the 3D lives, and where that same drawing is taken
-apart. Nobody who came to find out when the fest is has to scroll through it
-first.
-
-## The machine
-
-The centrepiece is a dilution refrigerator — the gold chandelier that houses a
-superconducting quantum processor. `machine.html` is one continuous sequence
-built around it, and nothing in that sequence ever cross-fades with a copy of
-itself.
-
-```
-preloader   the machine draws itself on while qubits stream out of its core;
-            meanwhile every asset the page needs is fetched
-    ↓       the drawing — the same DOM node — moves to a fixed stage
-hero        it sits behind the type, out of focus
-    ↓       it sharpens as the page comes down
-act I       the camera pushes in on the top plate, then the drawing
-            disintegrates into its own particles and those take the machine's
-            shape; the render fades in underneath them
-act II      the camera descends the machine. Glass plates name each stage,
-            then name what the fest is
-act III     at the chip the machine dissolves again and reassembles as a qubit
-act IV      the qubit moves aside and you drive it by hand: every gate is a
-            rotation, drawn as the arc the state actually sweeps
-act V       the camera rides up the state vector — beside it, not down it —
-            inside the sphere, past the team, the venue, the three certificate
-            tiers, the challenge and the speakers. The longest act: better than
-            a quarter of the runway, because it carries the whole back half of
-            the landing page as places you fly through
-act VI      everything converges into the register button
-```
-
-### One particle system, four shapes
-
-`js/saga/cloud.js` holds fourteen thousand points, and every point knows four
-places it can be: a point on the **line drawing**, a point on the **machine's
-surface**, a point on the **qubit's sphere**, and a point inside the **register
-button**. Three uniforms slide between them in order, with a per-point delay so
-each change sweeps through rather than snapping.
-
-That is why the hand-offs are seamless. The drawing's points are traced from the
-SVG itself during the loading screen (`traceOutline` in `js/assets.js`, which
-measures each subpath once instead of walking the combined path 14,000 times),
-and laid out on a plane exactly two world units tall — the machine's own height
-— so at the moment it disintegrates the particles are already precisely where
-its lines were.
-
-### One camera, fitted to both
-
-Act I is a **camera move, not a CSS zoom**. `cameraAt(p, aspect)` in
-`js/saga/timeline.js` is a pure function, and both the WebGL camera and the DOM
-drawing are driven by it: the drawing is scaled and offset to match where a
-two-unit plane would project. The camera always looks horizontally, which makes
-the descent read as an elevator ride and keeps that fit to plain trigonometry.
-On a portrait viewport the camera steps back so the machine still fits — and
-because the drawing uses the same function, the two framings never diverge.
-
-### Gates are real rotations
-
-Each gate carries both its 2x2 unitary and the axis/angle it turns the Bloch
-vector through. Applying one animates the state along **the actual arc of that
-rotation** via Rodrigues' formula, and leaves the arc behind for a beat.
-`tests/unit/bloch.test.js` asserts the declared rotation agrees with the matrix
-for every gate from several starting states, so the arc can never lie about
-where the state ends up.
-
-### How the assets are derived
-
-Everything under `assets/model/` is generated from one 42 MB source GLB by
-[`tools/build_model.sh`](tools/build_model.sh). The source is **not committed**
-(see AGENTS.md).
-
-| Output | From | Size |
-|--------|------|------|
-| `quantum-computer.glb` | `gltf-transform optimize` — weld, simplify, WebP textures, **Draco** | **434 KB** (from 42.4 MB) |
-| `qc-front.svg` | hidden-line extraction, front view | 63 KB |
-| `qc-three-quarter.svg` | hidden-line extraction, three-quarter view | 41 KB |
-
-The SVGs are **not traced from a screenshot.** `tools/glb2svg/` loads the model
-in headless Chromium and collects two kinds of edge:
-
-* **Feature edges** — creases and open boundaries, via `EdgesGeometry` at a
-  dihedral threshold.
-* **Silhouette edges** — for every edge shared by two faces, if those faces
-  disagree about whether they face the camera, that edge is on the outline. This
-  is what draws a *smooth* surface: the plates, the cylinders and the domed lid
-  have no crease anywhere, so without this pass their outlines are simply absent.
-
-Both sets are then tested against a packed-depth pre-pass and only the visible
-runs survive, giving a true hidden-line drawing in vector form — which is what
-makes the `stroke-dashoffset` draw-on in the preloader possible. Rebuild with:
-
-```bash
-QC_SOURCE=/path/to/Quantum_Computer.glb ./tools/build_model.sh
-```
-
-### Runtime cost
-
-three.js, its Draco decoder, the model and the traced outline are all fetched **during the loading
-screen**, by `js/assets.js`, with a weighted progress callback so the number on screen tracks real
-work rather than a timer. By the time the shutter lifts the saga has nothing left to wait for.
-
-None of it is fetched at all under `prefers-reduced-motion`, on a metered connection
-(`navigator.connection.saveData`), or where WebGL is unavailable. Those fall back to the still
-drawing behind the page, with every part description, value and station laid out as plain text.
+**Happy coding! 🚀**

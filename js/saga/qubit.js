@@ -88,7 +88,7 @@ export function buildQubit(THREE, pivot) {
   group.visible = false;
   pivot.add(group);
 
-  const ringMat = new THREE.LineBasicMaterial({ color: 0xe8c87a, transparent: true, opacity: 0 });
+  const ringMat = new THREE.LineBasicMaterial({ color: 0xa66eff, transparent: true, opacity: 0 });
   const ring = (rot) => {
     const pts = [];
     for (let i = 0; i <= 96; i += 1) {
@@ -104,7 +104,7 @@ export function buildQubit(THREE, pivot) {
   group.add(ring([0, Math.PI / 2, 0]));
 
   // Poles, so the sphere reads as |0> up and |1> down.
-  const poleMat = new THREE.LineBasicMaterial({ color: 0xa2854a, transparent: true, opacity: 0 });
+  const poleMat = new THREE.LineBasicMaterial({ color: 0x77a9ff, transparent: true, opacity: 0 });
   group.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints([
     new THREE.Vector3(0, -SPHERE_R * 1.22, 0), new THREE.Vector3(0, SPHERE_R * 1.22, 0),
   ]), poleMat));

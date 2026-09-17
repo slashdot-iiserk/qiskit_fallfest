@@ -201,7 +201,7 @@ export function buildCloud(THREE, wrap, outline) {
       uSize: { value: window.matchMedia('(pointer: coarse)').matches ? 0.0055 : 0.0042 },
       uProj: { value: 700 },
       uFog: { value: new THREE.Vector2(2, 8) },
-      uColor: { value: new THREE.Color(0xe8c87a) },
+      uColor: { value: new THREE.Color(0xa66eff) },
       uTip: { value: new THREE.Color(0xff7eb6) },
     },
     vertexShader: VERTEX,
@@ -348,7 +348,7 @@ export function buildDust(THREE, { count = 700, radius = 2.6, height = 2.6 } = {
       uOpacity: { value: 0 },
       uProj: { value: 700 },
       uFog: { value: new THREE.Vector2(2, 8) },
-      uColor: { value: new THREE.Color(0xe8c87a) },
+      uColor: { value: new THREE.Color(0xa66eff) },
       uSpan: { value: height },
     },
     vertexShader: `

@@ -187,16 +187,13 @@ export function initSaga() {
     const pmrem = new THREE.PMREMGenerator(renderer);
     scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
 
-    const key = new THREE.DirectionalLight(0xfff2d8, 2.5); key.position.set(3, 5, 4); scene.add(key);
-    const fill = new THREE.DirectionalLight(0xffc978, 1.5); fill.position.set(-4, 1.5, -3); scene.add(fill);
-    // A hard rim from behind: without it the gold and the steel both dissolve
-    // into the black instead of holding an edge.
-    const rim = new THREE.DirectionalLight(0xfff6e6, 3.4); rim.position.set(-1.5, -2, -6); scene.add(rim);
-    scene.add(new THREE.AmbientLight(0x2a2418, 1.2));
+    const key = new THREE.DirectionalLight(0xf5eeff, 2.5); key.position.set(3, 5, 4); scene.add(key);
+    const fill = new THREE.DirectionalLight(0xa66eff, 1.8); fill.position.set(-4, 1.5, -3); scene.add(fill);
+    // Rim light in cool lavender to separate edges cleanly
+    const rim = new THREE.DirectionalLight(0x77a9ff, 3.4); rim.position.set(-1.5, -2, -6); scene.add(rim);
+    scene.add(new THREE.AmbientLight(0x100820, 1.2));
 
-    // Atmosphere. Distances here are 1–5 units, so the range is re-derived
-    // from the shot each frame rather than fixed — without it the far side of
-    // the machine is as bright as the near side and the whole thing reads flat.
+    // Atmosphere. Catppuccin Crust fog
     scene.fog = new THREE.Fog(0x08080a, 2, 8);
 
     const camera = new THREE.PerspectiveCamera(32, 1, 0.05, 100);
@@ -225,7 +222,14 @@ export function initSaga() {
     model.traverse((o) => {
       if (!o.isMesh) return;
       o.frustumCulled = false;
-      if (o.material && 'envMapIntensity' in o.material) o.material.envMapIntensity = 1.7;
+      if (o.material) {
+        if ('envMapIntensity' in o.material) o.material.envMapIntensity = 1.7;
+        // Use true palette colors from the recolored model
+        if (o.material.color) {
+          o.material.color.set(0xffffff);
+          o.material.needsUpdate = true;
+        }
+      }
     });
     draco.dispose();
 
