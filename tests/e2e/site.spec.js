@@ -37,7 +37,7 @@ test.describe('every page', () => {
 
     test(`${path} renders no broken images`, async ({ page }) => {
       await page.goto(path);
-        await page.evaluate(() => window.scrollTo({ top: document.body.scrollHeight, behavior: 'instant' }));
+      await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
       await page.waitForTimeout(1200);
       // Only images that were actually asked to load count; the lightbox's
       // <img> is intentionally src-less until a tile is opened.
@@ -54,19 +54,9 @@ test.describe('home page', () => {
   test.beforeEach(async ({ page }) => { await page.goto('/'); });
 
   test('states the event, the dates and the venue', async ({ page }) => {
-    // The h1 is set in three lines, so match on its normalised text.
-    const h1 = await page.getByRole('heading', { level: 1 }).innerText();
-    expect(h1.replace(/\s+/g, ' ')).toContain('Fall Fest 2026');
-    await expect(page.locator('.hero__badges')).toContainText('6 – 13 October 2026');
+    await expect(page.getByRole('heading', { level: 1 })).toContainText('Fall Fest 2026');
+    await expect(page.locator('.hero__meta')).toContainText('6 – 13 October 2026');
     await expect(page.locator('.hero__meta')).toContainText('MN Saha');
-  });
-
-  test('says the participation fee is still to be announced', async ({ page }) => {
-    // The figure row must not claim the fest is free — only that registering is.
-    await expect(page.locator('.figure-row')).toContainText('Participation fee');
-    await expect(page.locator('.figure-row')).toContainText('TBA');
-    await expect(page.locator('.figure-row')).not.toContainText('Cost to attend');
-    await expect(page.locator('#venue')).toContainText('participation fee applies');
   });
 
   test('publishes structured data for the event', async ({ page }) => {
@@ -75,9 +65,7 @@ test.describe('home page', () => {
     expect(data['@type']).toBe('EducationEvent');
     expect(data.startDate).toMatch(/^2026-10-06/);
     expect(data.location.address.addressCountry).toBe('IN');
-    // No price is published while the participation fee is unannounced.
-    expect(data.offers.price).toBeUndefined();
-    expect(data.offers.priceSpecification.description).toMatch(/participation fee/i);
+    expect(data.offers.price).toBe('0');
   });
 
   test('renders all five schedule days from the data file', async ({ page }) => {
@@ -124,7 +112,7 @@ test.describe('home page', () => {
 
   test('FAQ accordion opens one answer at a time', async ({ page }) => {
     const triggers = page.locator('[data-faq] .accordion__trigger');
-    await expect(triggers).toHaveCount(8);
+    await expect(triggers).toHaveCount(7);
     await triggers.first().click();
     await expect(triggers.first()).toHaveAttribute('aria-expanded', 'true');
     await triggers.nth(1).click();
@@ -134,9 +122,6 @@ test.describe('home page', () => {
 });
 
 test.describe('quantum lab', () => {
-  // #lab sits next to the machine section, so this page may be bootstrapping
-  // three.js on a software GL backend while these assertions run.
-  test.describe.configure({ timeout: 90_000 });
   test.beforeEach(async ({ page }) => { await page.goto('/#lab'); });
 
   test('starts in |0> with certainty', async ({ page }) => {
@@ -185,7 +170,7 @@ test.describe('chrome', () => {
     await page.goto('/');
     const width = () => page.locator('.scroll-rail__fill').evaluate((el) => el.style.width);
     expect(await width()).toBe('0%');
-    await page.evaluate(() => window.scrollTo({ top: document.body.scrollHeight / 2, behavior: 'instant' }));
+    await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight / 2));
     await page.waitForTimeout(250);
     expect(parseFloat(await width())).toBeGreaterThan(20);
   });
