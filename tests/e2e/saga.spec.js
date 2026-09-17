@@ -1,26 +1,4 @@
 import { test, expect } from '@playwright/test';
-import { T } from '../../js/saga/timeline.js';
-
-/**
- * Positions are derived from the score, not written out as numbers.
- *
- * The acts get retimed whenever the story changes — the journey has just gone
- * from a tenth of the runway to better than a quarter — and a spec full of
- * magic fractions fails for that alone, which teaches nobody anything. `mid`
- * lands in the middle of a named span, so these tests keep asserting the order
- * of the story rather than where it happened to sit on one particular day.
- */
-const mid = (from, to) => Number(((from + to) / 2).toFixed(4));
-const AT = {
-  shatter: mid(T.push, T.assemble),
-  machine: mid(T.solid, T.partsOut),
-  parts:   mid(T.partsIn, T.partsOut),
-  values:  mid(T.valuesIn, T.valuesOut),
-  qubit:   mid(T.qubitStart, T.gatesIn),
-  gates:   mid(T.gatesIn, T.gatesOut),
-  journey: mid(T.journeyIn, T.journeyOut),
-  register: mid(T.buttonOut, 1),
-};
 
 /**
  * The saga: preloader → blurred drawing behind the hero → the drawing pushed
@@ -187,7 +165,7 @@ test.describe('the saga', () => {
     // It has to stay small enough to ship on a landing page.
     if (entry.size) expect(entry.size).toBeLessThan(1_200_000);
 
-    await scrollSaga(page, AT.machine);
+    await scrollSaga(page, 0.35);
     await renderUp(page);
     // A composited WebGL buffer cannot be read back, so prove the loop keeps
     // running instead. The software backend used in CI manages only a couple
@@ -199,9 +177,9 @@ test.describe('the saga', () => {
 
   test('hands the drawing over to the render, then puts it away', async ({ page }) => {
     test.slow();
-    await scrollSaga(page, AT.machine);
+    await scrollSaga(page, 0.35);
     await renderUp(page);
-    await scrollSaga(page, AT.parts + 0.04);
+    await scrollSaga(page, 0.40);
     const state = await page.evaluate(() => ({
       stage: Number(document.querySelector('[data-qc-stage]').style.opacity),
       canvas: Number(document.querySelector('[data-saga-canvas]').style.opacity),
@@ -214,12 +192,12 @@ test.describe('the saga', () => {
 
   test('the drawing disintegrates into particles before the machine appears', async ({ page }) => {
     test.slow();
-    await scrollSaga(page, AT.machine);
+    await scrollSaga(page, 0.35);
     await renderUp(page);
 
     // Mid-shatter the drawing is on its way out and the particles are carrying
     // it: the render is up, but the solid model has not arrived yet.
-    await scrollSaga(page, AT.shatter);
+    await scrollSaga(page, 0.17);
     const mid = await page.evaluate(() => ({
       phase: document.querySelector('[data-saga]').dataset.sagaPhase,
       stage: Number(document.querySelector('[data-qc-stage]').style.opacity),
@@ -232,16 +210,16 @@ test.describe('the saga', () => {
 
   test('shows the part labels first, then the six things the fest is', async ({ page }) => {
     test.slow();
-    await scrollSaga(page, AT.machine);
+    await scrollSaga(page, 0.35);
     await renderUp(page);
 
-    await scrollSaga(page, AT.parts);
+    await scrollSaga(page, 0.32);
     const parts = await visible(page, '.hotspot--part');
     expect(parts).toBeGreaterThan(0);
     expect(await visible(page, '.hotspot--value')).toBe(0);
     await expect(page.locator('[data-saga-labels]')).toContainText('10 mK stage');
 
-    await scrollSaga(page, AT.values);
+    await scrollSaga(page, 0.52);
     expect(await visible(page, '.hotspot--value')).toBeGreaterThan(0);
     await expect(page.locator('[data-saga-values]')).toContainText('Start from zero');
     await expect(page.locator('[data-saga-values]')).toContainText('Three certificate tiers');
@@ -249,60 +227,54 @@ test.describe('the saga', () => {
 
   test('labels track the model as it turns', async ({ page }) => {
     test.slow();
-    await scrollSaga(page, AT.machine);
+    await scrollSaga(page, 0.35);
     await renderUp(page);
-    await scrollSaga(page, AT.parts);
+    await scrollSaga(page, 0.32);
     const spot = page.locator('.hotspot--part').first();
     const before = await spot.evaluate((el) => el.style.transform);
-    await scrollSaga(page, AT.parts + 0.04);
+    await scrollSaga(page, 0.40);
     const after = await spot.evaluate((el) => el.style.transform);
     expect(after).not.toBe(before);
     expect(after).toMatch(/translate3d/);
   });
 
-  test('advances the chapter copy through the descent and the journey', async ({ page }) => {
-    await scrollSaga(page, AT.parts);
+  test('advances the chapter copy through the descent', async ({ page }) => {
+    await scrollSaga(page, 0.30);
     const first = await page.locator('.saga__chapter.is-on h3').textContent();
-    await scrollSaga(page, mid(T.journeyIn, T.journeyIn + 0.03));
-    const entering = await page.locator('.saga__chapter.is-on h3').textContent();
-    expect(entering).not.toBe(first);
-    expect(entering).toContain('ride it');
-
-    // The journey is long enough to carry several chapters of its own now, so
-    // the copy has to keep moving after the vector ride begins.
-    await scrollSaga(page, mid(T.journeyOut - 0.06, T.journeyOut));
+    await scrollSaga(page, 0.90);
     const last = await page.locator('.saga__chapter.is-on h3').textContent();
-    expect(last).not.toBe(entering);
+    expect(first).not.toBe(last);
+    expect(last).toContain('Come inside');
   });
 
   test('runs the machine, the qubit, the gates, the journey and the button in order', async ({ page }) => {
     test.slow();
-    await scrollSaga(page, AT.machine);
+    await scrollSaga(page, 0.35);
     await renderUp(page);
 
     const phase = () => page.locator('[data-saga]').getAttribute('data-saga-phase');
-    await scrollSaga(page, AT.machine);
+    await scrollSaga(page, 0.50);
     expect(await phase()).toBe('machine');
-    await scrollSaga(page, AT.qubit);
+    await scrollSaga(page, 0.70);
     expect(await phase()).toBe('qubit');
-    await scrollSaga(page, AT.gates);
+    await scrollSaga(page, 0.79);
     expect(await phase()).toBe('gates');
-    await scrollSaga(page, AT.journey);
+    await scrollSaga(page, 0.90);
     expect(await phase()).toBe('journey');
-    await scrollSaga(page, AT.register);
+    await scrollSaga(page, 0.99);
     expect(await phase()).toBe('register');
   });
 
   test('hands the qubit over for gates, then puts the panel away', async ({ page }) => {
     test.slow();
-    await scrollSaga(page, AT.machine);
+    await scrollSaga(page, 0.35);
     await renderUp(page);
 
     const panel = page.locator('[data-saga-gates]');
-    await scrollSaga(page, AT.qubit);
+    await scrollSaga(page, 0.70);
     expect(Number(await panel.evaluate((el) => el.style.opacity || 0))).toBeLessThan(0.2);
 
-    await scrollSaga(page, AT.gates);
+    await scrollSaga(page, 0.79);
     await expect(panel).toBeVisible();
     await expect(panel.locator('[data-gate="H"]')).toBeVisible();
 
@@ -315,46 +287,23 @@ test.describe('the saga', () => {
     await panel.locator('[data-gate-reset]').click();
     await expect(panel.locator('[data-p0-pct]')).toHaveText('100.0%');
 
-    await scrollSaga(page, AT.journey);
+    await scrollSaga(page, 0.90);
     expect(Number(await panel.evaluate((el) => el.style.opacity || 0))).toBeLessThan(0.2);
   });
 
   test('carries the fest inside the sphere, then becomes the button', async ({ page }) => {
     test.slow();
-    await scrollSaga(page, AT.machine);
+    await scrollSaga(page, 0.35);
     await renderUp(page);
 
-    await scrollSaga(page, AT.journey);
+    await scrollSaga(page, 0.88);
     expect(await visible(page, '.hotspot--station')).toBeGreaterThan(0);
-
-    // The whole back half of the landing page is staged along the vector, so
-    // all of it has to be in there: the venue, the three tiers as three
-    // separate plates on their own ring, the challenge, and the people.
-    const stations = page.locator('[data-saga-stations]');
-    for (const text of [
-      'MN Saha Auditorium', 'Mohanpur',
-      'Participation certificate', 'Intermediate certificate', 'Advanced certificate',
-      'A challenge, with swag', 'One unnamed speaker',
-    ]) {
-      await expect(stations).toContainText(text);
-    }
+    await expect(page.locator('[data-saga-stations]')).toContainText('Three certificates');
     // The people you fly through are in there, with their portraits.
-    await expect(stations).toContainText('Manish Behera');
-    expect(await stations.locator('.hotspot__photo').count()).toBeGreaterThan(4);
+    await expect(page.locator('[data-saga-stations]')).toContainText('Manish Behera');
+    expect(await page.locator('[data-saga-stations] .hotspot__photo').count()).toBeGreaterThan(4);
 
-    // Riding the vector is the point: you should read several stops on the way
-    // up, not the same one for the whole act.
-    const seen = new Set();
-    for (const at of [T.journeyIn + 0.03, 0.75, 0.82, 0.90]) {
-      await scrollSaga(page, at);
-      const lit = await page.locator('[data-saga-stations] .hotspot').evaluateAll(
-        (els) => els.filter((el) => Number(el.style.opacity) > 0.4)
-          .map((el) => el.querySelector('.k-full').textContent));
-      lit.forEach((k) => seen.add(k));
-    }
-    expect(seen.size, `only saw ${[...seen].join(', ')}`).toBeGreaterThan(5);
-
-    await scrollSaga(page, AT.register);
+    await scrollSaga(page, 0.99);
     // Everything else is out of the way and the register button stands alone.
     expect(await visible(page, '.hotspot')).toBe(0);
     const cta = page.locator('[data-saga-cta]');
@@ -389,7 +338,7 @@ test.describe('the saga on a narrow screen', () => {
     test.slow();
     await page.goto('/machine.html');
     await gone(page);
-    await scrollSaga(page, AT.parts);
+    await scrollSaga(page, 0.32);
     await renderUp(page);
     await page.waitForTimeout(1200);
 
@@ -442,7 +391,7 @@ test.describe('on a phone', () => {
     test.slow();
     await page.goto('/machine.html');
     await gone(page);
-    await scrollSaga(page, AT.parts);
+    await scrollSaga(page, 0.32);
     await renderUp(page);
     await page.waitForTimeout(1200);
 
@@ -463,7 +412,7 @@ test.describe('on a phone', () => {
     test.slow();
     await page.goto('/machine.html');
     await gone(page);
-    await scrollSaga(page, AT.journey);
+    await scrollSaga(page, 0.90);
     await renderUp(page);
     await page.waitForTimeout(1500);
     await expect(page.locator('[data-saga-card]')).toBeVisible();

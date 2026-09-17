@@ -66,24 +66,18 @@
 
 .hero__cta { display: flex; flex-wrap: wrap; gap: var(--sp-3); justify-content: center; margin-bottom: var(--sp-6); }
 
-/* What the machine button leads to, said once, under the buttons. */
+/* The way through to the machine: offered, not pushed. */
 .hero__aside {
-  max-width: 62ch; margin-inline: auto;
+  display: grid; gap: 0.3rem;
   padding-top: var(--sp-5);
   border-top: 1px solid var(--line);
-  font-size: var(--step--1); line-height: 1.6; color: var(--paper-2);
-  text-wrap: pretty;
+  font-size: var(--step--1); color: var(--paper-2);
 }
-.hero__aside-tag {
-  display: inline-block;
-  margin-right: 0.5rem;
-  padding: 0.2rem 0.55rem;
-  border: 1px solid var(--line-strong);
+.hero__aside a { font-weight: 500; }
+.hero__aside small {
   font-family: var(--font-mono); font-size: var(--step--2);
-  letter-spacing: 0.14em; text-transform: uppercase; color: var(--gold-dim);
-  vertical-align: 0.1em;
+  letter-spacing: 0.08em; color: var(--paper-3);
 }
-.hero__aside a { display: inline-block; margin-top: 0.35rem; font-weight: 500; }
 
 /* Register is the point of the page, so on anything short it comes before the
    format breakdown rather than after it. */
@@ -153,13 +147,11 @@
 .saga {
   position: relative;
   /* The scroll runway the whole sequence plays across: drawing, machine,
-     qubit, gates, the journey inside the sphere, and the button. The journey
-     is the longest act and carries the most content, so the runway grew with
-     it — a bigger fraction of the same height would only have made it faster. */
-  height: 1800svh;
+     qubit, gates, the journey inside the sphere, and the button. */
+  height: 1320svh;
   touch-action: pan-y;
 }
-@media (max-width: 720px) { .saga { height: 1400svh; } }
+@media (max-width: 720px) { .saga { height: 1000svh; } }
 .saga__sticky {
   position: sticky; top: 0;
   height: 100svh;
