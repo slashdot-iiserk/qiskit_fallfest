@@ -6,6 +6,12 @@ import { test, expect } from '@playwright/test';
  * Every test intercepts docs.google.com so no test data ever reaches the real
  * Fall Fest response sheet. The interception also lets us assert the exact POST
  * body the page would have sent.
+ *
+ * The fee is confirmed and audience-scoped: participation is free for IISER
+ * Kolkata students, external participants pay a ₹200 registration fee, and
+ * optional hostel accommodation for externals costs an additional ₹200 per
+ * day. The branch tests below assert the price the visitor is actually told at
+ * each branch, and the submission tests assert the branch never leaks.
  */
 
 /** Stub Google Forms and capture what the page posted. */
@@ -39,6 +45,30 @@ test.beforeEach(async ({ page }) => {
   await page.reload();
 });
 
+test('states the confirmed fees on the page itself', async ({ page }) => {
+  const fees = page.locator('.aside-card--flag');
+  await expect(fees).toContainText(/free for IISER Kolkata students/i);
+  await expect(fees).toContainText(/₹200 registration fee/);
+  await expect(fees).toContainText(/₹200 per day/);
+  // The choice the branch turns on carries the fee, so the visitor learns it
+  // before they commit to a branch.
+  const feeHint = page.locator('[data-choice="isIiserK"]').locator('xpath=ancestor::div[@data-field]');
+  await expect(feeHint).toContainText(/free for IISER Kolkata students/i);
+  await expect(feeHint).toContainText(/External participants pay a ₹200 registration fee/);
+  // The external branch states its own fee, and the accommodation charge on top.
+  await fillStepOne(page, { name: 'Rahul Das', iiserK: false });
+  await expect(page.locator('[data-step="details-external"]')).toContainText(/registration fee for external participants is ₹200/);
+  const accom = page.locator('[data-choice="accommodation"]').locator('xpath=ancestor::div[@data-field]');
+  await expect(accom).toContainText(/₹200 per day, in addition to the ₹200 registration fee/);
+  // The IISER-K branch states free participation, never the external fee.
+  await page.reload();
+  await page.evaluate(() => localStorage.clear());
+  await page.reload();
+  await fillStepOne(page, { name: 'Ananya Sen', iiserK: true });
+  await expect(page.locator('[data-step="details-iiserk"]')).toContainText(/Participation is free for IISER Kolkata students/i);
+  await expect(page.locator('[data-step="details-iiserk"]')).not.toContainText(/₹200/);
+});
+
 test('blocks an empty first step and names the missing field', async ({ page }) => {
   await page.locator('[data-step="who"] [data-next]').click();
   await expect(page.locator('[data-step="who"]')).toBeVisible();
@@ -57,13 +87,21 @@ test('answering "Yes" routes to the IISER-K branch only', async ({ page }) => {
   await fillStepOne(page, { name: 'Ananya Sen', iiserK: true });
   await expect(page.locator('[data-step="details-iiserk"]')).toBeVisible();
   await expect(page.locator('[data-step="details-external"]')).toBeHidden();
+  // The free branch must stay free in what it asks for.
+  await expect(page.locator('[data-step="details-iiserk"]')).not.toContainText(/₹200/);
 });
 
-test('answering "No" routes to the external branch only', async ({ page }) => {
+test('answering "No" routes to the external branch only, priced at ₹200', async ({ page }) => {
   await fillStepOne(page, { name: 'Rahul Das', iiserK: false });
   await expect(page.locator('[data-step="details-external"]')).toBeVisible();
   await expect(page.locator('[data-step="details-iiserk"]')).toBeHidden();
   await expect(page.locator('#f-institute')).toBeVisible();
+  // The fee this branch charges, stated on the step itself.
+  await expect(page.locator('[data-step="details-external"]')).toContainText(/registration fee for external participants is ₹200/);
+  // And the optional accommodation price rides with the accommodation question.
+  const accom = page.locator('[data-choice="accommodation"]').locator('xpath=ancestor::div[@data-field]');
+  await expect(accom).toContainText(/optional and costs ₹200 per day/);
+  await expect(accom).toContainText(/in addition to the ₹200 registration fee/);
 });
 
 test('rejects a malformed email address', async ({ page }) => {
@@ -103,9 +141,13 @@ test('IISER-K submission posts the section-1 entry ids', async ({ page }) => {
   // The external branch's fields must not travel with an IISER-K response.
   expect(captured[0]['entry.171942399']).toBeUndefined();
   expect(captured[0]['entry.1903939656']).toBeUndefined();
+  // The IISER-K branch is the free one: no accommodation answer may leak in,
+  // and the review shown to a free-branch registrant prices nothing.
+  expect(captured[0]['entry.1545235002']).toBeUndefined();
+  await expect(page.locator('[data-success]')).toContainText(/Ananya/);
 });
 
-test('external submission posts the section-2 entry ids', async ({ page }) => {
+test('external submission posts the section-2 entry ids, with accommodation on top', async ({ page }) => {
   const captured = await stubGoogleForms(page);
   await fillStepOne(page, { name: 'Rahul Das', iiserK: false });
   await page.locator('#f-institute').fill('Jadavpur University');
@@ -113,6 +155,12 @@ test('external submission posts the section-2 entry ids', async ({ page }) => {
   await page.locator('[data-choice="accommodation"] [data-value="yes"]').click();
   await page.locator('[data-step="details-external"] [data-next]').click();
   await fillExperience(page, { python: 2, qiskit: 3 });
+
+  // The review repeats what the visitor will be billed: registration plus,
+  // because they asked for a room, the ₹200/day accommodation line.
+  const review = page.locator('[data-review]');
+  await expect(review).toContainText('Needs campus accommodation');
+  await expect(review).toContainText('yes');
   await page.locator('[data-submit]').click();
 
   await expect(page.locator('[data-success]')).toBeVisible({ timeout: 15000 });
@@ -127,6 +175,8 @@ test('external submission posts the section-2 entry ids', async ({ page }) => {
     pageHistory: '0,2',
   });
   expect(captured[0]['entry.1706809785']).toBeUndefined();
+  // The IISER-K branch's fields must not travel with an external response.
+  expect(captured[0]['entry.2011818632']).toBeUndefined();
 });
 
 test('the success screen replaces the form and hides the status message', async ({ page }) => {

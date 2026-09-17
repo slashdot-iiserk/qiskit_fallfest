@@ -1,9 +1,22 @@
 """Shared HTML fragments for the static pages (nav, footer, head boilerplate)."""
 
+REGISTRATION_FEES = (
+    "Participation is free for IISER Kolkata students. External participants pay a ₹200 registration fee. "
+    "Optional hostel accommodation for external participants costs ₹200 per day, separately from registration."
+)
+
+
 def head(title, description, canonical, *, extra_css=(), prefix=""):
     css = "".join(
-        f'<link rel="stylesheet" href="{prefix}css/{name}">\n' for name in
-        ("tokens.css", "base.css", "components.css", "sections.css", *extra_css))
+        f'<link rel="stylesheet" href="{prefix}css/{name}">\n'
+        for name in (
+            "tokens.css",
+            "base.css",
+            "components.css",
+            "sections.css",
+            *extra_css,
+        )
+    )
     return f"""<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -48,10 +61,11 @@ def nav(current="", prefix=""):
     aria = ' aria-current="page"'
     links = "".join(
         f'<li><a class="nav__link" href="{href}"{aria if key == current else ""}>{label}</a></li>\n        '
-        for label, href, key in items)
+        for label, href, key in items
+    )
     return f"""<header class="nav">
   <div class="nav__inner">
-    <a class="nav__brand" href="{prefix or './'}">
+    <a class="nav__brand" href="{prefix or "./"}">
       <img src="{prefix}assets/brand/badge-2026.svg" alt="" width="34" height="34">
       <span class="nav__brand-text">Qiskit Fall Fest<small>IISER Kolkata · 2026</small></span>
     </a>

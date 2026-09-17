@@ -33,11 +33,16 @@ function initTheme() {
   const stored = safeGet(THEME_KEY);
   if (stored === 'light' || stored === 'dark') document.documentElement.dataset.theme = stored;
 
+  // A restored palette needs the same opposite-action label as a click.
+  const updateLabel = () => toggle?.setAttribute('aria-label',
+    document.documentElement.dataset.theme === 'light' ? 'Switch to dark theme' : 'Switch to light theme');
+  updateLabel();
+
   toggle?.addEventListener('click', () => {
     const next = document.documentElement.dataset.theme === 'light' ? 'dark' : 'light';
     document.documentElement.dataset.theme = next;
     safeSet(THEME_KEY, next);
-    toggle.setAttribute('aria-label', next === 'light' ? 'Switch to dark theme' : 'Switch to light theme');
+    updateLabel();
     document.dispatchEvent(new CustomEvent('themechange', { detail: { theme: next } }));
   });
 }
