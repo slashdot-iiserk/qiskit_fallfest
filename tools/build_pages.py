@@ -268,10 +268,10 @@ def build_resources() -> None:
     <div class="container">
       <div class="section__head">
         <p class="eyebrow">Step one</p>
-        <h2>Install Qiskit before Day 0</h2>
+        <h2>Install Qiskit before Day 1</h2>
         <p class="lede">
           Fifteen minutes at home saves you an hour in the hall. If any of this fails, bring the error
-          message to the Day&nbsp;0 installation clinic — that session exists precisely for this.
+          message to the Day&nbsp;1 installation clinic — that session exists precisely for this.
         </p>
       </div>
 
@@ -347,7 +347,7 @@ print(AerSimulator().run(qc, shots=1024).result().get_counts())</code></pre>
       <div class="grid grid--2" data-drop-group="70">
         <a class="res-item" data-drop href="materials/2026/">
           <span class="res-item__badge">26</span>
-          <span><h3>Fall Fest 2026 material</h3><p>Day 1 Labs 1–2 and the Day 2 advanced challenge. Filling up as each session approaches.</p></span>
+          <span><h3>Fall Fest 2026 material</h3><p>Day-by-day folders for the 2026 labs. Filling up as each session approaches.</p></span>
         </a>
         <a class="res-item" data-drop href="materials/requirements.txt">
           <span class="res-item__badge">ENV</span>
@@ -380,7 +380,7 @@ print(AerSimulator().run(qc, shots=1024).result().get_counts())</code></pre>
         <p class="eyebrow">Optional</p>
         <h2>Pre-reading</h2>
         <p class="lede">
-          None of this is compulsory. All of it makes Day 1 easier. If you only have an hour, spend it on
+          None of this is compulsory. All of it makes Day 2 easier. If you only have an hour, spend it on
           the first item.
         </p>
       </div>
@@ -392,7 +392,7 @@ print(AerSimulator().run(qc, shots=1024).result().get_counts())</code></pre>
         </a>
         <a class="res-item" data-drop href="https://docs.quantum.ibm.com/guides" rel="noopener" target="_blank">
           <span class="res-item__badge">02</span>
-          <span><h3>Qiskit documentation</h3><p>The official guides. Skim “Build a circuit” before Day 1 and the labs will feel familiar.</p></span>
+          <span><h3>Qiskit documentation</h3><p>The official guides. Skim “Build a circuit” before Day 2 and the labs will feel familiar.</p></span>
         </a>
         <a class="res-item" data-drop href="https://numpy.org/doc/stable/user/absolute_beginners.html" rel="noopener" target="_blank">
           <span class="res-item__badge">03</span>
@@ -425,7 +425,7 @@ print(AerSimulator().run(qc, shots=1024).result().get_counts())</code></pre>
     <div class="container">
       <div class="cta-band" data-drop>
         <h2>Set up now, register in ninety seconds.</h2>
-        <p>Open to students from any institute. {P.REGISTRATION_FEES}</p>
+        <p>Registering is free and open to students from any institute. A participation fee for the fest applies; the amount is announced before the event.</p>
         <a class="btn btn--lg" href="register.html">Register for Fall Fest 2026</a>
       </div>
     </div>
@@ -463,8 +463,8 @@ def build_faq() -> None:
   <section class="section section--tight">
     <div class="container container--narrow">
       <div class="cta-band" data-drop>
-        <h2>Ready to join us?</h2>
-        <p>{P.REGISTRATION_FEES}</p>
+        <h2>Still unsure? Register anyway.</h2>
+        <p>It is free, it commits you to nothing, and it is how we reach you with everything else.</p>
         <a class="btn btn--lg" href="register.html">Register for Fall Fest 2026</a>
       </div>
     </div>
@@ -511,7 +511,7 @@ def build_archive_index() -> None:
         <article class="card" data-drop>
           <span class="chip chip--purple" style="margin-bottom:1rem">2026 · Live</span>
           <h3>Qiskit Fall Fest 2026</h3>
-          <p>The current edition, 10–13 October 2026 at IISER Kolkata. It will be archived here in turn once
+          <p>The current edition, 6–13 October 2026 at IISER Kolkata. It will be archived here in turn once
              the 2027 site goes up.</p>
           <p style="margin-top:1.25rem;display:flex;gap:.6rem;flex-wrap:wrap">
             <a class="btn btn--sm" href="../">Open the 2026 site</a>
@@ -604,7 +604,7 @@ def build_manifest() -> None:
     (ROOT / "site.webmanifest").write_text("""{
   "name": "Qiskit Fall Fest 2026 · IISER Kolkata",
   "short_name": "Fall Fest 26",
-  "description": "Four days of quantum computing at IISER Kolkata, 10–13 October 2026.",
+  "description": "Five days of quantum computing at IISER Kolkata, 6-13 October 2026.",
   "start_url": "/qiskit_fallfest/",
   "scope": "/qiskit_fallfest/",
   "display": "standalone",
@@ -621,10 +621,6 @@ def build_manifest() -> None:
 
 if __name__ == "__main__":
     print("Building pages:")
-    from build_machine import build as build_machine
-
-    (ROOT / "machine.html").write_text(build_machine(), encoding="utf-8")
-    print("  machine.html")
     build_gallery()
     build_resources()
     build_faq()

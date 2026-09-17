@@ -4,7 +4,7 @@
 
 # Qiskit Fall Fest 2026 · IISER Kolkata
 
-**10 – 13 October 2026 · MN Saha & G06, IISER Kolkata · Open to students from any institute**
+**6 – 13 October 2026 · MN Saha, IISER Kolkata · Open to students from any institute**
 
 Website for the Qiskit Fall Fest at IISER Kolkata, hosted by
 **SlashDot**, the coding and design club.
@@ -22,43 +22,25 @@ Website for the Qiskit Fall Fest at IISER Kolkata, hosted by
 ## The event
 
 The Qiskit Fall Fest is a global, student-run celebration of quantum computing. The IISER Kolkata
-edition runs four days of talks and hands-on Qiskit labs, and closes with an invited IBM industry
-expert talk and a panel with the IBM guest and faculty.
+edition runs five days of talks and hands-on Qiskit labs, and closes with an invited expert talk from
+the IBM Quantum ecosystem.
 
-All times are IST (UTC+05:30). Days 0–2 are at MN Saha; Day 3 is in G06.
-
-| Day | Date | Time | Session | Speakers |
-|-----|------|------|---------|----------|
-| Day 0 | Sat 10 Oct 2026 | 9:00 PM – 9:30 PM | Kick-off | Devang Shroff, Rishabh Chaudhuri, Manish Behera, Anuprovo Debnath, Abhinav Dhingra, Shuvam Banerji Seal, Afreen Chowdhury, Alok Jha, Md Shayan Bari |
-| Day 0 | Sat 10 Oct 2026 | 9:30 PM – 10:00 PM | Why Quantum? What Problems Are We Solving? | Manish Behera |
-| Day 0 | Sat 10 Oct 2026 | After the talks | Installation clinic | Volunteers |
-| Day 1 | Sun 11 Oct 2026 | 10:00 AM – 12:00 PM (noon) | Quantum Mechanics for Quantum Computing (with Gluon) | Devang Shroff, Rishabh Chaudhuri |
-| Day 1 | Sun 11 Oct 2026 | 2:00 PM – 3:00 PM | Introduction to Quantum Computing — Qiskit 101 | Manish Behera |
-| Day 1 | Sun 11 Oct 2026 | 3:00 PM – 4:00 PM | Stern–Gerlach Experiment and Spins + Lab 1 (QSS26 parallel) | Manish Behera, Alok Jha |
-| Day 1 | Sun 11 Oct 2026 | 4:00 PM – 5:00 PM | Entanglement and Quantum Teleportation with Qiskit + Lab 2 | Manish Behera, Md Shayan Bari |
-| Day 2 | Mon 12 Oct 2026 | 9:00 PM – 10:00 PM | Quantum Key Distribution (QKD) | Manish Behera |
-| Day 2 | Mon 12 Oct 2026 | 10:00 PM – 11:00 PM | Quantum Fourier Transform (QFT) and Phase Estimation | Alok Jha, Manish Behera |
-| Day 2 | Mon 12 Oct 2026 | 11:00 PM – 12:00 AM (midnight) | Shor’s Algorithm | Anuprovo Debnath, Alok Jha |
-| Day 3 | Tue 13 Oct 2026 | 6:00 PM – 7:00 PM | Expert Talk — IBM Industry Insider | IBM industry expert (TBA) |
-| Day 3 | Tue 13 Oct 2026 | 7:00 PM – 8:00 PM | Panel Discussion — IBM Guest and Faculty | IBM guest (TBA), faculty (TBA) |
-
-The Day 2 Shor’s Algorithm session ends at midnight at the start of 13 October, not noon.
+| Day | Date | Theme | Time |
+|-----|------|-------|------|
+| Day 0 | Tue 6 Oct 2026 | Quantum Mechanics for Quantum Computing (with Gluon) | 9:00 PM – 12:00 AM |
+| Day 1 | Fri 9 Oct 2026 | Kick-off · Why Quantum? · Installation clinic | 9:00 PM onwards |
+| Day 2 | Sat 10 Oct 2026 | Qiskit 101 · Entanglement & Teleportation · Noise & Hardware (Labs 1–3) | 2:00 – 5:00 PM |
+| Day 3 | Sun 11 Oct 2026 | Advanced track (topics TBA) | 2:00 – 5:00 PM |
+| Day 4 | Tue 13 Oct 2026 | Expert Talk — IBM Industry Insider (speaker TBA) | 6:00 – 8:00 PM |
 
 Three certificate tiers are awarded — **Participation**, **Intermediate** and **Advanced** — so a
-first-timer who finds the advanced day heavy can still earn the Intermediate certificate.
+first-timer who finds the advanced day heavy still leaves with the Intermediate certificate.
 
-- **Participation:** attend the Day 0 kick-off and “Why Quantum?” session, and complete installation
-  with a working Qiskit environment.
-- **Intermediate:** everything in Participation, attendance at all Day 1 afternoon sessions
-  (Qiskit 101, Stern–Gerlach & Spins, Entanglement & Teleportation), and submission of Labs 1–2 notebooks.
-- **Advanced:** everything in Intermediate, attendance at the Day 2 advanced sessions, completion of
-  the advanced challenge notebook, and attendance at the Day 3 invited expert talk.
-
-The morning primer remains optional; the closing panel adds no certificate requirement.
-
-> **Fees.** Participation is **free for IISER Kolkata students**. External participants pay a
-> **₹200 registration fee**. Optional hostel accommodation for external participants is an
-> additional **₹200 per day**.
+> **Participation fee.** There is a participation fee for the fest and the amount has **not been
+> announced yet**. It will be published on the site and emailed to everyone who has registered,
+> before the first session. Registering itself is free and commits nobody to anything — it exists so
+> we have an address to reach people at. Do not add a price anywhere on the site until it is set;
+> `tests/e2e/site.spec.js` asserts the figure row does not claim the fest is free.
 
 > **Editing the schedule, team or FAQ?** They all render from one file:
 > [`js/data/event.js`](js/data/event.js). Nothing else needs touching.
@@ -255,10 +237,10 @@ IBM.
 
 ## Two pages
 
-`index.html` is the front door: what the fest is, when it runs, the four-day
+`index.html` is the front door: what the fest is, when it runs, the five-day
 schedule laid out so every day is legible without a click, the challenge and its
-swag, the certificate tiers, how to get there — with **Schedule** and **Machine**
-in the first button row, followed by a larger **Register now** button.
+swag, the certificate tiers, how to get there — and two headline buttons,
+**Register now** and **Go inside the machine**.
 
 It keeps the loading screen: the machine traces itself inside the progress ring
 while qubits and the 2026 sticker artwork stream out of it, every sprite an

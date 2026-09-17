@@ -338,9 +338,6 @@ test.describe('the saga', () => {
     ]) {
       await expect(stations).toContainText(text);
     }
-    // The journey is staged on the real dates: four days, 10 – 13 October.
-    await expect(stations).toContainText('10 – 13 October');
-    await expect(stations).toContainText('Four days');
     // The people you fly through are in there, with their portraits.
     await expect(stations).toContainText('Manish Behera');
     expect(await stations.locator('.hotspot__photo').count()).toBeGreaterThan(4);
@@ -380,8 +377,6 @@ test.describe('the saga', () => {
     const listed = await page.locator('.static-spot').count();
     expect(listed).toBeGreaterThanOrEqual(24);
     await expect(page.locator('[data-saga-stations]')).toContainText('Manish Behera');
-    // The fallback carries the same dated, four-day journey.
-    await expect(page.locator('[data-saga-stations]')).toContainText('10 – 13 October');
     await context.close();
   });
 });
@@ -423,14 +418,11 @@ test.describe('scroll reveals', () => {
     await expect(about).toHaveClass(/is-in/);
   });
 
-  test('the figure row counts up to four days and states the confirmed fees', async ({ page }) => {
+  test('the figure row counts up and states the fee is unannounced', async ({ page }) => {
     await page.goto('/');
     await page.locator('.figure-row').scrollIntoViewIfNeeded();
-    await expect(page.locator('[data-count-to="4"]')).toHaveText('4', { timeout: 8000 });
-    await expect(page.locator('[data-count-to="10"]')).toHaveText('10+', { timeout: 8000 });
-    await expect(page.locator('.figure-row')).toContainText('10 – 13 October 2026');
-    await expect(page.locator('.figure-row')).toContainText('Free');
-    await expect(page.locator('.figure-row')).toContainText('registration ₹200, hostel ₹200/day optional');
+    await expect(page.locator('[data-count-to="5"]')).toHaveText('5', { timeout: 8000 });
+    await expect(page.locator('.figure-row')).toContainText('Announced before the fest');
   });
 });
 

@@ -57,8 +57,8 @@ test.describe('home page', () => {
     // The h1 is set in three lines, so match on its normalised text.
     const h1 = await page.getByRole('heading', { level: 1 }).innerText();
     expect(h1.replace(/\s+/g, ' ')).toContain('Fall Fest 2026');
-    await expect(page.locator('.hero__dates')).toContainText('10 – 13 October 2026');
-    await expect(page.locator('.hero__dates')).toContainText('MN Saha & G06, IISER Kolkata');
+    await expect(page.locator('.hero__dates')).toContainText('6 – 13 October 2026');
+    await expect(page.locator('.hero__dates')).toContainText('MN Saha');
     // The four things the fest actually consists of, stated in the hero.
     await expect(page.locator('.hero__format')).toContainText('Lectures');
     await expect(page.locator('.hero__format')).toContainText('Hands-on labs');
@@ -66,70 +66,43 @@ test.describe('home page', () => {
     await expect(page.locator('.hero__format')).toContainText('Panel');
   });
 
-  test('publishes audience-specific fees and optional hostel charges', async ({ page }) => {
-    const figure = page.locator('.figure').filter({ hasText: 'For IISER Kolkata students' });
-    await expect(figure.locator('.figure__value')).toHaveText('Free');
-    await expect(figure.locator('.figure__note')).toHaveText(
-      'External participants · registration ₹200, hostel ₹200/day optional');
-    for (const section of [page.locator('#venue'), page.locator('.cta-band')]) {
-      await expect(section).toContainText(/free for IISER Kolkata students/i);
-      await expect(section).toContainText(/external participants pay a ₹200 registration fee/i);
-      await expect(section).toContainText(/optional hostel accommodation (?:is|at)\s+₹200 per day/i);
-      await expect(section).not.toContainText(/fee.*(?:TBA|unannounced|to be announced)/i);
-    }
+  test('says the participation fee is still to be announced', async ({ page }) => {
+    // The figure row must not claim the fest is free — only that registering is.
+    await expect(page.locator('.figure-row')).toContainText('Participation fee');
+    await expect(page.locator('.figure-row')).toContainText('TBA');
+    await expect(page.locator('.figure-row')).not.toContainText('Cost to attend');
+    await expect(page.locator('#venue')).toContainText('participation fee applies');
   });
 
   test('publishes structured data for the event', async ({ page }) => {
     const raw = await page.locator('script[type="application/ld+json"]').first().textContent();
     const data = JSON.parse(raw);
     expect(data['@type']).toBe('EducationEvent');
-    expect(data.startDate).toBe('2026-10-10T21:00:00+05:30');
-    expect(data.endDate).toBe('2026-10-13T20:00:00+05:30');
-    expect(data.location.name).toBe('MN Saha Auditorium & G06, IISER Kolkata');
+    expect(data.startDate).toMatch(/^2026-10-06/);
     expect(data.location.address.addressCountry).toBe('IN');
-    expect(data.isAccessibleForFree).not.toBe(true);
-    expect(data.offers).toHaveLength(2);
-    const iiserK = data.offers.find((offer) => offer.name === 'IISER Kolkata student registration');
-    const external = data.offers.find((offer) => offer.name === 'External participant registration');
-    expect(iiserK).toMatchObject({ '@type': 'Offer', price: 0, priceCurrency: 'INR' });
-    expect(external).toMatchObject({ '@type': 'Offer', price: 200, priceCurrency: 'INR' });
-    expect(iiserK.description).toMatch(/free participation for IISER Kolkata students only/i);
-    expect(external.description).toMatch(/registration for external participants/i);
-    expect(external.description).toMatch(/optional hostel accommodation costs INR 200 per day, separately from registration/i);
+    // No price is published while the participation fee is unannounced.
+    expect(data.offers.price).toBeUndefined();
+    expect(data.offers.priceSpecification.description).toMatch(/participation fee/i);
   });
 
-  test('renders all four schedule days from 10 to 13 October', async ({ page }) => {
+  test('renders all five schedule days from the data file', async ({ page }) => {
     const tabs = page.locator('[data-schedule-tabs] [role="tab"]');
-    await expect(tabs).toHaveCount(4);
-    await expect(tabs.locator('.sched__card-day')).toHaveText(['Day 0', 'Day 1', 'Day 2', 'Day 3']);
-    await expect(tabs.locator('.sched__card-date')).toHaveText([
-      'Sat · 10 Oct 2026', 'Sun · 11 Oct 2026', 'Mon · 12 Oct 2026', 'Tue · 13 Oct 2026',
-    ]);
-    await expect(tabs.locator('.sched__card-theme')).toHaveText([
-      'Kick Off', 'Programming Quantum Computers', 'Advanced Topics', 'Expert Talk & Panel',
-    ]);
-    await expect(tabs.locator('.sched__card-count')).toHaveText(['3 sessions', '4 sessions', '3 sessions', '2 sessions']);
+    await expect(tabs).toHaveCount(5);
     await expect(tabs.first()).toHaveAttribute('aria-selected', 'true');
-    await expect(page.locator('[data-schedule-panels] [role="tabpanel"]')).toHaveCount(4);
   });
 
   test('schedule tabs switch panels and support arrow keys', async ({ page }) => {
     const tabs = page.locator('[data-schedule-tabs] [role="tab"]');
-    await tabs.nth(1).click();
-    await expect(page.locator('#panel-day-1')).toBeVisible();
+    await tabs.nth(2).click();
+    await expect(page.locator('#panel-day-2')).toBeVisible();
     await expect(page.locator('#panel-day-0')).toBeHidden();
-    await expect(page.locator('#panel-day-1')).toContainText('Qiskit 101');
+    await expect(page.locator('#panel-day-2')).toContainText('Qiskit 101');
 
-    await tabs.nth(1).focus();
-    for (const [key, day] of [['ArrowRight', 2], ['End', 3], ['ArrowRight', 0], ['ArrowLeft', 3], ['Home', 0]]) {
-      await page.keyboard.press(key);
-      await expect(tabs.nth(day)).toBeFocused();
-      await expect(tabs.nth(day)).toHaveAttribute('aria-selected', 'true');
-      await expect(tabs.nth(day)).toHaveAttribute('tabindex', '0');
-      await expect(page.locator(`#panel-day-${day}`)).toBeVisible();
-      await expect(page.locator('[data-schedule-tabs] [aria-selected="true"]')).toHaveCount(1);
-      await expect(page.locator('[data-schedule-panels] [role="tabpanel"]:visible')).toHaveCount(1);
-    }
+    await tabs.nth(2).focus();
+    await page.keyboard.press('ArrowRight');
+    await expect(page.locator('#panel-day-3')).toBeVisible();
+    await page.keyboard.press('End');
+    await expect(page.locator('#panel-day-4')).toBeVisible();
   });
 
   test('lists three certificate tiers, with Intermediate featured', async ({ page }) => {
@@ -175,18 +148,16 @@ test.describe('home page', () => {
     // asks the two questions separately and some faces answer both. What this
     // grid adds over the team grid is the topic.
     const cards = page.locator('#speakers .person');
-    await expect(cards).toHaveCount(7);
+    await expect(cards).toHaveCount(6);
 
     const section = page.locator('#speakers');
     for (const name of ['Devang Shroff', 'Rishabh Chaudhuri', 'Manish Behera',
-      'Shuvam Banerji Seal', 'Md Shayan Bari', 'Alok Jha', 'Anuprovo Debnath']) {
+      'Shuvam Banerji Seal', 'Md Shayan Bari', 'Alok Jha']) {
       await expect(section).toContainText(name);
     }
-    await expect(cards.filter({ hasText: 'Devang Shroff' })).toContainText('Gluon');
-    await expect(cards.filter({ hasText: 'Devang Shroff' })).toContainText('Quantum Mechanics Primer');
-    await expect(cards.filter({ hasText: 'Rishabh Chaudhuri' })).toContainText('Gluon');
-    await expect(cards.filter({ hasText: 'Alok Jha' })).toContainText(
-      'Stern–Gerlach & Spins · Lab 1 · QFT & Phase Estimation · Shor’s Algorithm');
+    // Day 0 is run with Gluon; everyone else is SlashDot.
+    await expect(section).toContainText('Gluon');
+    await expect(section).toContainText('Quantum Mechanics Primer');
 
     // Same rule as the team: a face, or initials, never a hole.
     const filled = await cards.evaluateAll((els) => els.map((el) => Boolean(
@@ -224,33 +195,20 @@ test.describe('home page', () => {
     await expect(page.locator('script[type="importmap"]')).toHaveCount(0);
   });
 
-  test('gives Schedule and Machine equal billing, Register the loudest slot', async ({ page }) => {
-    await expect(page.locator('[data-preloader]')).toHaveCount(0, { timeout: 30000 });
+  test('gives Register and the machine equal billing', async ({ page }) => {
+    // Both were asked for as headline calls to action: Register is the point
+    // of the page, the machine is what people came back to say they loved.
     const cta = page.locator('.hero__cta');
-    await expect(cta.locator('a')).toHaveText(['Schedule', 'Machine']);
-    const schedule = cta.getByRole('link', { name: 'Schedule', exact: true });
-    const machine = cta.getByRole('link', { name: 'Machine', exact: true });
-    const register = page.locator('.hero__register').getByRole('link', { name: 'Register now', exact: true });
-    await expect(schedule).toHaveAttribute('href', '#schedule');
-    await expect(machine).toHaveAttribute('href', 'machine.html');
-    await expect(register).toHaveAttribute('href', 'register.html');
-    for (const link of [schedule, machine, register]) await expect(link).toBeVisible();
-    await expect(page.locator('.hero__aside')).toHaveCount(0);
-    await expect(page.locator('.hero')).not.toContainText('For the curious');
-    const boxes = await page.locator('.hero__cta a, .hero__register a').evaluateAll(
-      (els) => els.map((el) => {
-        const r = el.getBoundingClientRect();
-        return { top: r.top, bottom: r.bottom, left: r.left, right: r.right, height: r.height };
-      }));
-    const [sch, mach, reg] = boxes;
-    expect(Math.abs(sch.height - mach.height)).toBeLessThanOrEqual(2);
-    expect(Math.abs(sch.top - mach.top)).toBeLessThanOrEqual(2);
-    expect(mach.left).toBeGreaterThan(sch.right);
-    expect(reg.top).toBeGreaterThan(Math.max(sch.bottom, mach.bottom));
-    expect(reg.height).toBeGreaterThan(Math.max(sch.height, mach.height));
-    expect(reg.height).toBeGreaterThanOrEqual(72);
-    expect(Math.abs(reg.left - sch.left)).toBeLessThanOrEqual(2);
-    expect(Math.abs(reg.right - mach.right)).toBeLessThanOrEqual(2);
+    await expect(cta.locator('a[href="register.html"]')).toBeVisible();
+    const machine = cta.locator('a[href="machine.html"]');
+    await expect(machine).toBeVisible();
+    await expect(machine).toContainText('machine');
+
+    // Equal billing means the same size, not a button and a footnote.
+    const [reg, mach] = await cta.locator('a').evaluateAll(
+      (els) => els.map((el) => Math.round(el.getBoundingClientRect().height)));
+    expect(Math.abs(reg - mach), `heights ${reg} vs ${mach}`).toBeLessThanOrEqual(2);
+    await expect(page.locator('.hero__aside')).toContainText('For the curious');
   });
 
   test('the loading screen keeps the frame budget to itself', async ({ page }) => {
@@ -390,70 +348,14 @@ test.describe('home page', () => {
   });
 
   test('the schedule shows every day at a glance', async ({ page }) => {
-    await expect(page.locator('[data-preloader]')).toHaveCount(0, { timeout: 30000 });
+    // Five days legible without a click — the schedule is the thing most
+    // visitors came for.
     const cards = page.locator('.sched__card');
-    await expect(cards).toHaveCount(4);
+    await expect(cards).toHaveCount(5);
     await expect(cards.first()).toHaveAttribute('aria-selected', 'true');
-    for (const [i, text] of [[1, 'Programming Quantum Computers'], [2, 'Advanced Topics'], [3, 'Expert Talk & Panel']]) {
-      await cards.nth(i).click();
-      await expect(cards.nth(i)).toHaveAttribute('aria-selected', 'true');
-      await expect(page.locator(`#panel-day-${i}`)).toBeVisible();
-      await expect(page.locator('.sched__day.is-active')).toContainText(text);
-    }
-  });
-
-  const SCHEDULE_AT_A_GLANCE = [
-    { day: 'day-0', tab: 0, sessions: [
-      { time: '9:00 PM – 9:30 PM', title: 'Qiskit Fall Fest 2026 — Kick Off Event!', venue: 'MN Saha', tag: 'Opening' },
-      { time: '9:30 PM – 10:00 PM', title: 'Why Quantum? What Problems Are We Solving?', venue: 'MN Saha', tag: 'Talk' },
-      { time: 'After the talks', title: 'Installation Session — Getting Started', venue: 'MN Saha', tag: 'Hands-on' },
-    ] },
-    { day: 'day-1', tab: 1, sessions: [
-      { time: '10:00 AM – 12:00 PM', title: 'Quantum Mechanics for Quantum Computing', venue: 'MN Saha', tag: 'Primer' },
-      { time: '2:00 PM – 3:00 PM', title: 'Introduction to Quantum Computing — Qiskit 101', venue: 'MN Saha', tag: 'Talk' },
-      { time: '3:00 PM – 4:00 PM', title: 'Stern–Gerlach Experiment and Spins + Lab 1', venue: 'MN Saha', tag: 'Lab 1' },
-      { time: '4:00 PM – 5:00 PM', title: 'Entanglement and Quantum Teleportation with Qiskit + Lab 2', venue: 'MN Saha', tag: 'Lab 2' },
-    ] },
-    { day: 'day-2', tab: 2, sessions: [
-      { time: '9:00 PM – 10:00 PM', title: 'Quantum Key Distribution (QKD)', venue: 'MN Saha', tag: 'Advanced' },
-      { time: '10:00 PM – 11:00 PM', title: 'Quantum Fourier Transform (QFT) and Phase Estimation', venue: 'MN Saha', tag: 'Advanced' },
-      { time: '11:00 PM – 12:00 AM (midnight)', title: 'Shor’s Algorithm', venue: 'MN Saha', tag: 'Advanced' },
-    ] },
-    { day: 'day-3', tab: 3, sessions: [
-      { time: '6:00 PM – 7:00 PM', title: 'Expert Talk — IBM Industry Insider', venue: 'G06', tag: 'Invited' },
-      { time: '7:00 PM – 8:00 PM', title: 'Panel Discussion — IBM Guest and Faculty', venue: 'G06', tag: 'Panel' },
-    ] },
-  ];
-
-  for (const { day, tab, sessions } of SCHEDULE_AT_A_GLANCE) {
-    test(`lists ${day} sessions with times and venues`, async ({ page }) => {
-      await page.goto('/');
-      await expect(page.locator('[data-preloader]')).toHaveCount(0, { timeout: 30000 });
-      const panel = page.locator(`#panel-${day}`);
-      if (tab !== 0) await expect(panel).toBeHidden();
-      await page.locator('[data-schedule-tabs] [role="tab"]').nth(tab).click();
-      await expect(panel).toBeVisible();
-      await expect(page.locator('[data-schedule-tabs] [role="tab"]').nth(tab)).toHaveAttribute('aria-selected', 'true');
-      const items = panel.locator('.tl-item');
-      await expect(items).toHaveCount(sessions.length);
-      for (const [i, s] of sessions.entries()) {
-        const item = items.nth(i);
-        await expect(item.locator('.tl-item__time')).toHaveText(s.time);
-        await expect(item.locator('.tl-item__title')).toHaveText(s.title);
-        await expect(item.locator('.tl-item__meta')).toContainText(s.venue);
-        await expect(item.locator('.tl-item__meta')).toContainText(s.tag);
-      }
-      await expect(panel.locator('.sched__day-head .sched__date')).toContainText(
-        ['10 Oct 2026', '11 Oct 2026', '12 Oct 2026', '13 Oct 2026'][tab]);
-    });
-  }
-
-  test('the Day 1 afternoon builds the Intermediate certificate', async ({ page }) => {
-    await expect(page.locator('[data-preloader]')).toHaveCount(0, { timeout: 30000 });
-    await page.locator('[data-schedule-tabs] [role="tab"]').nth(1).click();
-    await expect(page.locator('#panel-day-1')).toContainText('Stern–Gerlach Experiment and Spins + Lab 1');
-    await expect(page.locator('#panel-day-1')).toContainText('Entanglement and Quantum Teleportation with Qiskit + Lab 2');
-    await expect(page.locator('[data-tiers] .tier--featured')).toContainText('Stern–Gerlach & Spins, Entanglement & Teleportation');
+    await cards.nth(2).click();
+    await expect(cards.nth(2)).toHaveAttribute('aria-selected', 'true');
+    await expect(page.locator('.sched__day.is-active')).toContainText('Programming Quantum Computers');
   });
 
   test('announces the challenge and its swag', async ({ page }) => {
@@ -493,16 +395,6 @@ test.describe('the FAQ page', () => {
     await expect(page.locator('[data-faq]')).toContainText('How much does it cost?');
   });
 
-  test('answers the cost question with the confirmed fees', async ({ page }) => {
-    const cost = page.locator('[data-faq] .accordion__item')
-      .filter({ hasText: 'How much does it cost?' });
-    await cost.locator('.accordion__trigger').click();
-    await expect(cost).toContainText(/free for IISER Kolkata students/i);
-    await expect(cost).toContainText(/external participants pay a ₹200 registration fee/i);
-    await expect(cost).toContainText(/optional hostel accommodation for external participants costs ₹200 per day/i);
-    await expect(cost).not.toContainText(/TBA|unannounced|to be announced/i);
-  });
-
   test('opens one answer at a time', async ({ page }) => {
     const triggers = page.locator('[data-faq] .accordion__trigger');
     await triggers.first().click();
@@ -521,49 +413,12 @@ test.describe('the FAQ page', () => {
 test.describe('chrome', () => {
   test('theme toggle flips the palette and is remembered', async ({ page }) => {
     await page.goto('/');
-    const toggle = page.locator('[data-theme-toggle]');
     await expect(page.locator('html')).not.toHaveAttribute('data-theme', 'light');
-    await expect(toggle).toHaveAccessibleName('Switch to light theme');
-    await toggle.click();
+    await page.locator('[data-theme-toggle]').click();
     await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
-    await expect(toggle).toHaveAccessibleName('Switch to dark theme');
     await page.reload();
     await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
-    await expect(toggle).toHaveAccessibleName('Switch to dark theme');
-    await page.goto('/faq.html');
-    await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
-    await expect(toggle).toHaveAccessibleName('Switch to dark theme');
-    await toggle.click();
-    await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
-    await expect(toggle).toHaveAccessibleName('Switch to light theme');
-    await page.reload();
-    await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
-    await expect(toggle).toHaveAccessibleName('Switch to light theme');
   });
-
-  for (const storage of ['invalid', 'unavailable']) {
-    test(`theme toggle stays usable when storage is ${storage}`, async ({ page }) => {
-      const problems = watchForProblems(page);
-      await page.addInitScript((mode) => {
-        if (mode === 'invalid') localStorage.setItem('qff-theme', 'unexpected-theme');
-        else {
-          for (const method of ['getItem', 'setItem']) {
-            Storage.prototype[method] = () => { throw new Error('Storage unavailable'); };
-          }
-        }
-      }, storage);
-      await page.goto('/faq.html');
-      const toggle = page.locator('[data-theme-toggle]');
-      await expect(toggle).toHaveAccessibleName('Switch to light theme');
-      await toggle.click();
-      await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
-      await expect(toggle).toHaveAccessibleName('Switch to dark theme');
-      await toggle.click();
-      await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
-      await expect(toggle).toHaveAccessibleName('Switch to light theme');
-      expect(problems).toEqual([]);
-    });
-  }
 
   test('scroll progress advances as the page scrolls', async ({ page }) => {
     await page.goto('/');

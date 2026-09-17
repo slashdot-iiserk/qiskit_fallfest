@@ -8,7 +8,6 @@ decoder and the model are only ever fetched by this page.
 
 Usage:  python3 tools/build_machine.py
 """
-
 from pathlib import Path
 
 import page_parts as P
@@ -16,24 +15,18 @@ import page_parts as P
 ROOT = Path(__file__).resolve().parent.parent
 BASE = "https://slashdot-iiserk.github.io/qiskit_fallfest"
 
-ARROW = (
-    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" '
-    'stroke-linecap="round" stroke-linejoin="round" width="17" height="17" aria-hidden="true">'
-    '<path d="M5 12h14M13 6l6 6-6 6"/></svg>'
-)
+ARROW = ('<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" '
+         'stroke-linecap="round" stroke-linejoin="round" width="17" height="17" aria-hidden="true">'
+         '<path d="M5 12h14M13 6l6 6-6 6"/></svg>')
 
 
 def drawing(name: str, extra: str = "") -> str:
     """The line drawings are inlined: the preloader has to paint on the first
     frame, and `currentColor` only follows the theme for inline SVG."""
-    svg = (
-        (ROOT / "assets" / "model" / f"{name}.svg").read_text(encoding="utf-8").strip()
-    )
+    svg = (ROOT / "assets" / "model" / f"{name}.svg").read_text(encoding="utf-8").strip()
     svg = svg.replace("<svg ", '<svg aria-hidden="true" ', 1)
     svg = svg.replace(' role="img"', "").replace(
-        ' aria-label="Line drawing of a dilution refrigerator — the gold chandelier that houses a superconducting quantum processor"',
-        "",
-    )
+        ' aria-label="Line drawing of a dilution refrigerator — the gold chandelier that houses a superconducting quantum processor"', "")
     return f'<div class="qc-draw"{extra}>{svg}</div>'
 
 
@@ -43,7 +36,7 @@ HEAD = f"""<!DOCTYPE html>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Inside the machine · Qiskit Fall Fest 2026 · IISER Kolkata</title>
-<meta name="description" content="Scroll through a dilution refrigerator, stage by stage, down to the chip — and watch it become a single qubit you can put gates through. Part of Qiskit Fall Fest 2026 at IISER Kolkata, 10–13 October.">
+<meta name="description" content="Scroll through a dilution refrigerator, stage by stage, down to the chip — and watch it become a single qubit you can put gates through. Part of Qiskit Fall Fest 2026 at IISER Kolkata.">
 <meta name="theme-color" content="#08080a">
 <link rel="canonical" href="{BASE}/machine.html">
 
@@ -147,10 +140,9 @@ INTRO = f"""
       <p class="eyebrow" style="display:inline-flex;margin-bottom:1.25rem">That was the machine</p>
       <h2 style="margin-bottom:1.25rem">Now come and program one.</h2>
       <p class="lede" style="margin-inline:auto;margin-bottom:2rem">
-        Four days, 10&nbsp;–&nbsp;13 October 2026 at IISER Kolkata. Lectures, hands-on labs, a challenge
+        Five days, 6&nbsp;–&nbsp;13 October at IISER Kolkata. Lectures, hands-on labs, a challenge
         and a panel — and everything you just scrolled through, explained properly.
       </p>
-      <p class="muted" style="margin-bottom:2rem">{P.REGISTRATION_FEES}</p>
       <p style="display:flex;gap:.75rem;justify-content:center;flex-wrap:wrap">
         <a class="btn btn--lg" href="register.html">Register for Fall Fest 2026 {ARROW}</a>
         <a class="btn btn--lg btn--ghost" href="./#schedule">See the schedule</a>
@@ -228,9 +220,7 @@ SAGA = """  <!-- ============================ THE SAGA =========================
 
 def build() -> str:
     saga = SAGA
-    saga = saga.replace("{ARROW}", ARROW).replace(
-        "{stage_art}", drawing("qc-three-quarter")
-    )
+    saga = saga.replace("{ARROW}", ARROW).replace("{stage_art}", drawing("qc-three-quarter"))
     preloader = PRELOADER.replace("{art}", drawing("qc-front", " data-preloader-art"))
     return HEAD + preloader + NAV + INTRO.replace("{saga}", saga) + P.footer()
 
