@@ -1,0 +1,14 @@
+{
+  "name": "Qiskit Fall Fest 2026 · IISER Kolkata",
+  "short_name": "Fall Fest 26",
+  "description": "Five days of quantum computing at IISER Kolkata, 6-13 October 2026.",
+  "start_url": "/qiskit_fallfest/",
+  "scope": "/qiskit_fallfest/",
+  "display": "standalone",
+  "background_color": "#08040f",
+  "theme_color": "#08040f",
+  "icons": [
+    { "src": "assets/brand/favicon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "assets/brand/favicon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" }
+  ]
+}
