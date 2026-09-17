@@ -134,17 +134,7 @@ export function initSaga() {
     return;
   }
 
-  /* Nothing this loop does is visible until the shutter lifts: `.preloader` is
-     opaque and covers the viewport. Measuring layout and repainting the
-     drawing behind it, every frame, is the same waste the ambient layer was
-     making — and it competes with the one animation the visitor can actually
-     see. `boot()` still runs underneath, so the saga is ready on time. */
-  const covered = () => document.documentElement.classList.contains('is-loading');
-
-  const preTick = () => {
-    if (!covered()) { measure(); paintDrawing(); paintChapters(); }
-    if (!ready) raf = requestAnimationFrame(preTick);
-  };
+  const preTick = () => { measure(); paintDrawing(); paintChapters(); if (!ready) raf = requestAnimationFrame(preTick); };
   preTick();
 
   boot().catch((err) => {
@@ -397,7 +387,6 @@ export function initSaga() {
       const dt = Math.min(0.25, Math.max(0.001, (now - lastTime) / 1000));
       lastTime = now;
 
-      if (covered()) return;
       measure();
       paintDrawing();
       paintChapters();
