@@ -946,3 +946,122 @@
   .footer__logos { gap: var(--sp-4) var(--sp-5); }
   .footer__logo img { height: calc(var(--logo-h, 30px) * 0.78); }
 }
+
+/* ==========================================================================
+   The machine page, on a phone
+   ==========================================================================
+   Measured at 390x844 rather than reasoned about, and four things were wrong:
+   the bar wrapped its own back button to two lines (53px against Register's
+   44), the chapter copy ran flush to the bottom edge of the screen over a busy
+   render, the label card floated mid-screen detached from what it described,
+   and the intro was a wall of text. None of it showed on a laptop. */
+
+.nav__back-short { display: none; }
+
+@media (max-width: 560px) {
+  /* One line, always. A button that wraps is taller than its neighbour and the
+     bar reads as broken; a shorter word costs nothing. */
+  .nav--machine .nav__back-long { display: none; }
+  .nav--machine .nav__back-short { display: inline; }
+  .nav--machine .nav__actions .btn { white-space: nowrap; }
+  .nav--machine .nav__brand-text small { display: none; }
+  .nav--machine .nav__actions { gap: 0.5rem; }
+
+  /* ---- the intro ---------------------------------------------------------- */
+  .machine-intro { padding-inline: 1.25rem; }
+  .machine-intro .lede {
+    font-size: var(--step-0);
+    line-height: 1.55;
+    text-wrap: pretty;
+    max-width: 30ch;
+  }
+  .machine-intro__meta-long { display: none; }
+  .machine-intro__meta { margin-top: var(--sp-5); }
+  .machine-intro__cue { margin-top: var(--sp-6); }
+
+  /* ---- the chapter copy ----------------------------------------------------
+     It sat flush to the bottom edge, which on a phone is under the home-gesture
+     bar, over the busiest part of the render with only a text-shadow for a
+     ground. A solid panel is legible on any frame; the safe-area inset keeps it
+     clear of the gesture bar. */
+  .saga__chapters {
+    height: auto;
+    padding: 0 0.9rem calc(0.9rem + env(safe-area-inset-bottom));
+  }
+  .saga__chapter {
+    position: absolute; inset: auto 0.9rem calc(0.9rem + env(safe-area-inset-bottom));
+    width: auto;
+    padding: 0.95rem 1.05rem 1.05rem;
+    text-align: left;
+    background: color-mix(in srgb, var(--void) 82%, transparent);
+    border: 1px solid var(--line);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+  }
+  .saga__chapter h3 { font-size: var(--step-1); margin-bottom: 0.4rem; line-height: 1.2; }
+  .saga__chapter p { font-size: var(--step--1); line-height: 1.5; color: var(--paper-2); }
+  /* The panel is the ground now; a glow on top of it only smears the type. */
+  .saga__chapter h3, .saga__chapter p { text-shadow: none; }
+
+  /* ---- the label card ------------------------------------------------------
+     Pinned just above the chapter panel and at the same width, so the two read
+     as one stacked caption for what is on screen — not as a box that happens
+     to be hovering over the model. It is measured against the panel's real
+     height (see js/saga.js) rather than a guess, because chapters vary from two
+     lines to four. */
+  .saga__card {
+    left: 0.9rem; right: 0.9rem; translate: none;
+    width: auto;
+    bottom: calc(var(--chapter-h, 8.5rem) + 1.6rem + env(safe-area-inset-bottom));
+    background: color-mix(in srgb, var(--ink-2) 92%, transparent);
+  }
+
+  /* ---- gate panel -----------------------------------------------------------
+     Anchored between the nav and the chapter panel, with a `max-height` that is
+     whatever is left between them, and scrollable inside that if it is still
+     not enough. It used to hang from `bottom` at a fixed offset with its
+     natural height, which is fine at 844px and not at 568: on a 320x568 phone
+     it ran 25px under the bar, and in landscape it ran 145px off the top of
+     the screen, taking the gate buttons with it. */
+  .gate-panel {
+    left: 0.9rem; right: 0.9rem; translate: none; width: auto;
+    top: auto;
+    bottom: calc(var(--chapter-h, 8.5rem) + 1.6rem + env(safe-area-inset-bottom));
+    max-height: calc(100svh - var(--nav-h) - var(--chapter-h, 8.5rem) - 2.6rem - env(safe-area-inset-bottom));
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding: 0.9rem 1rem 1rem;
+  }
+  .gate-panel .gate-row { margin-bottom: 0.7rem; }
+  .gate-panel .circuit-strip { margin-bottom: 0.7rem; }
+}
+
+/* Landscape phones are short rather than narrow, so the width query above does
+   not catch them. There is no room for the chapter panel and the gates both:
+   the gates take the right-hand side, the way they do on a laptop, and the
+   chapter copy keeps the left. */
+@media (max-height: 460px) and (orientation: landscape) {
+  .gate-panel {
+    left: auto; right: 0.9rem; width: min(330px, 46vw);
+    top: calc(var(--nav-h) + 0.5rem); bottom: 0.7rem;
+    max-height: none;
+    translate: none;
+  }
+  .saga__chapters { padding-inline: 0.9rem; }
+  /* Margins on all sides: it sat flush against the bottom edge, which on a
+     landscape phone is under the home bar. */
+  .saga__chapter {
+    left: calc(0.9rem + env(safe-area-inset-left)); right: auto;
+    bottom: calc(0.7rem + env(safe-area-inset-bottom));
+    width: min(46vw, 22rem);
+    padding: 0.7rem 0.9rem 0.8rem;
+  }
+  .saga__chapter h3 { font-size: var(--step-0); margin-bottom: 0.25rem; }
+  .saga__chapter p { font-size: var(--step--2); line-height: 1.45; }
+  .saga__card { right: auto; width: min(46vw, 22rem);
+    bottom: calc(var(--chapter-h, 6rem) + 1.2rem); }
+}
+
+@media (max-width: 560px) and (prefers-reduced-motion: reduce) {
+  .saga__chapter { backdrop-filter: none; -webkit-backdrop-filter: none; }
+}

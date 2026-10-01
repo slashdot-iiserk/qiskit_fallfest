@@ -7,7 +7,8 @@ published **before** each session and kept online afterwards.
 materials/2026/
 ├── day-0/     10 October · Kick-off slides · installation checklist
 ├── day-1/     11 October · Quantum mechanics · Qiskit 101 · Lab 1 Stern–Gerlach & Spins · Lab 2 Entanglement & Teleportation
-├── day-2/     12 October · Quantum Key Distribution · QFT & Phase Estimation · Shor’s Algorithm
+├── day-2/     12 October · Variational Quantum Eigensolver · Qiskit MCP
+├── day-4/     14 October · Quantum Key Distribution · QFT & Phase Estimation
 └── day-3/     13 October · Invited expert talk · IBM guest and faculty panel
 ```
 

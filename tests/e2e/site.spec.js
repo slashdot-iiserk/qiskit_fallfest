@@ -57,7 +57,7 @@ test.describe('home page', () => {
     // The h1 is set in three lines, so match on its normalised text.
     const h1 = await page.getByRole('heading', { level: 1 }).innerText();
     expect(h1.replace(/\s+/g, ' ')).toContain('Fall Fest 2026');
-    await expect(page.locator('.hero__dates')).toContainText('10 – 13 October 2026');
+    await expect(page.locator('.hero__dates')).toContainText('10 – 14 October 2026');
     await expect(page.locator('.hero__dates')).toContainText('MN Saha & G06, IISER Kolkata');
     // The four things the fest actually consists of, stated in the hero.
     await expect(page.locator('.hero__format')).toContainText('Lectures');
@@ -84,7 +84,8 @@ test.describe('home page', () => {
     const data = JSON.parse(raw);
     expect(data['@type']).toBe('EducationEvent');
     expect(data.startDate).toBe('2026-10-10T21:00:00+05:30');
-    expect(data.endDate).toBe('2026-10-13T20:00:00+05:30');
+    // Day 4's last session ends at midnight, so the event ends as 15 October begins.
+    expect(data.endDate).toBe('2026-10-15T00:00:00+05:30');
     expect(data.location.name).toBe('MN Saha Auditorium & G06, IISER Kolkata');
     expect(data.location.address.addressCountry).toBe('IN');
     expect(data.isAccessibleForFree).not.toBe(true);
@@ -98,19 +99,21 @@ test.describe('home page', () => {
     expect(external.description).toMatch(/optional hostel accommodation costs INR 200 per day, separately from registration/i);
   });
 
-  test('renders all four schedule days from 10 to 13 October', async ({ page }) => {
+  test('renders all five schedule days from 10 to 14 October', async ({ page }) => {
     const tabs = page.locator('[data-schedule-tabs] [role="tab"]');
-    await expect(tabs).toHaveCount(4);
-    await expect(tabs.locator('.sched__card-day')).toHaveText(['Day 0', 'Day 1', 'Day 2', 'Day 3']);
+    await expect(tabs).toHaveCount(5);
+    await expect(tabs.locator('.sched__card-day')).toHaveText(['Day 0', 'Day 1', 'Day 2', 'Day 3', 'Day 4']);
     await expect(tabs.locator('.sched__card-date')).toHaveText([
-      'Sat · 10 Oct 2026', 'Sun · 11 Oct 2026', 'Mon · 12 Oct 2026', 'Tue · 13 Oct 2026',
+      'Sat · 10 Oct 2026', 'Sun · 11 Oct 2026', 'Mon · 12 Oct 2026', 'Tue · 13 Oct 2026', 'Wed · 14 Oct 2026',
     ]);
     await expect(tabs.locator('.sched__card-theme')).toHaveText([
-      'Kick Off', 'Programming Quantum Computers', 'Advanced Topics', 'Expert Talk & Panel',
+      'Kick Off', 'Programming Quantum Computers', 'Variational Algorithms & Tooling',
+      'Expert Talk & Panel', 'Cryptography & Phase Estimation',
     ]);
-    await expect(tabs.locator('.sched__card-count')).toHaveText(['3 sessions', '4 sessions', '3 sessions', '2 sessions']);
+    await expect(tabs.locator('.sched__card-count')).toHaveText(
+      ['3 sessions', '4 sessions', '2 sessions', '2 sessions', '2 sessions']);
     await expect(tabs.first()).toHaveAttribute('aria-selected', 'true');
-    await expect(page.locator('[data-schedule-panels] [role="tabpanel"]')).toHaveCount(4);
+    await expect(page.locator('[data-schedule-panels] [role="tabpanel"]')).toHaveCount(5);
   });
 
   test('schedule tabs switch panels and support arrow keys', async ({ page }) => {
@@ -121,7 +124,8 @@ test.describe('home page', () => {
     await expect(page.locator('#panel-day-1')).toContainText('Qiskit 101');
 
     await tabs.nth(1).focus();
-    for (const [key, day] of [['ArrowRight', 2], ['End', 3], ['ArrowRight', 0], ['ArrowLeft', 3], ['Home', 0]]) {
+    // Five tabs: End is Day 4, and the arrows wrap at both ends.
+    for (const [key, day] of [['ArrowRight', 2], ['End', 4], ['ArrowRight', 0], ['ArrowLeft', 4], ['Home', 0]]) {
       await page.keyboard.press(key);
       await expect(tabs.nth(day)).toBeFocused();
       await expect(tabs.nth(day)).toHaveAttribute('aria-selected', 'true');
@@ -175,18 +179,28 @@ test.describe('home page', () => {
     // asks the two questions separately and some faces answer both. What this
     // grid adds over the team grid is the topic.
     const cards = page.locator('#speakers .person');
-    await expect(cards).toHaveCount(7);
+    await expect(cards).toHaveCount(9);
 
     const section = page.locator('#speakers');
     for (const name of ['Devang Shroff', 'Rishabh Chaudhuri', 'Manish Behera',
-      'Shuvam Banerji Seal', 'Md Shayan Bari', 'Alok Jha', 'Anuprovo Debnath']) {
+      'Shuvam Banerji Seal', 'Md Shayan Bari', 'Alok Jha', 'Anuprovo Debnath',
+      'Vakamulla Riddhiman', 'Aranya Mukherjee']) {
       await expect(section).toContainText(name);
     }
     await expect(cards.filter({ hasText: 'Devang Shroff' })).toContainText('Gluon');
     await expect(cards.filter({ hasText: 'Devang Shroff' })).toContainText('Quantum Mechanics Primer');
     await expect(cards.filter({ hasText: 'Rishabh Chaudhuri' })).toContainText('Gluon');
     await expect(cards.filter({ hasText: 'Alok Jha' })).toContainText(
-      'Stern–Gerlach & Spins · Lab 1 · QFT & Phase Estimation · Shor’s Algorithm');
+      'Stern–Gerlach & Spins · Lab 1 · Qiskit MCP');
+    await expect(cards.filter({ hasText: 'Vakamulla Riddhiman' })).toContainText('Quantum Key Distribution');
+    await expect(cards.filter({ hasText: 'Aranya Mukherjee' })).toContainText('Phase Estimation');
+
+    // The Day 3 invited speaker is announced on 13 October, not before. His
+    // portrait is staged in source/ but must not be served until then, or the
+    // reveal is a guessable URL.
+    await expect(section).not.toContainText('Ritajit');
+    const leaked = await page.request.get('/assets/organisers/ritajit-majumdar-256.webp');
+    expect(leaked.status(), 'the unannounced speaker\'s portrait must not be served').toBe(404);
 
     // Same rule as the team: a face, or initials, never a hole.
     const filled = await cards.evaluateAll((els) => els.map((el) => Boolean(
@@ -392,9 +406,10 @@ test.describe('home page', () => {
   test('the schedule shows every day at a glance', async ({ page }) => {
     await expect(page.locator('[data-preloader]')).toHaveCount(0, { timeout: 30000 });
     const cards = page.locator('.sched__card');
-    await expect(cards).toHaveCount(4);
+    await expect(cards).toHaveCount(5);
     await expect(cards.first()).toHaveAttribute('aria-selected', 'true');
-    for (const [i, text] of [[1, 'Programming Quantum Computers'], [2, 'Advanced Topics'], [3, 'Expert Talk & Panel']]) {
+    for (const [i, text] of [[1, 'Programming Quantum Computers'], [2, 'Variational Algorithms'],
+      [3, 'Expert Talk & Panel'], [4, 'Cryptography & Phase Estimation']]) {
       await cards.nth(i).click();
       await expect(cards.nth(i)).toHaveAttribute('aria-selected', 'true');
       await expect(page.locator(`#panel-day-${i}`)).toBeVisible();
@@ -415,13 +430,16 @@ test.describe('home page', () => {
       { time: '4:00 PM – 5:00 PM', title: 'Entanglement and Quantum Teleportation with Qiskit + Lab 2', venue: 'MN Saha', tag: 'Lab 2' },
     ] },
     { day: 'day-2', tab: 2, sessions: [
-      { time: '9:00 PM – 10:00 PM', title: 'Quantum Key Distribution (QKD)', venue: 'MN Saha', tag: 'Advanced' },
-      { time: '10:00 PM – 11:00 PM', title: 'Quantum Fourier Transform (QFT) and Phase Estimation', venue: 'MN Saha', tag: 'Advanced' },
-      { time: '11:00 PM – 12:00 AM (midnight)', title: 'Shor’s Algorithm', venue: 'MN Saha', tag: 'Advanced' },
+      { time: '9:00 PM – 11:00 PM', title: 'Variational Quantum Eigensolver (VQE)', venue: 'MN Saha', tag: 'Advanced' },
+      { time: '11:00 PM – 12:00 AM', title: 'Qiskit MCP', venue: 'MN Saha', tag: 'Advanced' },
     ] },
     { day: 'day-3', tab: 3, sessions: [
       { time: '6:00 PM – 7:00 PM', title: 'Expert Talk — IBM Industry Insider', venue: 'G06', tag: 'Invited' },
       { time: '7:00 PM – 8:00 PM', title: 'Panel Discussion — IBM Guest and Faculty', venue: 'G06', tag: 'Panel' },
+    ] },
+    { day: 'day-4', tab: 4, sessions: [
+      { time: '8:00 PM – 9:45 PM', title: 'Quantum Key Distribution', venue: 'MN Saha', tag: 'Advanced' },
+      { time: '10:15 PM – 12:00 AM', title: 'Quantum Fourier Transform and Phase Estimation', venue: 'MN Saha', tag: 'Advanced' },
     ] },
   ];
 
@@ -444,7 +462,7 @@ test.describe('home page', () => {
         await expect(item.locator('.tl-item__meta')).toContainText(s.tag);
       }
       await expect(panel.locator('.sched__day-head .sched__date')).toContainText(
-        ['10 Oct 2026', '11 Oct 2026', '12 Oct 2026', '13 Oct 2026'][tab]);
+        ['10 Oct 2026', '11 Oct 2026', '12 Oct 2026', '13 Oct 2026', '14 Oct 2026'][tab]);
     });
   }
 

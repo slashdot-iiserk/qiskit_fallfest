@@ -338,9 +338,9 @@ test.describe('the saga', () => {
     ]) {
       await expect(stations).toContainText(text);
     }
-    // The journey is staged on the real dates: four days, 10 – 13 October.
-    await expect(stations).toContainText('10 – 13 October');
-    await expect(stations).toContainText('Four days');
+    // The journey is staged on the real dates: five days, 10 – 14 October.
+    await expect(stations).toContainText('10 – 14 October');
+    await expect(stations).toContainText('Five days');
     // The people you fly through are in there, with their portraits.
     await expect(stations).toContainText('Manish Behera');
     expect(await stations.locator('.hotspot__photo').count()).toBeGreaterThan(4);
@@ -381,7 +381,7 @@ test.describe('the saga', () => {
     expect(listed).toBeGreaterThanOrEqual(24);
     await expect(page.locator('[data-saga-stations]')).toContainText('Manish Behera');
     // The fallback carries the same dated, four-day journey.
-    await expect(page.locator('[data-saga-stations]')).toContainText('10 – 13 October');
+    await expect(page.locator('[data-saga-stations]')).toContainText('10 – 14 October');
     await context.close();
   });
 });
@@ -423,12 +423,14 @@ test.describe('scroll reveals', () => {
     await expect(about).toHaveClass(/is-in/);
   });
 
-  test('the figure row counts up to four days and states the confirmed fees', async ({ page }) => {
+  test('the figure row counts up to five days and states the confirmed fees', async ({ page }) => {
     await page.goto('/');
     await page.locator('.figure-row').scrollIntoViewIfNeeded();
-    await expect(page.locator('[data-count-to="4"]')).toHaveText('4', { timeout: 8000 });
-    await expect(page.locator('[data-count-to="10"]')).toHaveText('10+', { timeout: 8000 });
-    await expect(page.locator('.figure-row')).toContainText('10 – 13 October 2026');
+    // Both counts come from js/data/event.js via tools/event_data.py, so these
+    // follow the schedule rather than being a second copy of it.
+    await expect(page.locator('[data-count-to="5"]')).toHaveText('5', { timeout: 8000 });
+    await expect(page.locator('[data-count-to="13"]')).toHaveText('13', { timeout: 8000 });
+    await expect(page.locator('.figure-row')).toContainText('10 – 14 October 2026');
     await expect(page.locator('.figure-row')).toContainText('Free');
     await expect(page.locator('.figure-row')).toContainText('registration ₹200, hostel ₹200/day optional');
   });
@@ -441,6 +443,69 @@ function visible(page, selector) {
     selector);
 }
 
+
+test.describe('the machine page on a phone', () => {
+  test.describe.configure({ timeout: 180_000 });
+
+  test('keeps its bar on one line and its controls tappable', async ({ page, isMobile }) => {
+    test.skip(!isMobile, 'covered by the mobile project');
+    await page.goto('/machine.html');
+    // The back button used to wrap to two lines — 53px tall against Register's
+    // 44 — so the bar read as broken. A shorter word costs nothing.
+    const acts = await page.locator('.nav__actions .btn').evaluateAll((els) => els.map((el) => {
+      const r = el.getBoundingClientRect();
+      return { text: el.textContent.trim(), h: Math.round(r.height), w: Math.round(r.width) };
+    }));
+    expect(acts.length).toBe(2);
+    for (const a of acts) {
+      expect(a.h, `"${a.text}" is ${a.h}px tall`).toBeGreaterThanOrEqual(44);
+      expect(a.h, `"${a.text}" wrapped to a second line`).toBeLessThanOrEqual(48);
+    }
+    expect(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth),
+      'the page must not scroll sideways').toBe(false);
+  });
+
+  test('never lets the captions, card or gates collide, clip or leave the screen',
+    async ({ page, isMobile }) => {
+      test.skip(!isMobile, 'covered by the mobile project');
+      test.slow();
+      await page.goto('/machine.html?dpr=1');
+      await gone(page);
+      await renderUp(page);
+
+      for (const at of [AT.parts, AT.values, AT.gates, AT.journey]) {
+        await scrollSaga(page, at);
+        // The chapter slides in over ~300ms; measuring mid-slide reads 24px low.
+        await page.waitForTimeout(1800);
+        const found = await page.evaluate(() => {
+          const rect = (e) => { if (!e) return null; const b = e.getBoundingClientRect();
+            return { t: b.top, b: b.bottom, l: b.left, r: b.right }; };
+          const nav = document.querySelector('.nav').getBoundingClientRect();
+          const card = document.querySelector('[data-saga-card]');
+          const gate = document.querySelector('[data-saga-gates]');
+          const chapter = document.querySelector('.saga__chapter.is-on');
+          const boxes = {
+            card: card?.classList.contains('is-on') ? rect(card) : null,
+            gates: gate && !gate.hidden && Number(gate.style.opacity) > 0.5 ? rect(gate) : null,
+            chapter: chapter ? rect(chapter) : null,
+          };
+          const hit = (a, b) => a && b && a.b > b.t + 1 && a.t < b.b - 1 && a.r > b.l + 1 && a.l < b.r - 1;
+          const problems = [];
+          for (const [name, b] of Object.entries(boxes)) {
+            if (!b) continue;
+            if (b.t < nav.bottom - 1) problems.push(`${name} runs under the nav`);
+            if (b.b > innerHeight + 1) problems.push(`${name} runs off the bottom`);
+            if (b.l < -1 || b.r > innerWidth + 1) problems.push(`${name} runs off the side`);
+          }
+          if (hit(boxes.card, boxes.chapter)) problems.push('card overlaps chapter');
+          if (hit(boxes.gates, boxes.chapter)) problems.push('gates overlap chapter');
+          if (hit(boxes.card, boxes.gates)) problems.push('card overlaps gates');
+          return problems;
+        });
+        expect(found, `at ${at}`).toEqual([]);
+      }
+    });
+});
 
 test.describe('on a phone', () => {
   test.describe.configure({ timeout: 150_000 });

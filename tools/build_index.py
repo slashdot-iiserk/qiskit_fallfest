@@ -12,6 +12,10 @@ Usage:  python3 tools/build_index.py
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
+
+import event_data
+
+D = event_data.dates()
 BASE = "https://slashdot-iiserk.github.io/qiskit_fallfest"
 
 
@@ -33,7 +37,7 @@ HEAD = f"""<!DOCTYPE html>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Qiskit Fall Fest 2026 · IISER Kolkata — Quantum Computing with Qiskit</title>
-<meta name="description" content="Qiskit Fall Fest 2026 at IISER Kolkata, 10–13 October. Four days of quantum computing talks, Qiskit labs and an invited IBM Quantum industry talk. Open to all students, three tiers of certificate. Hosted by SlashDot.">
+<meta name="description" content="Qiskit Fall Fest 2026 at IISER Kolkata, {D['compact']}. {D['days']} days of quantum computing talks, Qiskit labs and an invited IBM Quantum industry talk. Open to all students, three tiers of certificate. Hosted by SlashDot.">
 <meta name="author" content="SlashDot — the Coding &amp; Design Club, IISER Kolkata">
 <meta name="keywords" content="Qiskit Fall Fest 2026, quantum computing, IISER Kolkata, Qiskit, IBM Quantum, quantum programming workshop, SlashDot, quantum computing India, dilution refrigerator">
 <meta name="theme-color" content="#08080a">
@@ -42,7 +46,7 @@ HEAD = f"""<!DOCTYPE html>
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Qiskit Fall Fest · IISER Kolkata">
 <meta property="og:title" content="Qiskit Fall Fest 2026 · IISER Kolkata">
-<meta property="og:description" content="Four days of quantum computing at IISER Kolkata, 10–13 October 2026. Talks, Qiskit labs, three tiers of certificate, and an invited IBM Quantum industry speaker.">
+<meta property="og:description" content="{D['days']} days of quantum computing at IISER Kolkata, {D['compact']} {D['year']}. Talks, Qiskit labs, three tiers of certificate, and an invited IBM Quantum industry speaker.">
 <meta property="og:url" content="{BASE}/">
 <meta property="og:image" content="{BASE}/assets/graphics/og-card.png">
 <meta property="og:image:width" content="1200">
@@ -51,7 +55,7 @@ HEAD = f"""<!DOCTYPE html>
 <meta property="og:locale" content="en_IN">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Qiskit Fall Fest 2026 · IISER Kolkata">
-<meta name="twitter:description" content="Four days of quantum computing at IISER Kolkata, 10–13 October 2026. Open to all students.">
+<meta name="twitter:description" content="{D['days']} days of quantum computing at IISER Kolkata, {D['compact']} {D['year']}. Open to all students.">
 <meta name="twitter:image" content="{BASE}/assets/graphics/og-card.png">
 
 <link rel="icon" href="assets/brand/badge-2026.svg" type="image/svg+xml">
@@ -74,8 +78,8 @@ HEAD = f"""<!DOCTYPE html>
   "@type": "EducationEvent",
   "name": "Qiskit Fall Fest 2026 — IISER Kolkata",
   "description": "Four days of quantum computing talks, hands-on Qiskit labs and an invited IBM Quantum industry talk, hosted by SlashDot at IISER Kolkata.",
-  "startDate": "2026-10-10T21:00:00+05:30",
-  "endDate": "2026-10-13T20:00:00+05:30",
+  "startDate": "{D['startISO']}",
+  "endDate": "{D['endISO']}",
   "eventStatus": "https://schema.org/EventScheduled",
   "eventAttendanceMode": "https://schema.org/OfflineEventAttendanceMode",
   "image": "{BASE}/assets/graphics/og-card.png",
@@ -350,7 +354,7 @@ def build() -> str:
       <h1 class="hero__title" data-hero-in>Qiskit<em>Fall Fest</em>2026</h1>
 
       <p class="hero__dates" data-hero-in>
-        <b>10 &ndash; 13 October 2026</b>
+        <b>{D['window']}</b>
         <span>MN Saha &amp; G06, IISER Kolkata</span>
       </p>
 
@@ -404,12 +408,12 @@ def build() -> str:
 
       <div class="figure-row" data-drop-group="90">
         <div class="figure" data-drop>
-          <span class="figure__value" data-count-to="4">0</span>
+          <span class="figure__value" data-count-to="{D['days']}">0</span>
           <span class="figure__label">Days of sessions</span>
-          <span class="figure__note">10 – 13 October 2026</span>
+          <span class="figure__note">{D['window']}</span>
         </div>
         <div class="figure" data-drop>
-          <span class="figure__value" data-count-to="10" data-count-suffix="+">0</span>
+          <span class="figure__value" data-count-to="{D['sessions']}">0</span>
           <span class="figure__label">Talks and labs</span>
           <span class="figure__note">From the kick-off to the expert panel</span>
         </div>

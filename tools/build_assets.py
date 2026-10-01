@@ -198,6 +198,14 @@ def rasterise_svg(src: Path, dest_png: Path, width: int) -> bool:
 SPEAKER_PHOTOS = {
     "devang-shroff.jpg": ("devang-shroff", (0.53, 0.42, 0.44)),
     "rishabh-chaudhuri.jpg": ("rishabh-chaudhuri", (0.57, 0.25, 0.58)),
+    "vakamulla-riddhiman.jpg": ("vakamulla-riddhiman", (0.52, 0.42, 0.52)),
+    "aranya-mukherjee.jpg": ("aranya-mukherjee", (0.60, 0.32, 0.64)),
+    # The Day 3 invited speaker. His portrait is staged in `source/speakers/`
+    # but deliberately NOT built: the fest makes a feature of the name being
+    # unannounced until 13 October, and a portrait sitting at a guessable URL
+    # gives it away. To announce, uncomment this, run `npm run build:assets`,
+    # and add him to SPEAKERS and the Day 3 session in js/data/event.js.
+    # "ritajit-majumdar.webp": ("ritajit-majumdar", (0.5, 0.5, 1.0)),
 }
 
 ORGANISERS = {

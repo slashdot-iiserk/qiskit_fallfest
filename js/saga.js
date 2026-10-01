@@ -107,11 +107,22 @@ export function initSaga() {
       `translate3d(0, ${shiftPx.toFixed(1)}px, 0) scale(${scale.toFixed(4)})`;
   }
 
+  let lastChapter = -2;
   function paintChapters() {
     let active = -1;
     CHAPTERS.forEach((ch, i) => { if (progress >= ch.at) active = i; });
     if (progress > T.buttonIn) active = -1;
     chapterEls.forEach((el, i) => el.classList.toggle('is-on', i === active));
+
+    // On a phone the label card stacks directly above the chapter panel, and
+    // chapters run from two lines to four, so the card is positioned from the
+    // active panel's real height rather than a guess. Written only when it
+    // changes: this runs every frame.
+    if (active !== lastChapter) {
+      lastChapter = active;
+      const h = active >= 0 ? chapterEls[active].offsetHeight : 0;
+      if (h) stage.style.setProperty('--chapter-h', `${h}px`);
+    }
   }
 
   /* --- No 3D: keep the drawing, lay the copy out as text ------------------ */

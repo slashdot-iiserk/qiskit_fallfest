@@ -14,7 +14,7 @@ are about to change code.
 
 ```bash
 npm install
-npm test                      # 44 unit + 187 e2e — everything should be green before you start
+npm test                      # 44 unit + ~220 e2e — everything should be green before you start
 python3 -m http.server 4173 --bind 127.0.0.1
 ```
 
@@ -178,6 +178,15 @@ The drawing stays a **single `<path>`** — `anime.js` draws it on through one
 
 ### Portraits
 
+**An announced-later speaker's portrait stays in `source/` and out of
+`SPEAKER_PHOTOS`.** The Day 3 invited speaker is billed as unannounced on
+purpose, with a countdown to 13 October. His photograph is staged at
+`source/speakers/ritajit-majumdar.webp` and the entry that builds it is
+commented out, because a portrait sitting at a guessable URL gives the reveal
+away; a test asserts `assets/organisers/ritajit-majumdar-256.webp` 404s. To
+announce: uncomment the entry, `npm run build:assets`, add him to `SPEAKERS`
+and the Day 3 session in `js/data/event.js`, and delete that test.
+
 Organiser portraits come out of the zip already framed as headshots, so
 `webp(square=True)` centre-crops them and that is enough.
 
@@ -305,6 +314,23 @@ Both scripts are idempotent — re-running them is always safe. `npm run build:p
 `2026_assets/`; only `build:assets` needs it.
 
 ## Single source of truth
+
+**The dates are not copied into the generators any more.** They were, in seven
+places — two meta descriptions, the Open Graph and Twitter cards, the JSON-LD
+start and end, the hero and the figure row — and the schedule moved twice, each
+time leaving at least one stale. `tools/event_data.py` now reads `EVENT.window`,
+`startISO`, `endISO` and the day and session counts straight out of
+`js/data/event.js`, and `tools/build_index.py` interpolates them (`{D['window']}`
+and friends). It is deliberately not a JavaScript parser: it reads the flat
+string fields of `EVENT` and counts `id: 'day-` and `time: '` lines in
+`SCHEDULE`, which is all the markup needs. If you add a field the markup needs,
+add it there rather than typing it into a template.
+
+Still hand-maintained, and worth a grep when the dates move: the saga copy in
+`js/saga/timeline.js`, `tools/build_machine.py`'s meta description and intro,
+`tools/build_pages.py`'s archive blurb, `README.md`, and the assertions in
+`tests/e2e/`. `endISO` is the *morning after* the last day when the final
+session runs to midnight, which is why `event_data.dates()['lastDay']` exists.
 
 `js/data/event.js` holds the schedule, organising team, speakers, certificate tiers and FAQ.
 The home page and resources page render from it at runtime. **Change the event data there and
@@ -447,6 +473,36 @@ The mobile panel:
   important one. The burger's bars are laid out by a grid rather than pinned to
   absolute offsets, so the button can be resized without the icon drifting off
   centre.
+
+## The machine page on a phone
+
+Measured at 390x844 and then at 360x640, 320x568, 430x932 and 844x390
+landscape, not reasoned about. Four things were wrong and none showed on a
+laptop: the back button wrapped to two lines (53px against Register's 44), the
+chapter copy sat flush to the bottom edge over the busiest part of the render,
+the label card floated mid-screen detached from what it described, and the
+intro was a wall of text.
+
+- **The chapter copy is a solid panel**, inset from every edge by the safe-area
+  insets. The label card stacks directly above it at the same width, positioned
+  from `--chapter-h`, which `paintChapters()` writes from the active panel's
+  real `offsetHeight` (chapters run from two lines to four). Written only when
+  the active chapter changes — it runs every frame.
+- **The gate panel is bounded**, not hung from `bottom` at its natural height:
+  it takes whatever is left between the nav and the chapter panel and scrolls
+  inside that. At a fixed offset it ran 25px under the bar at 320x568 and 145px
+  *off the top of the screen* in landscape, taking the gate buttons with it.
+- **Landscape phones are short, not narrow**, so the width queries miss them.
+  `(max-height: 460px) and (orientation: landscape)` puts the gates on the right
+  as on a laptop and the captions on the left.
+- **A measuring trap:** the chapter slides in over a few hundred ms, and a
+  check that fires early reads it 24px low and reports a clip that is not
+  there. Wait for the transition, and compare boxes on *both* axes — landscape
+  places things side by side on purpose, so a vertical-only overlap test calls
+  that a collision.
+
+`tests/e2e/saga.spec.js` ("the machine page on a phone") asserts all of this on
+the mobile project.
 
 ## Scroll reveals
 

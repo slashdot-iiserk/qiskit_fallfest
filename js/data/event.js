@@ -11,9 +11,9 @@ export const EVENT = {
   address: 'Mohanpur Campus, Mohanpur, Nadia, West Bengal 741246, India',
   mapUrl: 'https://maps.google.com/?q=IISER+Kolkata+Mohanpur',
   startISO: '2026-10-10T21:00:00+05:30',
-  endISO: '2026-10-13T20:00:00+05:30',
+  endISO: '2026-10-15T00:00:00+05:30',   // Day 4's last session ends at midnight
   revealISO: '2026-10-13T18:00:00+05:30', // invited-speaker reveal
-  window: '10 – 13 October 2026',
+  window: '10 – 14 October 2026',
   formId: '1FAIpQLScy8rg7XZ5eLH8hWIwBaz2WaEfUhfFGQERVr7Dap41k33aZpw',
   formShortUrl: 'https://forms.gle/VYnMRpgPCHiGEfNZ7',
   repoUrl: 'https://github.com/slashdot-iiserk/qiskit_fallfest',
@@ -91,9 +91,9 @@ export const SCHEDULE = [
         time: '3:00 PM – 4:00 PM',
         title: 'Stern–Gerlach Experiment and Spins + Lab 1',
         venue: 'MN Saha',
-        speakers: ['Manish Behera', 'Alok Jha'],
+        speakers: ['Anuprovo Debnath', 'Alok Jha'],
         tag: 'Lab 1',
-        note: 'A direct parallel to the Stern–Gerlach and spins material of QSS26.',
+        note: 'A direct parallel to the Entanglement and Quantum Effects module of QSS26.',
       },
       {
         time: '4:00 PM – 5:00 PM',
@@ -108,36 +108,28 @@ export const SCHEDULE = [
   {
     id: 'day-2',
     label: 'Day 2',
-    theme: 'Advanced Topics',
+    theme: 'Variational Algorithms & Tooling',
     date: '2026-10-12',
     dateLabel: 'Mon · 12 Oct 2026',
     blurb:
-      'Three advanced evening sessions: quantum key distribution, the quantum Fourier transform and ' +
-      'phase estimation, then Shor’s algorithm. The final session ends at midnight, as 13 October begins.',
+      'A long evening on the variational quantum eigensolver — the workhorse of near-term quantum ' +
+      'computing — and then Qiskit MCP, which puts a quantum toolchain behind a model context server.',
     sessions: [
       {
-        time: '9:00 PM – 10:00 PM',
-        title: 'Quantum Key Distribution (QKD)',
+        time: '9:00 PM – 11:00 PM',
+        title: 'Variational Quantum Eigensolver (VQE)',
         venue: 'MN Saha',
         speakers: ['Manish Behera'],
         tag: 'Advanced',
-        note: 'Quantum key distribution and quantum cryptography.',
+        note: 'Two hours on the algorithm that does most of the real work on today’s hardware.',
       },
       {
-        time: '10:00 PM – 11:00 PM',
-        title: 'Quantum Fourier Transform (QFT) and Phase Estimation',
+        time: '11:00 PM – 12:00 AM',
+        title: 'Qiskit MCP',
         venue: 'MN Saha',
-        speakers: ['Alok Jha', 'Manish Behera'],
+        speakers: ['Md Shayan Bari', 'Alok Jha'],
         tag: 'Advanced',
-        note: 'The quantum Fourier transform and quantum phase estimation.',
-      },
-      {
-        time: '11:00 PM – 12:00 AM (midnight)',
-        title: 'Shor’s Algorithm',
-        venue: 'MN Saha',
-        speakers: ['Anuprovo Debnath', 'Alok Jha'],
-        tag: 'Advanced',
-        note: 'Quantum factoring with Shor’s algorithm. Ends at midnight at the start of 13 October.',
+        note: 'Driving Qiskit through a Model Context Protocol server. Ends at midnight.',
       },
     ],
   },
@@ -169,6 +161,34 @@ export const SCHEDULE = [
       },
     ],
   },
+  {
+    id: 'day-4',
+    label: 'Day 4',
+    theme: 'Cryptography & Phase Estimation',
+    date: '2026-10-14',
+    dateLabel: 'Wed · 14 Oct 2026',
+    blurb:
+      'The last technical evening, and the most advanced: quantum key distribution with its own lab, ' +
+      'then the quantum Fourier transform and phase estimation — the machinery underneath Shor’s algorithm.',
+    sessions: [
+      {
+        time: '8:00 PM – 9:45 PM',
+        title: 'Quantum Key Distribution',
+        venue: 'MN Saha',
+        speakers: ['Vakamulla Riddhiman'],
+        tag: 'Advanced',
+        note: 'Quantum cryptography, with a lab run by Sneha Sundara.',
+      },
+      {
+        time: '10:15 PM – 12:00 AM',
+        title: 'Quantum Fourier Transform and Phase Estimation',
+        venue: 'MN Saha',
+        speakers: ['Aranya Mukherjee'],
+        tag: 'Advanced',
+        note: 'The transform and the phase-estimation routine built on it. Ends at midnight.',
+      },
+    ],
+  },
 ];
 
 /** Organising team. `photo` is a slug under assets/organisers/; null renders initials. */
@@ -193,11 +213,13 @@ export const PEOPLE = [
 export const SPEAKERS = [
   { name: 'Devang Shroff',      role: 'Quantum Mechanics Primer', org: 'Gluon', photo: 'devang-shroff' },
   { name: 'Rishabh Chaudhuri',  role: 'Quantum Mechanics Primer', org: 'Gluon', photo: 'rishabh-chaudhuri' },
-  { name: 'Manish Behera',      role: 'Why Quantum? · Qiskit 101 · Labs 1 & 2 · QKD · QFT & Phase Estimation', org: 'SlashDot, IISER Kolkata', photo: 'manish-behera' },
-  { name: 'Shuvam Banerji Seal', role: 'Kick Off',    org: 'SlashDot, IISER Kolkata', photo: 'shuvam-banerji-seal' },
-  { name: 'Md Shayan Bari',     role: 'Entanglement & Teleportation · Lab 2', org: 'SlashDot, IISER Kolkata', photo: null },
-  { name: 'Alok Jha',           role: 'Stern–Gerlach & Spins · Lab 1 · QFT & Phase Estimation · Shor’s Algorithm', org: 'SlashDot, IISER Kolkata', photo: 'alok-jha' },
-  { name: 'Anuprovo Debnath',   role: 'Advanced · Shor’s Algorithm', org: 'SlashDot, IISER Kolkata', photo: 'anuprovo-debnath' },
+  { name: 'Manish Behera',      role: 'Why Quantum? · Qiskit 101 · Lab 2 · VQE', org: 'SlashDot, IISER Kolkata', photo: 'manish-behera' },
+  { name: 'Shuvam Banerji Seal', role: 'Kick Off', org: 'SlashDot, IISER Kolkata', photo: 'shuvam-banerji-seal' },
+  { name: 'Anuprovo Debnath',   role: 'Stern–Gerlach & Spins · Lab 1', org: 'SlashDot, IISER Kolkata', photo: 'anuprovo-debnath' },
+  { name: 'Alok Jha',           role: 'Stern–Gerlach & Spins · Lab 1 · Qiskit MCP', org: 'SlashDot, IISER Kolkata', photo: 'alok-jha' },
+  { name: 'Md Shayan Bari',     role: 'Entanglement & Teleportation · Lab 2 · Qiskit MCP', org: 'SlashDot, IISER Kolkata', photo: null },
+  { name: 'Vakamulla Riddhiman', role: 'Quantum Key Distribution', org: 'IISER Kolkata', photo: 'vakamulla-riddhiman' },
+  { name: 'Aranya Mukherjee',   role: 'Quantum Fourier Transform & Phase Estimation', org: 'IISER Kolkata', photo: 'aranya-mukherjee' },
 ];
 
 /** Certificate tiers. */
@@ -224,7 +246,7 @@ export const TIERS = [
       'Everything in Participation',
       'Attend the Day 1 afternoon sessions — Qiskit 101, Stern–Gerlach & Spins, Entanglement & Teleportation',
       'Submit Labs 1 – 2 notebooks',
-      'Reachable even if the advanced day is out of reach',
+      'Reachable without attending the advanced evenings at all',
     ],
     req: 'Requires: Day 0 + Day 1 afternoon attendance and Labs 1 – 2',
     featured: true,
@@ -236,11 +258,11 @@ export const TIERS = [
     summary: 'For participants who go the whole distance, including the advanced track and the final assessment.',
     points: [
       'Everything in Intermediate',
-      'Attend the Day 2 advanced sessions',
+      'Attend the advanced evenings — VQE and Qiskit MCP on Day 2, QKD and QFT on Day 4',
       'Complete the advanced challenge notebook',
       'Attend the Day 3 invited expert talk',
     ],
-    req: 'Requires: Days 0 – 3 (Day 1 afternoon) and the advanced challenge',
+    req: 'Requires: the Intermediate criteria, the advanced evenings, the challenge and the Day 3 talk',
     featured: false,
   },
 ];
@@ -250,8 +272,8 @@ export const FAQ = [
   {
     q: 'Do I need any background in quantum physics or programming?',
     a: 'No quantum background is required. Basic Python — variables, loops, functions, and a little NumPy — will ' +
-       'make the labs much smoother. Day 0 ends with an installation clinic where volunteers get your ' +
-       'environment working. The optional Day 1 morning primer with Gluon covers the physics before the afternoon labs.',
+       'make the labs much smoother. Day 0 ends with an installation session where volunteers get your ' +
+       'Qiskit environment working. The optional Day 1 morning primer with Gluon covers the physics before the afternoon labs.',
   },
   {
     q: 'How much does it cost?',
@@ -272,9 +294,9 @@ export const FAQ = [
   {
     q: 'I can only make some of the days. Can I still get a certificate?',
     a: 'Yes. Attend the Day 0 kick-off and "Why Quantum?" session and complete installation for Participation. ' +
-       'Add the Day 1 afternoon sessions and submit Labs 1 – 2 for Intermediate. Add the Day 2 advanced sessions, ' +
-       'the advanced challenge notebook and the Day 3 invited expert talk for Advanced. The morning primer ' +
-       'and closing panel add no certificate requirements.',
+       'Add the Day 1 afternoon sessions and submit Labs 1 – 2 for Intermediate. Add the advanced evenings ' +
+       'on Days 2 and 4, the advanced challenge notebook and the Day 3 invited expert talk for Advanced. ' +
+       'The morning primer and the closing panel add no certificate requirements.',
   },
   {
     q: 'Who is the invited speaker on Day 3?',

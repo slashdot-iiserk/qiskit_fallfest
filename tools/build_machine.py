@@ -43,7 +43,7 @@ HEAD = f"""<!DOCTYPE html>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Inside the machine · Qiskit Fall Fest 2026 · IISER Kolkata</title>
-<meta name="description" content="Scroll through a dilution refrigerator, stage by stage, down to the chip — and watch it become a single qubit you can put gates through. Part of Qiskit Fall Fest 2026 at IISER Kolkata, 10–13 October.">
+<meta name="description" content="Scroll through a dilution refrigerator, stage by stage, down to the chip — and watch it become a single qubit you can put gates through. Part of Qiskit Fall Fest 2026 at IISER Kolkata, 10–14 October.">
 <meta name="theme-color" content="#08080a">
 <link rel="canonical" href="{BASE}/machine.html">
 
@@ -113,9 +113,9 @@ NAV = """
       <span class="nav__brand-text">Qiskit Fall Fest<small>IISER Kolkata · 2026</small></span>
     </a>
     <div class="nav__actions">
-      <a class="btn btn--sm btn--ghost" href="./">
+      <a class="btn btn--sm btn--ghost" href="./" aria-label="Back to the fest">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="16" height="16" aria-hidden="true"><path d="M19 12H5M11 18l-6-6 6-6"/></svg>
-        Back to the fest
+        <span class="nav__back-long">Back to the fest</span><span class="nav__back-short">Back</span>
       </a>
       <a class="btn btn--sm" href="register.html">Register</a>
     </div>
@@ -135,7 +135,8 @@ INTRO = f"""
         at the bottom, and then into the single qubit that chip actually holds.
       </p>
       <p class="machine-intro__meta" data-hero-in>
-        Takes about a minute · Drag to turn it · Everything is real geometry and real gate maths
+        <span class="machine-intro__meta-long">Takes about a minute · Drag to turn it · Everything is real geometry and real gate maths</span>
+        <span class="machine-intro__meta-short">About a minute · Real geometry, real gate maths</span>
       </p>
       <p class="machine-intro__cue" data-hero-in aria-hidden="true">Scroll to begin <i></i></p>
     </div>
@@ -147,7 +148,7 @@ INTRO = f"""
       <p class="eyebrow" style="display:inline-flex;margin-bottom:1.25rem">That was the machine</p>
       <h2 style="margin-bottom:1.25rem">Now come and program one.</h2>
       <p class="lede" style="margin-inline:auto;margin-bottom:2rem">
-        Four days, 10&nbsp;–&nbsp;13 October 2026 at IISER Kolkata. Lectures, hands-on labs, a challenge
+        Five days, 10&nbsp;–&nbsp;14 October 2026 at IISER Kolkata. Lectures, hands-on labs, a challenge
         and a panel — and everything you just scrolled through, explained properly.
       </p>
       <p class="muted" style="margin-bottom:2rem">{P.REGISTRATION_FEES}</p>

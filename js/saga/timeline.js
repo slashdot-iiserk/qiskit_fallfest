@@ -149,7 +149,7 @@ export const VALUES = [
   { k: 'Three certificate tiers', short: 'Three tiers',
     v: 'Participation, Intermediate, Advanced. Find the advanced day heavy and the Intermediate certificate is still well within reach.' },
   { k: 'Beyond the basics', short: 'Advanced topics',
-    v: 'Day 2 explores quantum key distribution, the quantum Fourier transform, phase estimation and Shor’s algorithm.' },
+    v: 'Day 2 is the variational quantum eigensolver and Qiskit MCP; Day 4 is quantum key distribution, the Fourier transform and phase estimation.' },
   { k: 'An industry insider to close', short: 'Invited talk',
     v: 'Day 3 brings an expert talk from the IBM Quantum ecosystem, followed by a panel with the IBM guest and faculty.' },
 ];
@@ -165,8 +165,8 @@ export const VALUES = [
  * flies through a circle of faces or tiers rather than past a list.
  */
 export const STATIONS = [
-  { t: 0.04, side: 'right', k: 'Four days', short: 'Four days',
-    v: '10 – 13 October at MN Saha and G06. A kick-off, physics and hands-on labs, an advanced evening, then an expert talk and panel.' },
+  { t: 0.04, side: 'right', k: 'Five days', short: 'Five days',
+    v: '10 – 14 October at MN Saha and G06. A kick-off, physics and hands-on labs, two advanced evenings, and an expert talk with a panel.' },
   { t: 0.11, side: 'left', k: 'Physics, then hands-on labs', short: 'Talk + lab',
     v: 'Day 1 pairs quantum mechanics and Qiskit 101 with labs on spins, entanglement and teleportation.' },
 
@@ -208,7 +208,7 @@ export const CHAPTERS = [
   { at: T.journeyIn, title: 'Now ride it.',
     body: 'The arrow you have been steering is a direction in space. Follow it outward and the rest of the fest is arranged along it.' },
   { at: 0.740, title: 'The room, and how to reach it.',
-    body: 'Four days on the IISER Kolkata campus: MN Saha for Days 0–2, then G06 for the closing talk and panel.' },
+    body: 'Five days on the IISER Kolkata campus: MN Saha throughout, except Day 3’s talk and panel in G06.' },
   { at: 0.800, title: 'Nobody walks away empty-handed.',
     body: 'Three certificate tiers, a challenge with real swag, and every notebook still public long after the lights go out.' },
   { at: 0.855, title: 'And the people you will meet.',
