@@ -10,6 +10,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 
 import { T, paced, ramp, clamp, lerp, cameraAt, aspectWiden, expandStations,
+  interiorPose, stationPlacement, yawAt, INTERIOR_BACK,
   PARTS, VALUES, STATIONS, CHAPTERS } from '../../js/saga/timeline.js';
 
 test('the beats are in order and inside the runway', () => {
@@ -145,4 +146,72 @@ test('stations ride the vector from the centre outward', () => {
     assert.ok(station.t > 0 && station.t < 1, 'stations must sit on the vector');
     previous = station.t;
   }
+});
+
+
+/* --- Inside the sphere ------------------------------------------------------ */
+
+test('the interior sits between the entry and the exit, inside act V', () => {
+  assert.ok(T.journeyIn < T.inside, 'the camera must travel in before it turns');
+  assert.ok(T.inside < T.outside, 'there must be an interior to turn through');
+  assert.ok(T.outside < T.journeyOut, 'the camera must have time to leave');
+  assert.ok(T.journeyOut < T.buttonIn, 'and be out before the button forms');
+});
+
+test('act V holds the wide shot, so the pull-back lands on the whole sphere', () => {
+  // The camera that goes inside is blended on top of this one, and comes back
+  // to it. cameraAt used to push in to 1.05 across act V; if it does that
+  // again the exit is a close-up of a few dots, not a sphere.
+  const gates = cameraAt(T.gatesOut).z;
+  for (const p of [T.journeyIn, T.inside, T.outside, T.journeyOut]) {
+    assert.equal(cameraAt(p).z, gates, `the base camera drifted at p=${p}`);
+  }
+});
+
+test('every stop hangs inside the sphere and comes dead ahead when it is read', () => {
+  const stops = expandStations();
+  stops.forEach((spec, i) => {
+    const place = stationPlacement(spec, i);
+    const [x, y, z] = place.position;
+    assert.ok(Math.hypot(x, y, z) < 1, `${spec.k} is outside the sphere`);
+
+    // At u = t the camera faces exactly the bearing the stop hangs on.
+    const pose = interiorPose(spec.t);
+    const cam = pose.position;
+    const to = [x - cam[0], y - cam[1], z - cam[2]];
+    const len = Math.hypot(...to);
+    const cos = (to[0] * pose.forward[0] + to[1] * pose.forward[1] + to[2] * pose.forward[2]) / len;
+    const degrees = Math.acos(Math.min(1, cos)) * 180 / Math.PI;
+    assert.ok(degrees < 25, `${spec.k} is ${degrees.toFixed(0)}deg off-axis when it is meant to be read`);
+  });
+});
+
+test('the camera stays inside the sphere and never reaches a stop', () => {
+  for (let u = 0; u <= 1; u += 0.01) {
+    const [x, y, z] = interiorPose(u).position;
+    assert.ok(Math.hypot(x, y, z) < INTERIOR_BACK + 0.1, 'the camera wandered toward the shell');
+  }
+  const nearest = Math.min(...expandStations().map((s, i) => {
+    const [x, y, z] = stationPlacement(s, i).position;
+    const c = interiorPose(s.t).position;
+    return Math.hypot(x - c[0], y - c[1], z - c[2]);
+  }));
+  assert.ok(nearest > 0.45, `a stop is only ${nearest.toFixed(2)} radii from the lens`);
+});
+
+test('the turn is steady: yaw only ever increases', () => {
+  let previous = -1;
+  for (let u = 0; u <= 1; u += 0.01) {
+    assert.ok(yawAt(u) > previous, 'the camera turned back on itself');
+    previous = yawAt(u);
+  }
+});
+
+test('a ring spreads across an arc of the turn rather than arriving in a heap', () => {
+  const people = expandStations().filter((s) => s.person && s.group !== 'speakers');
+  const bearings = people.map((s) => yawAt(s.t));
+  const span = Math.max(...bearings) - Math.min(...bearings);
+  assert.ok(span > 1.0, `the team spans only ${span.toFixed(2)} rad of the turn`);
+  const gaps = bearings.slice(1).map((b, i) => b - bearings[i]);
+  assert.ok(Math.min(...gaps) > 0.1, 'two faces share a bearing');
 });

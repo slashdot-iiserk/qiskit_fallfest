@@ -1065,3 +1065,22 @@
 @media (max-width: 560px) and (prefers-reduced-motion: reduce) {
   .saga__chapter { backdrop-filter: none; -webkit-backdrop-filter: none; }
 }
+
+/* --- Faces inside the sphere, on a phone -------------------------------------
+   Below 760px every plate is hidden and the nearest anchor's text moves to the
+   card. That is right for the machine's labels, but it left the faces — the
+   thing act V is *about* — as nothing at all: the camera turned through an
+   empty room with a caption. People keep a compact plate here: just the face
+   and the first name, small enough that two or three share a 390px screen, and
+   the card above the caption still carries the full role. */
+@media (max-width: 760px) {
+  .hotspot--person .hotspot__plate {
+    display: block;
+    width: 84px;
+    padding: 0.3rem 0.3rem 0.4rem;
+  }
+  .hotspot--person .hotspot__v { display: none; }
+  .hotspot--person .hotspot__k { font-size: 0.56rem; letter-spacing: 0.06em; margin-top: 0.25rem; }
+  .hotspot--person .k-full { display: none; }
+  .hotspot--person .k-short { display: inline; }
+}

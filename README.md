@@ -298,8 +298,8 @@ act II      the camera descends the machine. Glass plates name each stage,
 act III     at the chip the machine dissolves again and reassembles as a qubit
 act IV      the qubit moves aside and you drive it by hand: every gate is a
             rotation, drawn as the arc the state actually sweeps
-act V       the camera rides up the state vector — beside it, not down it —
-            inside the sphere, past the team, the venue, the three certificate
+act V       the camera goes inside the sphere, turns at its centre while
+            the faces and details come round it, then pulls back out. Past the team, the venue, the three certificate
             tiers, the challenge and the speakers. The longest act: better than
             a quarter of the runway, because it carries the whole back half of
             the landing page as places you fly through

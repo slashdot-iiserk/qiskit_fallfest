@@ -243,9 +243,10 @@ act II      the camera descends. Glass plates name each stage, then name what
 act III     at the chip the machine dissolves and reassembles as a qubit
 act IV      the qubit moves aside and you drive it: every gate is a rotation,
             drawn as the arc the state actually sweeps
-act V       the camera rides up the state vector — beside it, not down it —
-            past the team, the venue, the three certificate tiers, the
-            challenge and the speakers
+act V       the camera goes INSIDE the sphere and turns slowly at its centre
+            while the team, the venue, the three certificate tiers, the
+            challenge and the speakers come round it, a few at a time, then
+            it pulls back out to the whole sphere
 act VI      everything converges into the register button
 ```
 

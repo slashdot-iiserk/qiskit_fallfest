@@ -34,8 +34,10 @@ export const T = {
   /* Act V — along the state vector.
      The longest act on purpose: everything the rest of the site says gets said
      here, as places you fly past rather than sections you scroll. */
-  journeyIn:  0.668,
-  journeyOut: 0.942,
+  journeyIn:  0.668,  // the camera starts to move into the sphere
+  inside:     0.712,  // ...and is at its centre; the faces start to come round
+  outside:    0.876,  // the turn is over; the camera starts to leave
+  journeyOut: 0.942,  // pulled all the way back: one sphere, as before
 
   /* Act VI — everything becomes the button */
   buttonIn:   0.955,
@@ -83,7 +85,6 @@ export function paced(t, stops = 4) {
 export function cameraAt(p, aspect = 16 / 9) {
   const descent = paced(ramp(p, T.assemble, T.chip));
   const qubit = ramp(p, T.qubitStart, T.qubitEnd);
-  const journey = ramp(p, T.journeyIn, T.journeyOut);
   const button = ramp(p, T.buttonIn, T.buttonOut);
 
   // Act I frames the whole machine, then pushes in on the top plate.
@@ -98,8 +99,12 @@ export function cameraAt(p, aspect = 16 / 9) {
   // Act III pulls back so the qubit stands alone.
   const zQubit = lerp(z, 3.3, qubit);
 
-  // Act V flies along the state vector, through the sphere's shell.
-  const zJourney = lerp(zQubit, 1.05, journey);
+  // Act V holds the wide shot. The camera that goes *inside* the sphere is
+  // blended on top of this in js/saga.js, and it comes back out to exactly this
+  // framing — so the pull-back lands on the whole sphere rather than on a
+  // close-up, and the button forms from a shot the viewer has already seen.
+  // (This used to push in to 1.05 here, back when act V rode beside the vector.)
+  const zJourney = zQubit;
 
   // Act VI settles square on the button.
   const zButton = lerp(zJourney, 2.6, button);
@@ -123,6 +128,62 @@ export function aspectWiden(aspect) {
 /* --------------------------------------------------------------------------
    Copy
    -------------------------------------------------------------------------- */
+
+/* --------------------------------------------------------------------------
+   Inside the sphere
+   --------------------------------------------------------------------------
+   Act V puts the camera at the centre of the qubit and turns it slowly, while
+   the stops hang in the space around it — faces and details at different
+   distances and heights, each one coming round just as you turn to it. Both
+   functions are pure and work in units of the sphere's own radius, so the
+   render and the tests agree about where everything is. */
+
+/** How many full turns the camera makes over the whole interior. */
+export const INTERIOR_TURNS = 1.6;
+/** How far behind the centre the camera sits, so what is ahead has depth. */
+export const INTERIOR_BACK = 0.26;
+
+export const yawAt = (u) => u * INTERIOR_TURNS * Math.PI * 2;
+
+/**
+ * Where the camera is and where it looks, `u` being 0..1 through the interior.
+ * Positions are relative to the sphere's centre, in sphere radii.
+ */
+export function interiorPose(u) {
+  const yaw = yawAt(u);
+  const fx = Math.sin(yaw);
+  const fz = -Math.cos(yaw);
+  const pitch = 0.05 * Math.sin(u * 9);
+  return {
+    yaw, pitch,
+    // Looking along (fx, pitch, fz), standing a little behind the centre and
+    // bobbing slightly, so it reads as drifting rather than as a turntable.
+    position: [-fx * INTERIOR_BACK, 0.05 * Math.sin(u * 7), -fz * INTERIOR_BACK],
+    forward: [fx * Math.cos(pitch), Math.sin(pitch), fz * Math.cos(pitch)],
+  };
+}
+
+const ELEVATIONS = [-0.05, 0.16, 0.02, 0.24, 0.1];   // kept above the caption band
+const RADII = [0.62, 0.78, 0.7];
+
+/**
+ * Where a station hangs, in sphere radii from the centre. It sits on the bearing
+ * the camera faces at its own `t`, so it is dead ahead exactly when it is meant
+ * to be read; the rest of the spread comes from height and distance.
+ */
+export function stationPlacement(spec, index) {
+  const az = yawAt(spec.t);
+  const el = ELEVATIONS[index % ELEVATIONS.length];
+  const r = RADII[index % RADII.length];
+  return {
+    az, el, r,
+    position: [
+      Math.sin(az) * Math.cos(el) * r,
+      Math.sin(el) * r,
+      -Math.cos(az) * Math.cos(el) * r,
+    ],
+  };
+}
 
 /** What each part of the machine is. `y` is its height in model space. */
 export const PARTS = [
@@ -165,33 +226,36 @@ export const VALUES = [
  * flies through a circle of faces or tiers rather than past a list.
  */
 export const STATIONS = [
-  { t: 0.04, side: 'right', k: 'Five days', short: 'Five days',
+  { t: 0.03, side: 'right', k: 'Five days', short: 'Five days',
     v: '10 – 14 October at MN Saha and G06. A kick-off, physics and hands-on labs, two advanced evenings, and an expert talk with a panel.' },
-  { t: 0.11, side: 'left', k: 'Physics, then hands-on labs', short: 'Talk + lab',
-    v: 'Day 1 pairs quantum mechanics and Qiskit 101 with labs on spins, entanglement and teleportation.' },
+  { t: 0.09, side: 'left', k: 'Talk, then lab, every hour', short: 'Talk + lab',
+    v: 'Every session on the hands-on day is a talk followed immediately by a lab. A concept is never far from being code you have run.' },
 
-  { t: 0.22, kind: 'ring', group: 'team', ring: 0.80,
+  { t: 0.20, kind: 'ring', group: 'team', ring: 0.80,
     k: 'The people running it', short: 'The team' },
 
-  { t: 0.37, side: 'right', k: 'MN Saha Auditorium & G06', short: 'The venues',
-    v: 'Days 0–2 at MN Saha; the Day 3 expert talk and panel in G06, on the IISER Kolkata campus.' },
-  { t: 0.44, side: 'left', k: 'Mohanpur, Nadia', short: 'Getting there',
+  { t: 0.35, side: 'right', k: 'MN Saha Auditorium', short: 'The venue',
+    v: 'Every session but one, in one room on the IISER Kolkata campus. Nothing is streamed — you are in it.' },
+  { t: 0.41, side: 'left', k: 'Mohanpur, Nadia', short: 'Getting there',
     v: 'The campus is at Mohanpur, about an hour and a half north of Kolkata. Directions and the nearest station are on the venue section.' },
 
-  { t: 0.56, kind: 'ring', group: 'tiers', ring: 0.62,
+  { t: 0.53, kind: 'ring', group: 'tiers', ring: 0.62,
     k: 'Three certificates', short: 'Certificates' },
 
-  { t: 0.69, side: 'right', k: 'A challenge, with swag', short: 'The challenge',
+  { t: 0.64, side: 'right', k: 'A challenge, with swag', short: 'The challenge',
     v: 'A problem set to take away and actually solve, run across the fest. The brief is still being written; the prizes are not hypothetical.' },
-  { t: 0.76, side: 'left', k: 'Everything published up front', short: 'Published',
+  { t: 0.70, side: 'left', k: 'Everything published up front', short: 'Published',
     v: 'Slides, notebooks and the setup guide go public before each session — and stay there. The 2025 archive is what that looks like.' },
 
-  { t: 0.86, kind: 'ring', group: 'speakers', ring: 0.72,
+  { t: 0.85, kind: 'ring', group: 'speakers', ring: 0.72,
     k: 'Who is talking', short: 'Speakers' },
 
-  { t: 0.96, side: 'right', k: 'One unnamed speaker', short: 'The speaker',
-    v: 'An IBM industry insider speaks on 13 October, before the closing panel with the guest and faculty. Names are to be announced.' },
+  { t: 0.98, side: 'right', k: 'One unnamed speaker', short: 'The speaker',
+    v: 'An industry insider from the IBM Quantum world closes the fest on 13 October. The name is still unmeasured.' },
 ];
+
+/** `u` of the way through the interior, as a position on the runway. */
+const IN = (u) => T.inside + u * (T.outside - T.inside);
 
 /** Copy under the stage, keyed to where the scroll is. */
 export const CHAPTERS = [
@@ -205,14 +269,18 @@ export const CHAPTERS = [
     body: 'Everything you have just scrolled past exists to hold this still.' },
   { at: T.gatesIn, title: 'Now move it.',
     body: 'Each gate is a rotation. Pick one and watch the state sweep along its arc — these are the same numbers Qiskit would print.' },
-  { at: T.journeyIn, title: 'Now ride it.',
-    body: 'The arrow you have been steering is a direction in space. Follow it outward and the rest of the fest is arranged along it.' },
-  { at: 0.740, title: 'The room, and how to reach it.',
-    body: 'Five days on the IISER Kolkata campus: MN Saha throughout, except Day 3’s talk and panel in G06.' },
-  { at: 0.800, title: 'Nobody walks away empty-handed.',
+  { at: T.journeyIn, title: 'Now step inside.',
+    body: 'The sphere you have been steering has an inside. Everything else about the fest is hung in the space around its centre.' },
+  { at: IN(0.14), title: 'The people running it.',
+    body: 'Students of IISER Kolkata, organising this alongside their own coursework — most of them were in the audience at a fest like this not long ago.' },
+  { at: IN(0.33), title: 'The room, and how to reach it.',
+    body: 'One auditorium, five days, an hour and a half north of Kolkata. Everything else in here is what happens inside it.' },
+  { at: IN(0.50), title: 'Nobody walks away empty-handed.',
     body: 'Three certificate tiers, a challenge with real swag, and every notebook still public long after the lights go out.' },
-  { at: 0.855, title: 'And the people you will meet.',
-    body: 'The team who built this, the speakers who will teach it, and one name still held in superposition until the last day.' },
+  { at: IN(0.78), title: 'And the people teaching it.',
+    body: 'Every session is taught by someone who will still be in the room afterwards — and one name still held in superposition until the last day.' },
+  { at: T.outside + 0.004, title: 'Now step back out.',
+    body: 'All of it, in one qubit. Pull away and it is a single sphere again.' },
 ];
 
 
@@ -264,8 +332,12 @@ export function expandStations() {
       out.push({
         ...item,
         side: Math.cos(angle) >= 0 ? 'right' : 'left',
-        // Spread each ring a little in depth so entries do not stack up.
-        t: stop.t + (i / items.length - 0.5) * 0.06,
+        // A ring is spread over an arc of the turn — about half a radian per
+        // member, capped — so its members come round one after another instead
+        // of arriving together in a heap. `t` is both when a member is read and,
+        // through yawAt(), the bearing it hangs on.
+        t: stop.t + ((items.length > 1 ? i / (items.length - 1) : 0.5) - 0.5)
+          * (Math.min(1.9, 0.5 * items.length) / (INTERIOR_TURNS * Math.PI * 2)),
         ring: stop.ring,
         angle,
       });

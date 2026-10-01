@@ -24,7 +24,7 @@
 import { preloadAll, wants3D, MODEL_URL } from './assets.js';
 import {
   T, SPHERE_X, SPHERE_Y, SPHERE_R, clamp, lerp, ramp, paced, cameraAt, aspectWiden,
-  PARTS, VALUES, STATIONS, CHAPTERS, expandStations,
+  PARTS, VALUES, STATIONS, CHAPTERS, expandStations, interiorPose, stationPlacement,
 } from './saga/timeline.js';
 import { buildCloud, buildDust } from './saga/cloud.js';
 import { buildQubit, GATES } from './saga/qubit.js';
@@ -278,8 +278,9 @@ export function initSaga() {
     const stations = expandStations().map((spec) => {
       const el = createLabel(spec, 'station');
       stationLayer?.appendChild(el);
-      return { el, spec, side: spec.side, t: spec.t, ring: spec.ring, angle: spec.angle, vec: new THREE.Vector3() };
+      return { el, spec, side: spec.side, t: spec.t, vec: new THREE.Vector3(), index: -1 };
     });
+    stations.forEach((st, i) => { st.index = i; st.place = stationPlacement(st.spec, i); });
 
     /* --- Drag -------------------------------------------------------------- */
     let dragYaw = 0;
@@ -362,9 +363,9 @@ export function initSaga() {
     const scratch = new THREE.Vector3();
     const vectorEnd = new THREE.Vector3();
     const sphereCentre = new THREE.Vector3(SPHERE_X, SPHERE_Y, 0);
-    const axis = new THREE.Vector3();
-    const sideA = new THREE.Vector3();
-    const sideB = new THREE.Vector3();
+    const tmpPos = new THREE.Vector3();
+    const tmpLook = new THREE.Vector3();
+    const baseLook = new THREE.Vector3();
     let smooth = progress;
     let frames = 0;
     // The CTA's layout is only trustworthy once the browser has settled, so the
@@ -456,7 +457,10 @@ export function initSaga() {
       // The qubit forms where the chip was, then moves aside for the gate
       // panel: left of it on a wide screen, above it on a narrow one.
       const narrow = W < 860;
-      const makeRoom = ramp(p, T.gatesIn - 0.05, T.gatesIn + 0.03);
+      // The sphere stands aside for the gates, and comes back to the middle as
+      // the camera leaves it, so the whole of it is framed for the button.
+      const makeRoom = ramp(p, T.gatesIn - 0.05, T.gatesIn + 0.03)
+        * (1 - ramp(p, T.outside, T.journeyOut));
       const centreX = lerp(0, narrow ? 0 : SPHERE_X, makeRoom);
       const centreY = SPHERE_Y + lerp(0, narrow ? 0.62 : 0, makeRoom);
       sphereCentre.set(centreX, centreY, 0);
@@ -475,10 +479,13 @@ export function initSaga() {
       //   → a sixth for the journey, where the camera is *inside* the sphere
       //     and the shell would otherwise fill the frame with points
       //   → full again to become the button.
+      // Amount of the way into the sphere, and of the way back out of it.
+      const enter = ramp(p, T.journeyIn, T.inside);
+      const leave = ramp(p, T.outside, T.journeyOut);
       const shell = lerp(
         lerp(lerp(1, 0.5, ramp(p, T.gatesIn - 0.03, T.gatesIn + 0.02)),
-             0.16, ramp(p, T.gatesOut, T.journeyIn + 0.04)),
-        1, ramp(p, T.journeyOut - 0.02, T.buttonIn));
+             0.42, enter),
+        1, leave);
 
       cloud.update({
         pivotMatrix: pivot.matrixWorld,
@@ -519,7 +526,10 @@ export function initSaga() {
       }
 
       /* The qubit -------------------------------------------------------------- */
-      const qubitAlpha = ramp(p, T.qubitEnd - 0.05, T.qubitEnd) * (1 - ramp(p, T.buttonIn, T.buttonIn + 0.03));
+      const enterAmt = ramp(p, T.journeyIn, T.inside);
+      const leaveAmt = ramp(p, T.outside, T.journeyOut);
+      const qubitAlpha = ramp(p, T.qubitEnd - 0.05, T.qubitEnd) * (1 - ramp(p, T.buttonIn, T.buttonIn + 0.03))
+        * (1 - enterAmt * (1 - leaveAmt));   // gone while we are inside it: the arrow would fill the lens
 
       qubit.setCentre(sphereCentre.x, sphereCentre.y);
       qubit.setVisible(qubitAlpha);
@@ -541,47 +551,34 @@ export function initSaga() {
       // camera is free to travel along the state vector instead.
       camera.position.set(0, cam.y, cam.z);
       camera.lookAt(0, cam.y, 0);
-      // Act V rides the state vector. The camera sits a fixed distance behind
-      // a point that climbs the vector, looking along it, so the stops come
-      // toward you and pass. The ride unwinds again as the button forms, so
-      // the camera is back on the base path to meet it head on.
-      const journeyRide = journey * (1 - toButton);
-      if (journeyRide > 0.001) {
-        const tip = qubit.tipWorld(scratch);
+      // Act V goes *inside*. The camera flies from where it has been watching
+      // the gates, through the shell, to the sphere's centre; turns there while
+      // the faces and details come round; then pulls back out to the same
+      // framing it left, so the cloud can become the button from a known shot.
+      // Everything is blended on `enter` and `leave` rather than switched, so
+      // there is no frame at which the camera jumps.
+      // Published so a test (or a curious person with devtools) can ask where
+      // the camera is, rather than infer it from what is on screen.
+      const view = enter * (1 - leave) > 0.5 ? 'inside' : 'outside';
+      if (saga.dataset.sagaView !== view) saga.dataset.sagaView = view;
+
+      if (enter > 0.001) {
         const centre = qubit.centreWorld(vectorEnd);
-        const dir = tip.clone().sub(centre);
-        const reach = dir.length() || 1;
-        dir.normalize();
+        const reach = qubit.tipWorld(scratch).distanceTo(centre) || SPHERE_R;
+        const u = clamp((p - T.inside) / (T.outside - T.inside));
+        const pose = interiorPose(u);
+        const k = enter * (1 - leave);
 
-        // Climb from just below the centre to just past the tip.
-        // Stops short of the tip: riding all the way into it fills the frame
-        // with the marker and there is nothing left to look at. The stand-off
-        // widens on a portrait screen, or the ring of faces falls outside it.
-        // Far enough back that the vector reads as an object being followed
-        // rather than a prop filling the lens — act V is long now, and there
-        // is time to see where you are going.
-        const back = 1.9 * aspectWiden(camera.aspect);
-        const along = centre.clone().addScaledVector(dir, reach * (journeyRide * 0.82 - 0.05));
+        tmpPos.set(
+          centre.x + pose.position[0] * reach,
+          centre.y + pose.position[1] * reach,
+          centre.z + pose.position[2] * reach);
+        tmpLook.set(
+          tmpPos.x + pose.forward[0], tmpPos.y + pose.forward[1], tmpPos.z + pose.forward[2]);
 
-        // Ride *beside* the vector, not straight down it. Dead astern
-        // foreshortens the arrow into a dot and the ring stops pass behind the
-        // lens instead of sweeping across it. The swing is a half-sine, so it
-        // is zero at both ends — the entry still lines up with the qubit and
-        // the exit still meets the button head on.
-        sideA.set(0, 1, 0);
-        if (Math.abs(sideA.dot(dir)) > 0.9) sideA.set(1, 0, 0);
-        sideA.crossVectors(dir, sideA).normalize();
-        const swing = reach * 0.6 * Math.sin(journeyRide * Math.PI);
-
-        camera.position.lerp(
-          along.clone().addScaledVector(dir, -reach * back).addScaledVector(sideA, swing),
-          journeyRide);
-        const look = along.clone().addScaledVector(dir, reach * 1.6);
-        camera.lookAt(
-          lerp(0, look.x, journeyRide),
-          lerp(cam.y, look.y, journeyRide),
-          lerp(0, look.z, journeyRide),
-        );
+        camera.position.lerp(tmpPos, k);
+        baseLook.set(0, cam.y, 0).lerp(tmpLook, k);
+        camera.lookAt(baseLook);
       }
       camera.updateMatrixWorld();
 
@@ -613,41 +610,29 @@ export function initSaga() {
       const ctx = { camera, pivot, width: W, height: H, scratch };
       const partAlpha = ramp(p, T.partsIn, T.partsIn + 0.03) * (1 - ramp(p, T.partsOut, T.partsOut + 0.03));
       const valueAlpha = ramp(p, T.valuesIn, T.valuesIn + 0.03) * (1 - ramp(p, T.valuesOut, T.valuesOut + 0.03));
-      const stationAlpha = ramp(p, T.journeyIn, T.journeyIn + 0.03) * (1 - ramp(p, T.journeyOut, T.journeyOut + 0.02));
+      const stationAlpha = ramp(p, T.inside - 0.02, T.inside + 0.01) * (1 - ramp(p, T.outside - 0.01, T.outside + 0.015));
 
       placeLabels(ctx, parts, partAlpha, (a) => 1 - clamp(Math.abs(a.spec.y - cam.y) / 0.85));
       placeLabels(ctx, values, valueAlpha, (a) => 1 - clamp(Math.abs(a.vec.y - cam.y) / 0.75));
 
       if (stationAlpha > 0.01) {
-        // Everything here hangs off the state vector, so when the vector moves
-        // the whole journey moves with it — and so does the camera.
-        const tip = qubit.tipWorld(scratch);
+        // Hung in the space around the sphere's centre, in units of its radius.
+        // They do not move; the camera turns past them.
         const centre = qubit.centreWorld(vectorEnd);
-        axis.copy(tip).sub(centre);
-        const reach = axis.length() || 1;
-        axis.normalize();
-        // Any two directions perpendicular to the vector, to hang a ring on.
-        sideA.set(0, 1, 0);
-        if (Math.abs(sideA.dot(axis)) > 0.9) sideA.set(1, 0, 0);
-        sideB.crossVectors(axis, sideA).normalize();
-        sideA.crossVectors(sideB, axis).normalize();
-
+        const reach = qubit.tipWorld(scratch).distanceTo(centre) || SPHERE_R;
         stations.forEach((st) => {
-          st.vec.copy(centre).addScaledVector(axis, reach * st.t);
-          if (st.ring) {
-            st.vec.addScaledVector(sideA, Math.cos(st.angle) * st.ring * reach);
-            st.vec.addScaledVector(sideB, Math.sin(st.angle) * st.ring * reach);
-          }
+          st.vec.set(
+            centre.x + st.place.position[0] * reach,
+            centre.y + st.place.position[1] * reach,
+            centre.z + st.place.position[2] * reach);
           st.local = false; // already world space
         });
-        // Only what is near the camera's depth along the vector is shown, so
-        // you read one stop at a time as you rise through them.
-        const along = clamp((journeyRide - 0.06) / 0.88);
-        // The stops are denser than they used to be, so the window is tighter:
-        // you read one or two at a time and each gets its own moment rather
-        // than four crowding the gutters at once.
-        placeLabels(ctx, stations, stationAlpha,
-          (st) => 1 - clamp(Math.abs(st.t - along) / 0.15));
+        // One stop at a time: whichever is nearest the camera's own progress
+        // through the turn. A phone shows a sliver of the room, so its window
+        // is narrower — the card carries the writing there.
+        const u = clamp((p - T.inside) / (T.outside - T.inside));
+        const window = W < 761 ? 0.03 : 0.075;
+        placeLabels(ctx, stations, stationAlpha, (st) => 1 - clamp(Math.abs(st.t - u) / window));
       } else {
         placeLabels(ctx, stations, 0, () => 0);
       }

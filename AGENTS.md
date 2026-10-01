@@ -352,18 +352,37 @@ One sequence owns the first two thirds of the page. It is split into four files:
 
 Things worth knowing before touching it:
 
-- **Act V is the longest act.** The journey along the state vector carries the
-  whole back half of the landing page — the team, the venue, the three
-  certificate tiers, the challenge and the speakers — as places you fly past
-  rather than sections you scroll. It runs `T.journeyIn` → `T.journeyOut`,
-  better than a quarter of the runway, and `.saga`'s height grew with it.
-- **`STATIONS` supports rings.** A `kind: 'ring'` stop names a `group` in
-  `RINGS` (`team`, `speakers`, `tiers`) and is expanded into one anchor per
-  item, arranged around the vector at that depth. Only people get a portrait;
-  tiers read as the three plates they are.
+- **Act V goes inside the sphere.** After the gates the camera flies through
+  the shell to the centre of the qubit, turns there while the faces and details
+  come round it, then pulls back out to the whole sphere, which becomes the
+  button. It is four beats in `T`: `journeyIn` (starts moving in), `inside`
+  (arrived), `outside` (starts leaving), `journeyOut` (out). Everything is
+  blended on `enter`/`leave` ramps rather than switched, so there is no frame at
+  which the camera jumps. `data-saga-view` publishes `inside` / `outside`.
+- **The interior is two pure functions in `saga/timeline.js`**, in units of the
+  sphere's own radius: `interiorPose(u)` (where the camera is and faces) and
+  `stationPlacement(spec, i)` (where a stop hangs). A stop sits on the bearing
+  the camera faces at its own `t`, so it is dead ahead exactly when it is meant
+  to be read; heights and distances vary so they do not stack. The camera makes
+  `INTERIOR_TURNS` revolutions, stands `INTERIOR_BACK` behind the centre and
+  never reaches a stop. Tested directly in `tests/unit/timeline.test.js`.
+- **`cameraAt` must hold the wide shot through act V.** The pull-back returns to
+  it, so if it drifts the exit is a close-up of a few dots rather than a sphere
+  (it used to push in to z=1.05 here, from when act V rode beside the vector).
+  A unit test pins it. `makeRoom` is also eased back to zero on the way out so
+  the sphere is centred for the button.
+- **The qubit's arrow is hidden while inside** (alpha goes to zero), because
+  from the centre it is a slab filling the lens.
+- **Rings spread over an arc of the turn**, about half a radian per member,
+  capped at 1.9. A ring's `t` is both when a member is read and, via `yawAt`,
+  its bearing — so spreading `t` spreads them around you. Squeezing them into
+  a hair's breadth of `t` (they were, at first) puts nine faces in one heap.
+- **Phones keep a compact face.** Below 760px plates are hidden for the machine
+  parts, but `.hotspot--person` keeps a small portrait and first name, or the
+  camera turns through an empty room; the card carries the full role.
 - **The shell is a progression, not a product.** `shell` in `js/saga.js` goes
-  full → half for the gates → a sixth for the journey → full to become the
-  button. It has to thin for act V because the camera is *inside* the sphere
+  full → half for the gates → 0.42 once the camera is inside → full on the way
+  out, to become the button. It has to thin for act V because the camera is *inside* the sphere
   there; at full opacity fourteen thousand points fill the frame with what
   looks like static. It was written as a product of overlapping ramps once, and
   one term silently undid another.

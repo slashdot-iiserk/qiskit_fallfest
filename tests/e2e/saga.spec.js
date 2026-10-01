@@ -266,13 +266,17 @@ test.describe('the saga', () => {
     await scrollSaga(page, mid(T.journeyIn, T.journeyIn + 0.03));
     const entering = await page.locator('.saga__chapter.is-on h3').textContent();
     expect(entering).not.toBe(first);
-    expect(entering).toContain('ride it');
+    expect(entering).toContain('step inside');
 
-    // The journey is long enough to carry several chapters of its own now, so
-    // the copy has to keep moving after the vector ride begins.
-    await scrollSaga(page, mid(T.journeyOut - 0.06, T.journeyOut));
-    const last = await page.locator('.saga__chapter.is-on h3').textContent();
-    expect(last).not.toBe(entering);
+    // The interior carries several chapters of its own, and the way out has
+    // one more: the copy has to keep moving the whole way.
+    const seen = new Set([entering]);
+    for (const at of [mid(T.inside, T.outside), T.outside + 0.01]) {
+      await scrollSaga(page, at);
+      seen.add(await page.locator('.saga__chapter.is-on h3').textContent());
+    }
+    expect(seen.size, `only saw ${[...seen].join(' / ')}`).toBe(3);
+    expect([...seen].pop()).toContain('step back out');
   });
 
   test('runs the machine, the qubit, the gates, the journey and the button in order', async ({ page }) => {
@@ -345,17 +349,40 @@ test.describe('the saga', () => {
     await expect(stations).toContainText('Manish Behera');
     expect(await stations.locator('.hotspot__photo').count()).toBeGreaterThan(4);
 
-    // Riding the vector is the point: you should read several stops on the way
-    // up, not the same one for the whole act.
+    // The point of act V: the camera goes INSIDE the sphere, turns, and comes
+    // back out. Asserted on the published view rather than inferred from the
+    // labels, then the labels are checked to be arriving one group at a time.
+    const view = () => page.locator('[data-saga]').getAttribute('data-saga-view');
+    await scrollSaga(page, T.gatesOut + 0.005);
+    expect(await view(), 'still outside while the gates are played').toBe('outside');
+
     const seen = new Set();
-    for (const at of [T.journeyIn + 0.03, 0.75, 0.82, 0.90]) {
-      await scrollSaga(page, at);
+    const groups = [];
+    for (const u of [0.04, 0.20, 0.36, 0.53, 0.70, 0.85, 0.97]) {
+      await scrollSaga(page, T.inside + u * (T.outside - T.inside));
+      await page.waitForTimeout(400);
+      expect(await view(), `not inside the sphere at u=${u}`).toBe('inside');
       const lit = await page.locator('[data-saga-stations] .hotspot').evaluateAll(
         (els) => els.filter((el) => Number(el.style.opacity) > 0.4)
           .map((el) => el.querySelector('.k-full').textContent));
       lit.forEach((k) => seen.add(k));
+      groups.push(lit.length);
     }
-    expect(seen.size, `only saw ${[...seen].join(', ')}`).toBeGreaterThan(5);
+    // Seven samples cannot meet everyone, and a phone's window is narrower, so
+    // count kinds of thing met rather than heads: a face from the team, the
+    // venue, a certificate, and the unnamed speaker at the very end.
+    const met = [...seen];
+    expect(met.length, `only saw ${met.join(', ')}`).toBeGreaterThanOrEqual(6);
+    expect(met.some((k) => /Anuprovo|Abhinav|Afreen|Shuvam|Alok|Manish|Shayan/.test(k)), 'no organiser came round').toBe(true);
+    expect(met.some((k) => /MN Saha/.test(k)), 'the venue never came round').toBe(true);
+    expect(met.some((k) => /certificate/i.test(k)), 'no certificate came round').toBe(true);
+    expect(met.some((k) => /unnamed/i.test(k)), 'the unnamed speaker never came round').toBe(true);
+    // Never the whole room at once: a stop (or a ring of them) at a time.
+    expect(Math.max(...groups), `groups of ${groups}`).toBeLessThanOrEqual(10);
+
+    await scrollSaga(page, T.journeyOut + 0.004);
+    expect(await view(), 'back out, looking at the whole sphere').toBe('outside');
+    expect(await visible(page, '.hotspot--station'), 'nothing hangs in the room once we have left it').toBe(0);
 
     await scrollSaga(page, AT.register);
     // Everything else is out of the way and the register button stands alone.
